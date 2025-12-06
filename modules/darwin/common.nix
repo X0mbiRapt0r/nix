@@ -57,11 +57,16 @@
       AppleShowAllExtensions = false;
       NSAutomaticWindowAnimationsEnabled = false;
     };
-    dock.autohide = true;
+    dock = {
+      tilesize = 64;
+      magnification = true;
+      largesize = 128;
+      autohide = true;
+    };
     finder  = {
     AppleShowAllFiles = true;
     ShowPathbar = true;
-    _FXSortFoldersFirst = false;
+    _FXSortFoldersFirst = true;
     };
   };
 
