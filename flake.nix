@@ -12,6 +12,15 @@
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
   };
 
+  nixConfig = {
+    # You already enable these in /etc, but having it here makes
+    # flake-local commands Just Work even if /etc/nix/nix.conf is plain.
+    extra-experimental-features = [ "nix-command" "flakes" ];
+
+    # Make `nix shell nixpkgs#foo` use THIS flake's nixpkgs
+    registry.nixpkgs.flake = nixpkgs;
+  };
+
   outputs = { self, nixpkgs, darwin, home-manager, ... }:
   let
     # helper so we can easily get pkgs for a platform
