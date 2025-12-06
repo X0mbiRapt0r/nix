@@ -18,7 +18,7 @@
     extra-experimental-features = [ "nix-command" "flakes" ];
 
     # Make `nix shell nixpkgs#foo` use THIS flake's nixpkgs
-    registry.nixpkgs.flake = nixpkgs;
+    # registry.nixpkgs.flake = nixpkgs;
   };
 
   outputs = { self, nixpkgs, darwin, home-manager, ... }:
