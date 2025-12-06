@@ -55,6 +55,7 @@
   system.defaults = {
     NSGlobalDomain = {
       AppleShowAllExtensions = false;
+      AppleShowAllFiles = true;
       NSAutomaticWindowAnimationsEnabled = false;
     };
     dock = {
@@ -64,9 +65,14 @@
       autohide = true;
     };
     finder  = {
-    AppleShowAllFiles = true;
-    ShowPathbar = true;
     _FXSortFoldersFirst = true;
+    _FXSortFoldersFirstOnDesktop = true;
+    AppleShowAllExtensions = false;
+    AppleShowAllFiles = false;
+    CreateDesktop = true;
+    FXDefaultSearchScope = "SCcf";
+    FXPreferredViewStyle = "icnv";
+    ShowPathbar = true;
     };
   };
 
