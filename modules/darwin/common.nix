@@ -10,9 +10,36 @@
 
   # Some global packages
   environment.systemPackages = with pkgs; [
+    chatgpt
     discord
+    mas
+    obsidian
+    transmission_4
     vscode
+    winbox4
   ];
+
+  homebrew = {
+    enable = true;
+
+    # Don’t auto-upgrade everything on every rebuild unless you want that
+    onActivation = {
+      autoUpdate = true;  # or true if you like
+      upgrade    = true;  # or true to upgrade outdated stuff on switch
+    };
+
+    # Mac App Store apps via `mas`
+    #
+    # NOTE: keys = human-readable app name
+    #       values = numeric App Store ID (from `mas list` / `mas search`)
+    masApps = {
+      "AdGuard for Safari" = 1440147259;
+      "Numbers"            = 409203825;
+      "Pages"              = 409201541;
+      "WhatsApp"           = 310633997;
+      # add more as you wish
+    };
+  };
 
   # Make sure zsh is enabled (macOS default shell)
   programs.zsh.enable = true;
@@ -27,11 +54,15 @@
   # A couple of macOS defaults (tweak later)
   system.defaults = {
     NSGlobalDomain = {
-      AppleShowAllExtensions = true;
+      AppleShowAllExtensions = false;
       NSAutomaticWindowAnimationsEnabled = false;
     };
     dock.autohide = true;
-    finder.AppleShowAllFiles = true;
+    finder  = {
+    AppleShowAllFiles = true;
+    ShowPathbar = true;
+    _FXSortFoldersFirst = false;
+    };
   };
 
   # nix-darwin’s own state version (small integer, not the same as NixOS)
