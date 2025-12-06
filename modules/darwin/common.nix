@@ -12,11 +12,14 @@
   environment.systemPackages = with pkgs; [
     chatgpt
     discord
+    go
     mas
     obsidian
+    python3
     transmission_4
     vscode
     winbox4
+    uv
   ];
 
   homebrew = {

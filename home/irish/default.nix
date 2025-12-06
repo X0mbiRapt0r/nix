@@ -42,6 +42,10 @@
     '';
   };
 
+  home.sessionVariables = {
+    PATH = "$PATH:$HOME/go/bin";
+  };
+
   home.packages = with pkgs; [
     ripgrep
     fd
