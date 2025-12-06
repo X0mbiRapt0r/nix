@@ -20,30 +20,43 @@
       config.allowUnfree = true;
     };
   in {
-    # We'll add NixOS hosts here later:
-    # nixosConfigurations = { ... };
 
-    darwinConfigurations = {
-      # Work Mac
-      QTM-Irish-MBA = darwin.lib.darwinSystem {
-        system = "aarch64-darwin";  # change to "x86_64-darwin" if Intel
-        pkgs = forSystem "aarch64-darwin";
+    darwinConfigurations.Irish-MBP = darwin.lib.darwinSystem {
+      system = "aarch64-darwin";
+      pkgs = forSystem "aarch64-darwin";
+      specialArgs = { inherit self; };
+      modules = [
+        ./modules/common.nix
+        ./modules/darwin/common.nix
+        ./hosts/Irish-MBP/darwin.nix
 
-        specialArgs = { inherit self; };
+        home-manager.darwinModules.home-manager
+        {
+          home-manager.useGlobalPkgs = true;
+          home-manager.useUserPackages = true;
+          home-manager.backupFileExtension = ".before-hm";
+          home-manager.users.irish = import ./home/irish/default.nix;
+        }
+      ];
+    };
 
-        modules = [
-          ./hosts/QTM-Irish-MBA/darwin.nix
+    darwinConfigurations.QTM-Irish-MBA = darwin.lib.darwinSystem {
+      system = "aarch64-darwin";
+      pkgs = forSystem "aarch64-darwin";
+      specialArgs = { inherit self; };
+      modules = [
+        ./modules/common.nix
+        ./modules/darwin/common.nix
+        ./hosts/QTM-Irish-MBA/darwin.nix
 
-          home-manager.darwinModules.home-manager
-          {
-            home-manager.useGlobalPkgs = true;
-            home-manager.useUserPackages = true;
-
-            # adjust username if your macOS account name isn't "irish"
-            home-manager.users.irish = import ./home/irish/default.nix;
-          }
-        ];
-      };
+        home-manager.darwinModules.home-manager
+        {
+          home-manager.useGlobalPkgs = true;
+          home-manager.useUserPackages = true;
+          home-manager.backupFileExtension = ".before-hm";
+          home-manager.users.irish = import ./home/irish/default.nix;
+        }
+      ];
     };
   };
 }
