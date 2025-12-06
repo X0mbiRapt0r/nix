@@ -5,20 +5,9 @@
   home.username = "irish";
   home.homeDirectory = "/Users/irish";
 
-  programs.zsh = {
-    enable = true;
-    enableCompletion = true;
-    autosuggestion.enable = true;
-    syntaxHighlighting.enable = true;
-
-    initContent = ''
-      export EDITOR=nvim
-      # Shorter prompt: user@host:~/path >
-      # %~ = nice, shortened path (uses ~ for $HOME and collapses middle)
-      PROMPT='%n@%m:%1~ > '
-      alias gs="git status"
-      alias ll="ls -lah"
-    '';
+  targets.darwin.defaults.NSGlobalDomain = {
+    AppleLanguages = [ "en-GB" ];
+    AppleLocale = "en_ZA";
   };
 
   programs.git = {
@@ -35,6 +24,22 @@
     enable = true;
     defaultEditor = true;
     vimAlias = true;
+  };
+
+  programs.zsh = {
+    enable = true;
+    enableCompletion = true;
+    autosuggestion.enable = true;
+    syntaxHighlighting.enable = true;
+
+    initContent = ''
+      export EDITOR=nvim
+      # Shorter prompt: user@host:~/path >
+      # %~ = nice, shortened path (uses ~ for $HOME and collapses middle)
+      PROMPT='%n@%m:%1~ > '
+      alias gs="git status"
+      alias ll="ls -lah"
+    '';
   };
 
   home.packages = with pkgs; [
