@@ -14,7 +14,7 @@
     enable = true;
     settings = {
       user.name = "X0mbiRapt0r";
-      user.email = "02gold.dogsled@icloud.com";
+      user.email = "11319449+X0mbiRapt0r@users.noreply.github.com";
       init.defaultBranch = "main";
       pull.rebase = true;
     };
