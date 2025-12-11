@@ -57,33 +57,50 @@
       #!/usr/bin/env bash
       set -euo pipefail
 
-      REPO_DIR="$HOME/Library/Mobile\ Documents/com~apple~CloudDocs/Documents/github.com/X0mbiRapt0r/nix"
-      HOST="$HostName"  # or hardcode, see below
+      REPO_DIR="$HOME/Library/Mobile Documents/com~apple~CloudDocs/Documents/github.com/X0mbiRapt0r/nix"
+      HOST="$HOSTNAME"  # or hardcode, see below
 
-      # Only run once per calendar day
-      STAMP="$HOME/.cache/nix-auto-rebuild.last"
-      mkdir -p "$(dirname "$STAMP")"
-      today="$(date +%F)"
+      LOG="$HOME/.cache/nix-auto-rebuild.log"
+      mkdir -p "$(dirname "$LOG")"
+      {
+        echo "========== $(date) =========="
+        echo "Host: $HOST"
+        echo "PWD before cd: $(pwd)"
 
-      if [ -f "$STAMP" ] && [ "$(cat "$STAMP")" = "$today" ]; then
-        exit 0
-      fi
+        # Only run once per calendar day
+        STAMP="$HOME/.cache/nix-auto-rebuild.last"
+        mkdir -p "$(dirname "$STAMP")"
+        today="$(date +%F)"
 
-      echo "$today" > "$STAMP"
+        echo "Stamp path: $STAMP"
+        if [ -f "$STAMP" ]; then
+          echo "Previous run stamp: $(cat "$STAMP")"
+        else
+          echo "Stamp file does not exist yet"
+        fi
 
-      cd "$REPO_DIR"
+        if [ -f "$STAMP" ] && [ "$(cat "$STAMP")" = "$today" ]; then
+          echo "Already ran today, exiting."
+          exit 0
+        fi
 
-      # Get latest from GitHub (if any)
-      git pull --ff-only || exit 0
+        echo "$today" > "$STAMP"
+        echo "Updated stamp, continuing."
 
-      # Safer: rebuild only, no flake update
-      # sudo -n darwin-rebuild switch --flake ".#$HOST" || true
+        cd "$REPO_DIR"
+        echo "Now in repo: $(pwd)"
+        echo "Running: git pull --ff-only"
+        git pull --ff-only || {
+          echo "git pull failed or no fast-forward, exiting."
+          exit 0
+        }
 
-      # ⚠ Spicy version (uncomment if you REALLY want auto-update):
-      nix flake update
-      git commit -am "chore: auto flake update $today" || true
-      git push origin main || true
-      sudo -n darwin-rebuild switch --flake ".#$HOST" || true
+        echo "Running: sudo -n darwin-rebuild switch --flake .#$HOST"
+        sudo -n darwin-rebuild switch --flake ".#$HOST"
+        echo "darwin-rebuild finished with exit code $?"
+
+        # If you later enable auto flake update, log that here too.
+      } >>"$LOG" 2>&1
     '';
     executable = true;
   };
