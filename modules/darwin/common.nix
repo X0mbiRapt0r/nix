@@ -79,6 +79,32 @@
     };
   };
 
+  # security.sudo.enable = true;
+
+  # security.sudo.extraConfig = ''
+  #   irish ALL=(ALL:ALL) NOPASSWD: /run/current-system/sw/bin/darwin-rebuild
+  # '';
+
+  environment.etc."sudoers.d/darwin-rebuild-irish" = {
+    text = ''
+      irish ALL=(ALL:ALL) NOPASSWD: /run/current-system/sw/bin/darwin-rebuild
+    '';
+  };
+
+  launchd.user.agents."nix-auto-rebuild" = {
+
+    # nix-darwin will generate a small script with this content
+    script = ''
+      /bin/zsh -lc "$HOME/.local/bin/nix-auto-rebuild.sh"
+    '';
+
+    # These become keys in the launchd plist
+    serviceConfig = {
+      RunAtLoad = true;  # run once when you log in/unlock
+      KeepAlive = false; # don’t restart it; script exits after one run
+    };
+  };
+
   # nix-darwin’s own state version (small integer, not the same as NixOS)
   system.stateVersion = 4;
 }
