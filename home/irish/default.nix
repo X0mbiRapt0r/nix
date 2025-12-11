@@ -58,7 +58,7 @@
       set -euo pipefail
 
       REPO_DIR="$HOME/Library/Mobile\ Documents/com~apple~CloudDocs/Documents/github.com/X0mbiRapt0r/nix"
-      HOST="$HOSTNAME"  # or hardcode, see below
+      HOST="$HostName"  # or hardcode, see below
 
       # Only run once per calendar day
       STAMP="$HOME/.cache/nix-auto-rebuild.last"
