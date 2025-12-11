@@ -38,6 +38,7 @@
       # %~ = nice, shortened path (uses ~ for $HOME and collapses middle)
       PROMPT='%n@%m:%1~ > '
       alias gs="git status"
+      alias gacp="git add . && git commit -m 'quick update' && git push"
       alias ll="ls -lah"
     '';
   };
