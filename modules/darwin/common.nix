@@ -79,12 +79,6 @@
     };
   };
 
-  # security.sudo.enable = true;
-
-  # security.sudo.extraConfig = ''
-  #   irish ALL=(ALL:ALL) NOPASSWD: /run/current-system/sw/bin/darwin-rebuild
-  # '';
-
   environment.etc."sudoers.d/darwin-rebuild-irish" = {
     text = ''
       irish ALL=(ALL:ALL) NOPASSWD: /run/current-system/sw/bin/darwin-rebuild
