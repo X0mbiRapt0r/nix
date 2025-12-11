@@ -101,6 +101,7 @@
     # These become keys in the launchd plist
     serviceConfig = {
       RunAtLoad = true;  # run once when you log in/unlock
+      StartInterval = 900;  # every 900 seconds = 15 minutes
       KeepAlive = false; # don’t restart it; script exits after one run
     };
   };
