@@ -55,7 +55,7 @@
 
   home.file.".local/bin/nix-auto-rebuild.sh" = {
     text = ''
-      #!/usr/bin/env bash
+      #!/usr/bin/env zsh
       set -euo pipefail
 
       REPO_DIR="$HOME/Library/Mobile Documents/com~apple~CloudDocs/Documents/github.com/X0mbiRapt0r/nix"
