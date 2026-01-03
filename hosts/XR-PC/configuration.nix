@@ -7,6 +7,28 @@
     ];
 
   # Extra Hardware Support
+  hardware.bluetooth = {
+    enable = true;
+    powerOnBoot = true;
+    # package = pkgs.bluezFull;
+    settings = {
+      General = {
+        # Shows battery charge of connected devices on supported
+        # Bluetooth adapters. Defaults to 'false'.
+        Experimental = true;
+        # When enabled other devices can connect faster to us, however
+        # the tradeoff is increased power consumption. Defaults to
+        # 'false'.
+        FastConnectable = true;
+      };
+      Policy = {
+        # Enable all controllers when they are found. This includes
+        # adapters present on start as well as adapters that are plugged
+        # in later on. Defaults to 'true'.
+        AutoEnable = true;
+      };
+    };
+  };
   hardware.xone.enable = true; #environment.systemPackages = with pkgs; [ linuxKernel.packages.linux_6_6.xone ];
   hardware.graphics = {
     enable = true;
@@ -58,7 +80,7 @@
   users.users.irish = {
     isNormalUser = true;
     description = "Irish";
-    extraGroups = [ "networkmanager" "wheel" ]; # Enable ‘sudo’ for the user.
+    extraGroups = [ "networkmanager" "render" "video" "wheel" ]; # Enable ‘sudo’ for the user.
     packages = with pkgs; [
       tree
     ];
@@ -75,10 +97,12 @@
 
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
+  # Ensure packages that have optional ROCm support can enable it
+  nixpkgs.config.rocmSupport = true; # nixpkgs option exists & is documented :contentReference[oaicite:1]{index=1}
 
   # Install Steam
   programs = {
-  gamemode.enable = true;
+    gamemode.enable = true;
     gamescope = {
       enable = true;
       capSysNice = true;
@@ -125,21 +149,28 @@
       ];
       remotePlay.openFirewall = true; # Open ports in the firewall for Steam Remote Play
       dedicatedServer.openFirewall = true; # Open ports in the firewall for Source Dedicated Server
-      localNetworkGameTransfers.openFirewall = true; # Open ports in the firewall for Steam Local Network Game Tr>
+      localNetworkGameTransfers.openFirewall = true; # Open ports in the firewall for Steam Local Network Game Transfers
     };
   };
 
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   environment.systemPackages = with pkgs; [
-    btop
+    (btop.override { rocmSupport = true; })  # btop with AMD GPU support
+    rocmPackages.rocm-smi                   # provides rocm-smi
+    # btop
     cmatrix
+    firefox
     htop
     linuxKernel.packages.linux_6_12.xone
     neofetch
     mangohud
     lm_sensors
-  #   vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by defaul>
+    rsync
+    #  wineWowPackages.staging
+    wineWowPackages.waylandFull
+    winetricks
+  #   vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
   #   wget
   ];
 
@@ -181,10 +212,10 @@
   # This value being lower than the current NixOS release does NOT mean your system is
   # out of date, out of support, or vulnerable.
   #
-  # Do NOT change this value unless you have manually inspected all the changes it would make to your configurati>
+  # Do NOT change this value unless you have manually inspected all the changes it would make to your configuration,
   # and migrated your data accordingly.
   #
-  # For more information, see `man configuration.nix` or https://nixos.org/manual/nixos/stable/options#opt-system>
+  # For more information, see `man configuration.nix` or https://nixos.org/manual/nixos/stable/options#opt-system.stateVersion .
   system.stateVersion = "24.11"; # Did you read the comment?
   system.autoUpgrade = {
     enable = true;
