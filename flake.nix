@@ -26,8 +26,10 @@
     # helper so we can easily get pkgs for a platform
     forSystem = system: import nixpkgs {
       inherit system;
-      config.allowUnfree = true;
-    };
+      config = {
+        allowUnfree = true;
+        rocmSupport = true;
+      };
   in {
 
     darwinConfigurations.Irish-MBP = darwin.lib.darwinSystem {

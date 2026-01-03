@@ -98,9 +98,9 @@
   };
 
   # Allow unfree packages
-  nixpkgs.config.allowUnfree = true;
+  # nixpkgs.config.allowUnfree = true;
   # Ensure packages that have optional ROCm support can enable it
-  nixpkgs.config.rocmSupport = true; # nixpkgs option exists & is documented :contentReference[oaicite:1]{index=1}
+  # nixpkgs.config.rocmSupport = true; # nixpkgs option exists & is documented :contentReference[oaicite:1]{index=1}
 
   # Install Steam
   programs = {
