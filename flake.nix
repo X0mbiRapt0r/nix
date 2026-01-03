@@ -47,7 +47,7 @@
           home-manager.users.irish = { ... }: {
             imports = [
               ./home/irish/common.nix
-              ./home/irish/darwin.nix
+              ./home/irish/macos.nix
             ];
           };
         }
@@ -71,7 +71,7 @@
           home-manager.users.irish = { ... }: {
             imports = [
               ./home/irish/common.nix
-              ./home/irish/darwin.nix
+              ./home/irish/macos.nix
             ];
           };
         }
