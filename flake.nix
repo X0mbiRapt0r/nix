@@ -44,7 +44,12 @@
           home-manager.useGlobalPkgs = true;
           home-manager.useUserPackages = true;
           home-manager.backupFileExtension = ".before-hm";
-          home-manager.users.irish = import ./home/irish/default.nix;
+          home-manager.users.irish = { ... }: {
+            imports = [
+              ./home/irish/common.nix
+              ./home/irish/darwin.nix
+            ];
+          };
         }
       ];
     };
@@ -63,7 +68,37 @@
           home-manager.useGlobalPkgs = true;
           home-manager.useUserPackages = true;
           home-manager.backupFileExtension = ".before-hm";
-          home-manager.users.irish = import ./home/irish/default.nix;
+          home-manager.users.irish = { ... }: {
+            imports = [
+              ./home/irish/common.nix
+              ./home/irish/darwin.nix
+            ];
+          };
+        }
+      ];
+    };
+
+    nixosConfigurations.XR-PC = nixpkgs.lib.nixosSystem {
+      system = "x86_64-linux"; # XR-PC likely
+      pkgs = forSystem "x86_64-linux";
+      specialArgs = { inherit self; };
+
+      modules = [
+        ./modules/common.nix
+        ./hosts/XR-PC/configuration.nix
+        ./hosts/XR-PC/hardware-configuration.nix
+
+        home-manager.nixosModules.home-manager
+        {
+          home-manager.useGlobalPkgs = true;
+          home-manager.useUserPackages = true;
+
+          home-manager.users.irish = { ... }: {
+            imports = [
+              ./home/irish/common.nix
+              ./home/irish/linux.nix
+            ];
+          };
         }
       ];
     };

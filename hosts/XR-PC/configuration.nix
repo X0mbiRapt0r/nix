@@ -1,10 +1,10 @@
 { config, lib, pkgs, ... }:
 
 {
-  imports =
-    [ # Include the results of the hardware scan.
-      ./hardware-configuration.nix
-    ];
+  # imports =
+  #   [ # Include the results of the hardware scan.
+  #     ./hardware-configuration.nix
+  #   ];
 
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
@@ -44,7 +44,7 @@
 
   # Enable Networking
   networking = {
-    hostName = "xr-pc"; # Define your hostname.
+    hostName = "XR-PC"; # Define your hostname.
     networkmanager.enable = true;
     enableIPv6 = false;
   # Open ports in the firewall.
@@ -131,7 +131,7 @@
           # DSVK_ASYNC = "1";
           AMD_VULKAN_ICD = "RADV";
           DXVK_HDR = "1";
-          DSVK_LOG_LEL = "none";
+          DSVK_LOG_LEVEL = "none";
           VKD3D_DEBUG = "none";
           ENABLE_GAMESCOPE_WSI = "1";
           #MANGOHUD = "1";
@@ -160,15 +160,10 @@
   environment.systemPackages = with pkgs; [
     (btop.override { rocmSupport = true; })  # btop with AMD GPU support
     rocmPackages.rocm-smi                   # provides rocm-smi
-    # btop
-    cmatrix
     firefox
-    htop
     linuxKernel.packages.linux_6_12.xone
-    neofetch
     mangohud
     lm_sensors
-    rsync
     #  wineWowPackages.staging
     wineWowPackages.waylandFull
     winetricks
@@ -219,11 +214,11 @@
   #
   # For more information, see `man configuration.nix` or https://nixos.org/manual/nixos/stable/options#opt-system.stateVersion .
   system.stateVersion = "24.11"; # Did you read the comment?
-  system.autoUpgrade = {
-    enable = true;
-    allowReboot = true;
-    channel = "https://nixos.org/channels/nixos-25.05";
-  };
+  # system.autoUpgrade = {
+  #   enable = true;
+  #   allowReboot = true;
+  #   channel = "https://nixos.org/channels/nixos-25.05";
+  # };
 
   nix.settings.auto-optimise-store = true;
   nix.gc = {
