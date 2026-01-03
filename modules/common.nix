@@ -6,8 +6,8 @@
     cmatrix
     curl
     git
-    htop
     neofetch
     neovim
+    tmux
   ];
 }
