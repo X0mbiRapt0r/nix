@@ -8,6 +8,7 @@
     git
     neofetch
     neovim
+    rsync
     tmux
   ];
 }
