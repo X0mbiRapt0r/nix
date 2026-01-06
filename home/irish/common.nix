@@ -38,8 +38,7 @@
     };
 
     initContent = ''
-      # Prompt
-      PROMPT='%n@%m:%1~ > '
+      PROMPT='%n@%m:%1~ > ' # Clean PROMPT - USER@HOSTNAME:CURRENT_WORKING_DIRECTORY
     '';
   };
 
