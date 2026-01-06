@@ -25,14 +25,19 @@
     autosuggestion.enable = true;
     syntaxHighlighting.enable = true;
 
+    sessionVariables = {
+      EDITOR = "nvim";
+    };
+
+    shellAliases = {
+      gs = "git status";
+      gacp = "git add . && git commit -m 'quick update' && git push origin main";
+      ll = "ls -lah";
+    };
+
     initContent = ''
-      export EDITOR=nvim
-      # Shorter prompt: user@host:~/path >
-      # %~ = nice, shortened path (uses ~ for $HOME and collapses middle)
+      # Prompt
       PROMPT='%n@%m:%1~ > '
-      alias gs="git status"
-      alias gacp="git add . && git commit -m 'quick update' && git push origin main"
-      alias ll="ls -lah"
     '';
   };
 
