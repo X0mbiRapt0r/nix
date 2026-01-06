@@ -6,6 +6,7 @@
     cmatrix
     curl
     git
+    lsd
     neofetch
     neovim
     rsync
