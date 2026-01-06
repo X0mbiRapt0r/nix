@@ -30,8 +30,8 @@
     };
 
     shellAliases = {
-      gs = "git status";
       gacp = "git add . && git commit -m 'quick update' && git push origin main";
+      gs = "git status";
       ls = "lsd";
       lt = "lsd --tree";
       ll = "ls -lah";
