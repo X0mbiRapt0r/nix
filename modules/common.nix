@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, lib, ... }:
 
 {
   environment.systemPackages = with pkgs; [
@@ -14,12 +14,12 @@
     tmux
   ];
 
-  fonts.fontconfig.enable = true;
-
   fonts.packages = with pkgs; [
     nerd-fonts.jetbrains-mono
     nerd-fonts.fira-code
     # add more as needed, e.g.:
     # nerd-fonts.iosevka
   ];
+} // lib.optionalAttrs pkgs.stdenv.isLinux {
+  fonts.fontconfig.enable = true;
 }
