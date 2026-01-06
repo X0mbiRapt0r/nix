@@ -16,7 +16,7 @@
 
   fonts.packages = with pkgs; [
     nerd-fonts.jetbrains-mono
-    nerd-fonts.fira-code
+    # nerd-fonts.fira-code
     # add more as needed, e.g.:
     # nerd-fonts.iosevka
   ];
