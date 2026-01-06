@@ -14,5 +14,12 @@
     tmux
   ];
 
-  fonts.packages = with pkgs; [ nerdfonts ];
+  fonts.fontconfig.enable = true;
+
+  fonts.packages = with pkgs; [
+    nerd-fonts.jetbrains-mono
+    nerd-fonts.fira-code
+    # add more as needed, e.g.:
+    # nerd-fonts.iosevka
+  ];
 }
