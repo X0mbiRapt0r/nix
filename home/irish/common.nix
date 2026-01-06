@@ -34,7 +34,7 @@
       gs = "git status";
       ls = "lsd";
       lt = "lsd --tree";
-      ll = "ls -lah";
+      ll = "lsd -lah";
     };
 
     initContent = ''
