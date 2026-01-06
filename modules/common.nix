@@ -1,4 +1,4 @@
-{ pkgs, lib, ... }:
+{ pkgs, ... }:
 
 {
   environment.systemPackages = with pkgs; [
@@ -20,6 +20,4 @@
     # add more as needed, e.g.:
     # nerd-fonts.iosevka
   ];
-} // lib.optionalAttrs pkgs.stdenv.isLinux {
-  fonts.fontconfig.enable = true;
 }
