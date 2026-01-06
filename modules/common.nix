@@ -10,8 +10,9 @@
     lsd
     neofetch
     neovim
-    nerdfonts
     rsync
     tmux
   ];
+
+  fonts.packages = with pkgs; [ nerdfonts ];
 }
