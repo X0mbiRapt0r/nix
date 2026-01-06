@@ -25,21 +25,14 @@
     autosuggestion.enable = true;
     syntaxHighlighting.enable = true;
 
-    # Environment variables (better than inline export)
-    sessionVariables = {
-      EDITOR = "nvim";
-    };
-
-    # Aliases (better than inline alias)
-    shellAliases = {
-      gs = "git status";
-      gacp = "git add . && git commit -m 'quick update' && git push origin main";
-      ll = "ls -lah";
-    };
-
-    # Prompt: put prompt config in initExtra (or use starship)
-    initExtra = ''
+    initContent = ''
+      export EDITOR=nvim
+      # Shorter prompt: user@host:~/path >
+      # %~ = nice, shortened path (uses ~ for $HOME and collapses middle)
       PROMPT='%n@%m:%1~ > '
+      alias gs="git status"
+      alias gacp="git add . && git commit -m 'quick update' && git push origin main"
+      alias ll="ls -lah"
     '';
   };
 
