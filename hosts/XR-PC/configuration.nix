@@ -73,6 +73,11 @@
     autoLogin.user = "irish";
   };
   services.desktopManager.plasma6.enable = true;
+  services.xrdp = {
+    enable = true;
+    openFirewall = true; # opens TCP 3389
+    defaultWindowManager = "startplasma-x11";
+  };
   
   # Configure keymap in X11
   # services.xserver.xkb.layout = "us";
