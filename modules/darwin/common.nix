@@ -12,6 +12,7 @@
   environment.systemPackages = with pkgs; [
     chatgpt
     discord
+    freerdp
     go
     mas
     obsidian

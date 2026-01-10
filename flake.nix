@@ -1,27 +1,20 @@
 {
-  description = "Irish's unified NixOS + macOS flake";
+  description = "Irish's unified NixOS + macOS flake"; # descriptive metadata
 
   inputs = {
-    # Use unstable for everything for now
-    nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
-
-    darwin.url = "github:LnL7/nix-darwin";
-    darwin.inputs.nixpkgs.follows = "nixpkgs";
-
-    home-manager.url = "github:nix-community/home-manager";
-    home-manager.inputs.nixpkgs.follows = "nixpkgs";
+    darwin.url = "github:LnL7/nix-darwin"; # pins the nix-darwin project as input
+    darwin.inputs.nixpkgs.follows = "nixpkgs"; # make nix-darwin use the same nixpkgs
+    home-manager.url = "github:nix-community/home-manager"; # pins the home-manager project as input
+    home-manager.inputs.nixpkgs.follows = "nixpkgs"; # make home-manager use the same nixpkgs
+    nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable"; # use unstable branch for everything
   };
 
   nixConfig = {
-    # You already enable these in /etc, but having it here makes
-    # flake-local commands Just Work even if /etc/nix/nix.conf is plain.
-    extra-experimental-features = [ "nix-command" "flakes" ];
-
-    # Make `nix shell nixpkgs#foo` use THIS flake's nixpkgs
-    # registry.nixpkgs.flake = nixpkgs;
+    extra-experimental-features = [ "nix-command" "flakes" ]; # enable nix-command and flakes globally
+    registry.nixpkgs.flake = nixpkgs; # point to the input nixpkgs
   };
 
-  outputs = { self, nixpkgs, darwin, home-manager, ... }:
+  outputs = { self, nixpkgs, darwin, home-manager, ... }: # export systems
   let
     # helper so we can easily get pkgs for a platform
     forSystem = system: import nixpkgs {
