@@ -32,6 +32,11 @@
       upgrade    = true;  # or true to upgrade outdated stuff on switch
     };
 
+    # GUI dependency for X11 apps like `xfreerdp`
+    casks = [
+      "xquartz"
+    ];
+
     # Mac App Store apps via `mas`
     #
     # NOTE: keys = human-readable app name
