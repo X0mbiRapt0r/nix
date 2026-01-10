@@ -1,6 +1,8 @@
-{ pkgs, ... }:
+{ pkgs, nixpkgs, ... }:
 
 {
+  nix.registry.nixpkgs.flake = nixpkgs; # Make nixpkgs registry follow this flake input
+  
   environment.systemPackages = with pkgs; [
     btop
     cmatrix
