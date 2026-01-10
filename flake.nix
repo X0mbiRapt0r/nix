@@ -11,7 +11,6 @@
 
   nixConfig = {
     extra-experimental-features = [ "nix-command" "flakes" ]; # enable nix-command and flakes globally
-    registry.nixpkgs.flake = nixpkgs; # point to the input nixpkgs
   };
 
   outputs = { self, nixpkgs, darwin, home-manager, ... }: # export systems
@@ -26,7 +25,7 @@
     darwinConfigurations.Irish-MBP = darwin.lib.darwinSystem {
       system = "aarch64-darwin";
       pkgs = forSystem "aarch64-darwin";
-      specialArgs = { inherit self; };
+      specialArgs = { inherit self nixpkgs; };
       modules = [
         ./modules/common.nix
         ./modules/darwin/common.nix
@@ -50,7 +49,7 @@
     darwinConfigurations.QTM-Irish-MBA = darwin.lib.darwinSystem {
       system = "aarch64-darwin";
       pkgs = forSystem "aarch64-darwin";
-      specialArgs = { inherit self; };
+      specialArgs = { inherit self nixpkgs; };
       modules = [
         ./modules/common.nix
         ./modules/darwin/common.nix
@@ -74,7 +73,7 @@
     nixosConfigurations.XR-PC = nixpkgs.lib.nixosSystem {
       system = "x86_64-linux"; # XR-PC likely
       # pkgs = forSystem "x86_64-linux";
-      specialArgs = { inherit self; };
+      specialArgs = { inherit self nixpkgs; };
 
       modules = [
         ./modules/common.nix
