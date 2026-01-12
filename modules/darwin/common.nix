@@ -32,6 +32,12 @@
       upgrade    = true;  # or true to upgrade outdated stuff on switch
     };
 
+    casks = [
+      "gimp"
+      "godot"
+      "steam"
+      "stremio@beta"
+    ];
     # Mac App Store apps via `mas`
     #
     # NOTE: keys = human-readable app name
