@@ -5,10 +5,8 @@
   nix.enable = true;
   nix.settings.experimental-features = "nix-command flakes";
 
-  # Your primary user (needed for system.defaults etc)
-  system.primaryUser = "irish";
+  system.primaryUser = "irish"; # primary user (needed for system.defaults etc)
 
-  # Some global packages
   environment.systemPackages = with pkgs; [
     chatgpt
     discord
@@ -17,7 +15,6 @@
     mas
     obsidian
     python3
-    transmission_4
     vscode
     winbox4
     uv
@@ -25,21 +22,19 @@
 
   homebrew = {
     enable = true;
-
-    # Don’t auto-upgrade everything on every rebuild unless you want that
+    # nativelyManage = true;  # let nix-darwin manage Homebrew itself
     onActivation = {
       autoUpdate = true;  # or true if you like
       upgrade    = true;  # or true to upgrade outdated stuff on switch
     };
-
     casks = [
       "gimp"
       "godot"
       "steam"
       "stremio@beta"
+      "transmission"
     ];
     # Mac App Store apps via `mas`
-    #
     # NOTE: keys = human-readable app name
     #       values = numeric App Store ID (from `mas list` / `mas search`)
     masApps = {
@@ -47,12 +42,10 @@
       "Numbers"            = 409203825;
       "Pages"              = 409201541;
       "WhatsApp"           = 310633997;
-      # add more as you wish
     };
   };
 
-  # Make sure zsh is enabled (macOS default shell)
-  programs.zsh.enable = true;
+  programs.zsh.enable = true; # Make sure zsh is enabled (macOS default shell)
 
   users.users.irish = {
     home = "/Users/irish";
@@ -61,7 +54,6 @@
 
   ids.gids.nixbld = 350;
 
-  # A couple of macOS defaults (tweak later)
   system.defaults = {
     NSGlobalDomain = {
       AppleShowAllExtensions = false;
