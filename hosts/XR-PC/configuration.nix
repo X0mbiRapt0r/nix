@@ -31,7 +31,14 @@
       };
     };
   };
-  hardware.xone.enable = true; #environment.systemPackages = with pkgs; [ linuxKernel.packages.linux_6_6.xone ];
+  # hardware.xone.enable = true; #environment.systemPackages = with pkgs; [ linuxKernel.packages.linux_6_6.xone ];
+  # Xbox Series controller over Bluetooth (recommended)
+  hardware.xpadneo.enable = true;
+  # Optional but handy: tray/GUI Bluetooth manager for Plasma
+  services.blueman.enable = true;
+
+  # Use the full BlueZ feature set (helps with some controllers/headsets)
+  hardware.bluetooth.package = pkgs.bluezFull;
   hardware.graphics = {
     enable = true;
     enable32Bit = true;
@@ -166,7 +173,7 @@
     (btop.override { rocmSupport = true; })  # btop with AMD GPU support
     rocmPackages.rocm-smi                   # provides rocm-smi
     firefox
-    linuxKernel.packages.linux_6_12.xone
+    # linuxKernel.packages.linux_6_12.xone
     mangohud
     lm_sensors
     #  wineWowPackages.staging
