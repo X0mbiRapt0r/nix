@@ -28,6 +28,7 @@
       upgrade    = true;  # or true to upgrade outdated stuff on switch
     };
     casks = [
+      "calibre"
       "gimp"
       "godot"
       "steam"
