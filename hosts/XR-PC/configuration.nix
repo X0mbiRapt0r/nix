@@ -38,7 +38,7 @@
   services.blueman.enable = true;
 
   # Use the full BlueZ feature set (helps with some controllers/headsets)
-  hardware.bluetooth.package = pkgs.bluezFull;
+  # hardware.bluetooth.package = pkgs.bluezFull;
   hardware.graphics = {
     enable = true;
     enable32Bit = true;
