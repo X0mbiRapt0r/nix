@@ -10,6 +10,7 @@
   };
 
   nixConfig = {
+    # auto-optimise-store = true; # enable auto-optimise-store globally
     extra-experimental-features = [ "nix-command" "flakes" ]; # enable nix-command and flakes globally
   };
 
