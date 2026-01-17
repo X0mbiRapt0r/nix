@@ -122,7 +122,7 @@
     openFirewall = true; # opens TCP 3389
   };
   services.xserver.enable = true; # Enable the X11 windowing system.
-  services.xserver.displayManager.steam.enable = true; # Enable SteamOS display manager
+  # services.xserver.displayManager.steam.enable = true; # Enable SteamOS display manager
   # services.xserver.xkb.layout = "us"; # Configure keymap in X11
   # services.xserver.xkb.options = "eurosign:e,caps:escape";
 
