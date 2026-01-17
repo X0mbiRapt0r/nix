@@ -33,10 +33,10 @@
       powerOnBoot = true;
     };
     graphics = {
-      amd = {
-        dpm = true; # Dynamic Power Management
-        enable = true;
-      }; 
+      # amd = {
+      #   dpm = true; # Dynamic Power Management
+      #   enable = true;
+      # }; 
       enable = true;
       enable32Bit = true;
     };
