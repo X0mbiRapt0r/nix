@@ -3,20 +3,24 @@
 {
   # nix-darwin's Nix management
   nix.enable = true;
-  nix.settings.experimental-features = "nix-command flakes";
+  nix.gc = {
+    # automatic = true;
+    interval = { Weekday = 0; Hour = 0; Minute = 0; };
+    # options = "--delete-older-than 30d";
+  };
+  # launchd StartCalendarInterval-style schedule
+  nix.optimise.interval = [
+    { Weekday =0; Hour = 0; Minute = 0; }
+  ];
+  # nix.settings.experimental-features = "nix-command flakes";
 
   system.primaryUser = "irish"; # primary user (needed for system.defaults etc)
 
   environment.systemPackages = with pkgs; [
-    chatgpt
-    discord
     freerdp
     go
     mas
-    obsidian
     python3
-    vscode
-    winbox4
     uv
   ];
 
@@ -29,11 +33,16 @@
     };
     casks = [
       "calibre"
+      "chatgpt"
+      "discord"
       "gimp"
       "godot"
+      "obsidian"
       "steam"
       "stremio@beta"
       "transmission"
+      "visual-studio-code"
+      "winbox"
     ];
     # Mac App Store apps via `mas`
     # NOTE: keys = human-readable app name
