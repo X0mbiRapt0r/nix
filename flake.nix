@@ -28,8 +28,8 @@
       pkgs = forSystem "aarch64-darwin";
       specialArgs = { inherit self nixpkgs; };
       modules = [
-        ./modules/common.nix
-        ./modules/darwin/common.nix
+        ./modules/modules_common.nix
+        ./modules/modules_darwin.nix
         ./hosts/Irish-MBP/darwin.nix
 
         home-manager.darwinModules.home-manager
@@ -52,8 +52,8 @@
       pkgs = forSystem "aarch64-darwin";
       specialArgs = { inherit self nixpkgs; };
       modules = [
-        ./modules/common.nix
-        ./modules/darwin/common.nix
+        ./modules/modules_common.nix
+        ./modules/modules_darwin.nix
         ./hosts/QTM-Irish-MBA/darwin.nix
 
         home-manager.darwinModules.home-manager
