@@ -49,7 +49,7 @@
   networking = {
     hostName = "XR-PC"; # Define your hostname.
     networkmanager.enable = true;
-    enableIPv6 = false;
+    # enableIPv6 = false;
   };
 
   nix.gc = {
