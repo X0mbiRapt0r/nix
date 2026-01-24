@@ -104,11 +104,11 @@
 
   services.blueman.enable = true; # Optional but handy: tray/GUI Bluetooth manager for Plasma
   services.displayManager.defaultSession = "steam";
-  services.desktopManager.cosmic.enable = true;
+  # services.desktopManager.cosmic.enable = true;
   # services.desktopManager.plasma6.enable = true;
-  services.displayManager.cosmic-greeter.enable = true;
-  # services.displayManager.sddm.enable = true;
-  # services.displayManager.sddm.wayland.enable = true;
+  # services.displayManager.cosmic-greeter.enable = true;
+  services.displayManager.sddm.enable = true;
+  services.displayManager.sddm.wayland.enable = true;
   services.displayManager = {
     autoLogin.enable = true;
     autoLogin.user = "irish";
