@@ -14,7 +14,7 @@
     # firefox
     # mangohud
     # lm_sensors
-    rustdesk
+    # rustdesk
     # wineWowPackages.waylandFull
     # winetricks
   ];

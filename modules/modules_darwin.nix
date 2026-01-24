@@ -38,7 +38,7 @@
       "gimp"
       "godot"
       "obsidian"
-      "rustdesk"
+    #   "rustdesk"
       "steam"
       "stremio@beta"
       "transmission"
