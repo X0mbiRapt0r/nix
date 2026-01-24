@@ -77,7 +77,7 @@
       specialArgs = { inherit self nixpkgs; };
 
       modules = [
-        ./modules/common.nix
+        ./modules/modules_common.nix
         ./hosts/XR-PC/configuration.nix
         ./hosts/XR-PC/hardware-configuration.nix
 
