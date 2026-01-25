@@ -105,7 +105,7 @@
   services.blueman.enable = true; # Optional but handy: tray/GUI Bluetooth manager for Plasma
   services.displayManager.defaultSession = "steam";
   # services.desktopManager.cosmic.enable = true;
-  # services.desktopManager.plasma6.enable = true;
+  services.desktopManager.plasma6.enable = true;
   # services.displayManager.cosmic-greeter.enable = true;
   services.displayManager.sddm.enable = true;
   services.displayManager.sddm.wayland.enable = true;
@@ -119,12 +119,12 @@
     enable = true;
     pulse.enable = true;
   };
-  # services.xrdp = {
-  #   enable = true;
-  #   defaultWindowManager = "startplasma-x11";
-  #   openFirewall = true; # opens TCP 3389
-  # };
-  # services.xserver.enable = true; # Enable the X11 windowing system.
+  services.xrdp = {
+    enable = true;
+    defaultWindowManager = "startplasma-x11";
+    openFirewall = true; # opens TCP 3389
+  };
+  services.xserver.enable = true; # Enable the X11 windowing system.
   # services.xserver.displayManager.steam.enable = true; # Enable SteamOS display manager
   # services.xserver.xkb.layout = "us"; # Configure keymap in X11
   # services.xserver.xkb.options = "eurosign:e,caps:escape";
