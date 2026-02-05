@@ -32,7 +32,6 @@
       upgrade    = true;  # or true to upgrade outdated stuff on switch
     };
     casks = [
-      "adguard"
       "calibre"
       "chatgpt"
       "discord"
@@ -54,11 +53,8 @@
     # NOTE: keys = human-readable app name
     #       values = numeric App Store ID (from `mas list` / `mas search`)
     masApps = {
-      # "AdGuard for Safari" = 1440147259;
       "Numbers"            = 409203825;
       "Pages"              = 409201541;
-      # "WhatsApp"           = 310633997;
-      # "Windows App"        = 1295203466;
     };
   };
 
