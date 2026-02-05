@@ -32,29 +32,33 @@
       upgrade    = true;  # or true to upgrade outdated stuff on switch
     };
     casks = [
+      "adguard"
       "calibre"
       "chatgpt"
       "discord"
       "gimp"
       "godot"
       "obsidian"
+      "porting-kit"
       "powershell"
     #   "rustdesk"
       "steam"
       "stremio@beta"
       "transmission"
       "visual-studio-code"
+      "whatsapp"
+      "windows-app"
       "winbox"
     ];
     # Mac App Store apps via `mas`
     # NOTE: keys = human-readable app name
     #       values = numeric App Store ID (from `mas list` / `mas search`)
     masApps = {
-      "AdGuard for Safari" = 1440147259;
+      # "AdGuard for Safari" = 1440147259;
       "Numbers"            = 409203825;
       "Pages"              = 409201541;
-      "WhatsApp"           = 310633997;
-      "Windows App"        = 1295203466;
+      # "WhatsApp"           = 310633997;
+      # "Windows App"        = 1295203466;
     };
   };
 
