@@ -38,6 +38,7 @@
       "gimp"
       "godot"
       "obsidian"
+      "powershell"
     #   "rustdesk"
       "steam"
       "stremio@beta"
