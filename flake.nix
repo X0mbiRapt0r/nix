@@ -31,7 +31,7 @@
       modules = [
         ./modules/modules_common.nix
         ./modules/modules_darwin.nix
-        ./hosts/Irish-MBP/darwin.nix
+        ./hosts/Irish-MBP/host_darwin.nix
 
         home-manager.darwinModules.home-manager
         {
@@ -40,8 +40,8 @@
           home-manager.backupFileExtension = ".before-hm";
           home-manager.users.irish = { ... }: {
             imports = [
-              ./home/irish/common.nix
-              ./home/irish/macos.nix
+              ./home/irish/home_common.nix
+              ./home/irish/home_darwin.nix
             ];
           };
         }
@@ -51,7 +51,6 @@
             enable = true; # Install Homebrew under the default prefix
             enableRosetta = true; # Apple Silicon Only: Also install Homebrew under the default Intel prefix for Rosetta 2
             user = "irish"; # User owning the Homebrew prefix
-            # autoMigrate = true; # Automatically migrate existing Homebrew installations
           };
         }
       ];
@@ -64,7 +63,7 @@
       modules = [
         ./modules/modules_common.nix
         ./modules/modules_darwin.nix
-        ./hosts/QTM-Irish-MBA/darwin.nix
+        ./hosts/QTM-Irish-MBA/host_darwin.nix
 
         home-manager.darwinModules.home-manager
         {
@@ -73,8 +72,8 @@
           home-manager.backupFileExtension = ".before-hm";
           home-manager.users.irish = { ... }: {
             imports = [
-              ./home/irish/common.nix
-              ./home/irish/macos.nix
+              ./home/irish/home_common.nix
+              ./home/irish/home_darwin.nix
             ];
           };
         }
@@ -84,7 +83,6 @@
             enable = true; # Install Homebrew under the default prefix
             enableRosetta = true; # Apple Silicon Only: Also install Homebrew under the default Intel prefix for Rosetta 2
             user = "irish"; # User owning the Homebrew prefix
-            # autoMigrate = true; # Automatically migrate existing Homebrew installations
           };
         }
       ];
@@ -107,8 +105,8 @@
 
           home-manager.users.irish = { ... }: {
             imports = [
-              ./home/irish/common.nix
-              ./home/irish/linux.nix
+              ./home/irish/home_common.nix
+              ./home/irish/home_linux.nix
             ];
           };
         }
