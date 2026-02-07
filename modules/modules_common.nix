@@ -1,7 +1,7 @@
 { pkgs, nixpkgs, ... }:
 
 {
-    environment.systemPackages = with pkgs; [
+  environment.systemPackages = with pkgs; [
     btop
     cmatrix
     curl
@@ -14,7 +14,7 @@
     tmux
   ];
 
-    fonts.packages = with pkgs; [
+  fonts.packages = with pkgs; [
     nerd-fonts.jetbrains-mono
     # nerd-fonts.fira-code
     # add more as needed, e.g.:
