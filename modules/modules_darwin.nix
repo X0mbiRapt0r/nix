@@ -26,33 +26,24 @@
 
   homebrew = {
     enable = true;
-    # nativelyManage = true;  # let nix-darwin manage Homebrew itself
     onActivation = {
       autoUpdate = true;  # or true if you like
+      cleanup    = "zap";  # or true to cleanup old stuff on switch
       upgrade    = true;  # or true to upgrade outdated stuff on switch
     };
     casks = [
-      "calibre"
       "chatgpt"
-      "discord"
       "gimp"
-      "godot"
       "obsidian"
-      "porting-kit"
-      "powershell"
-    #   "rustdesk"
-      "steam"
-      "stremio@beta"
-      "transmission"
       "visual-studio-code"
       "whatsapp"
-      "windows-app"
       "winbox"
     ];
     # Mac App Store apps via `mas`
     # NOTE: keys = human-readable app name
     #       values = numeric App Store ID (from `mas list` / `mas search`)
     masApps = {
+      "AdGuard Mini"       = 1440147259;
       "Numbers"            = 409203825;
       "Pages"              = 409201541;
     };
