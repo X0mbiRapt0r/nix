@@ -6,10 +6,13 @@
     cmatrix
     curl
     fastfetch
+    fd
     git
+    jq
     lsd
     neofetch
     neovim
+    ripgrep
     rsync
     tmux
   ];
