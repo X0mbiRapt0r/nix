@@ -61,4 +61,11 @@
     executable = true;
   };
 
+  programs.vscode = {
+    enable = true;
+    profiles.default.userSettings = {
+      "window.restoreWindows" = "all";
+    };
+  };
+
 }
