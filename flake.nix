@@ -6,6 +6,7 @@
     darwin.inputs.nixpkgs.follows = "nixpkgs"; # make nix-darwin use the same nixpkgs
     home-manager.url = "github:nix-community/home-manager"; # pins the home-manager project as input
     home-manager.inputs.nixpkgs.follows = "nixpkgs"; # make home-manager use the same nixpkgs
+    nix-homebrew.url = "github:zhaofengli/nix-homebrew"; # pins the nix-homebrew project as input
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable"; # use unstable branch for everything
   };
 
@@ -14,7 +15,7 @@
     extra-experimental-features = [ "nix-command" "flakes" ]; # enable nix-command and flakes globally
   };
 
-  outputs = { self, nixpkgs, darwin, home-manager, ... }: # export systems
+  outputs = { self, nixpkgs, darwin, home-manager, nix-homebrew, ... }: # export systems
   let
     # helper so we can easily get pkgs for a platform
     forSystem = system: import nixpkgs {
@@ -44,6 +45,22 @@
             ];
           };
         }
+        nix-homebrew.darwinModules.nix-homebrew
+        {
+          nix-homebrew = {
+            # Install Homebrew under the default prefix
+            enable = true;
+
+            # Apple Silicon Only: Also install Homebrew under the default Intel prefix for Rosetta 2
+            enableRosetta = true;
+
+            # User owning the Homebrew prefix
+            user = "irish";
+
+            # Automatically migrate existing Homebrew installations
+            autoMigrate = true;
+          };
+        }
       ];
     };
 
@@ -66,6 +83,22 @@
               ./home/irish/common.nix
               ./home/irish/macos.nix
             ];
+          };
+        }
+        nix-homebrew.darwinModules.nix-homebrew
+        {
+          nix-homebrew = {
+            # Install Homebrew under the default prefix
+            enable = true;
+
+            # Apple Silicon Only: Also install Homebrew under the default Intel prefix for Rosetta 2
+            enableRosetta = true;
+
+            # User owning the Homebrew prefix
+            user = "irish";
+
+            # Automatically migrate existing Homebrew installations
+            autoMigrate = true;
           };
         }
       ];
