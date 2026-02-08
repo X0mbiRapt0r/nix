@@ -4,15 +4,12 @@
   # nix-darwin's Nix management
   nix.enable = true;
   nix.gc = {
-    # automatic = true;
     interval = { Weekday = 0; Hour = 0; Minute = 0; };
-    # options = "--delete-older-than 30d";
   };
   # launchd StartCalendarInterval-style schedule
   nix.optimise.interval = [
     { Weekday =0; Hour = 0; Minute = 0; }
   ];
-  # nix.settings.experimental-features = "nix-command flakes";
 
   system.primaryUser = "irish"; # primary user (needed for system.defaults etc)
 
@@ -79,27 +76,6 @@
     FXDefaultSearchScope = "SCcf";
     FXPreferredViewStyle = "icnv";
     ShowPathbar = true;
-    };
-  };
-
-  environment.etc."sudoers.d/darwin-rebuild-irish" = {
-    text = ''
-      irish ALL=(ALL:ALL) NOPASSWD: /run/current-system/sw/bin/darwin-rebuild
-    '';
-  };
-
-  launchd.user.agents."nix-auto-rebuild" = {
-
-    # nix-darwin will generate a small script with this content
-    script = ''
-      /bin/zsh -lc "$HOME/.local/bin/nix-auto-rebuild.sh"
-    '';
-
-    # These become keys in the launchd plist
-    serviceConfig = {
-      RunAtLoad = true;  # run once when you log in/unlock
-      StartInterval = 900;  # every 900 seconds = 15 minutes
-      KeepAlive = false; # don’t restart it; script exits after one run
     };
   };
 

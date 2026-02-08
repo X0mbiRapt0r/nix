@@ -46,12 +46,5 @@
     PATH = "$PATH:$HOME/go/bin";
   };
 
-  # home.packages = with pkgs; [
-  #   fontconfig
-  #   ripgrep
-  #   fd
-  #   jq
-  # ];
-
   home.stateVersion = "24.05";
 }
