@@ -6,6 +6,10 @@
       systemd-boot.enable = true;
       efi.canTouchEfiVariables = true;
     };
+
+    # Follow the newest kernel series available in your pinned nixpkgs
+    # (on unstable this typically advances faster than the default LTS kernel).
+    kernelPackages = pkgs.linuxPackages_latest;
   };
 
   environment.systemPackages = with pkgs; [ # List packages installed in system profile.
