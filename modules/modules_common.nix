@@ -10,7 +10,7 @@
     git
     jq
     lsd
-    neofetch
+    # neofetch
     neovim
     ripgrep
     rsync
