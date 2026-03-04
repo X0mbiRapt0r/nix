@@ -3,6 +3,7 @@
 {
     homebrew = {
     casks = [
+      "audacity"
       "calibre"
       "discord"
       "godot"
