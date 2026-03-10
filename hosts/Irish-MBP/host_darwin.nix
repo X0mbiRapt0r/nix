@@ -9,7 +9,7 @@
       "godot"
       "porting-kit"
       "steam"
-      "stremio@beta"
+      "stremio"
       "transmission"
     ];
     # Mac App Store apps via `mas`
