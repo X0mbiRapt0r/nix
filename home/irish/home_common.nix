@@ -46,5 +46,5 @@
     PATH = "$PATH:$HOME/go/bin";
   };
 
-  home.stateVersion = "24.05";
+  home.stateVersion = "26.05";
 }

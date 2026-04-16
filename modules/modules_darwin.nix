@@ -39,11 +39,11 @@
     # Mac App Store apps via `mas`
     # NOTE: keys = human-readable app name
     #       values = numeric App Store ID (from `mas list` / `mas search`)
-    masApps = {
-      "AdGuard Mini"       = 1440147259;
-      "Numbers"            = 409203825;
-      "Pages"              = 409201541;
-    };
+    # masApps = {
+    #   "AdGuard Mini"       = 1440147259;
+    #   "Numbers"            = 409203825;
+    #   "Pages"              = 409201541;
+    # };
   };
 
   programs.zsh.enable = true; # Make sure zsh is enabled (macOS default shell)
