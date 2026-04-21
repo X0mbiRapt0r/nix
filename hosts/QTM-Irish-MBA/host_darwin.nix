@@ -3,8 +3,6 @@
 {
   homebrew = {
     casks = [
-      "steam"
-      "stremio"
       "powershell"
       "windows-app"
     ];
