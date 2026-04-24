@@ -5,6 +5,7 @@
     casks = [
       "audacity"
       "calibre"
+      "codex-app"
       "discord"
       "godot"
       "porting-kit"
