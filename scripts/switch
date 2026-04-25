@@ -1,0 +1,115 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+usage() {
+  cat <<'USAGE'
+Usage:
+  scripts/switch [HOST] [--repo PATH] [--print-command] [-- EXTRA_ARGS...]
+  scripts/switch --host HOST [--repo PATH] [--print-command] [-- EXTRA_ARGS...]
+
+Build and activate the Nix flake for the current machine.
+
+Options:
+  --host HOST       Override the detected flake host name.
+  --repo PATH       Override the default repo path for this OS.
+  --print-command   Print the rebuild command without running it.
+  -h, --help        Show this help.
+
+Any arguments after -- are passed through to darwin-rebuild or nixos-rebuild.
+USAGE
+}
+
+host=""
+repo_dir=""
+print_command=false
+extra_args=()
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --host)
+      host="${2:?Missing value for --host}"
+      shift 2
+      ;;
+    --repo)
+      repo_dir="${2:?Missing value for --repo}"
+      shift 2
+      ;;
+    --print-command)
+      print_command=true
+      shift
+      ;;
+    -h | --help)
+      usage
+      exit 0
+      ;;
+    --)
+      shift
+      extra_args+=("$@")
+      break
+      ;;
+    *)
+      if [[ -z "$host" ]]; then
+        host="$1"
+        shift
+      else
+        echo "Unknown argument: $1" >&2
+        usage >&2
+        exit 2
+      fi
+      ;;
+  esac
+done
+
+detect_host() {
+  if [[ "$(uname -s)" == "Darwin" ]] && command -v scutil >/dev/null 2>&1; then
+    scutil --get LocalHostName 2>/dev/null && return 0
+  fi
+
+  hostname -s
+}
+
+os="$(uname -s)"
+detected_host="$(detect_host)"
+
+case "$os" in
+  Darwin)
+    repo_dir="${repo_dir:-$HOME/Library/Mobile Documents/com~apple~CloudDocs/Documents/github.com/X0mbiRapt0r/nix}"
+    host="${host:-$detected_host}"
+    rebuild_cmd=(sudo darwin-rebuild switch)
+    ;;
+  Linux)
+    repo_dir="${repo_dir:-$HOME/Documents/github.com/X0mbiRapt0r/nix}"
+    host="${host:-$detected_host}"
+    rebuild_cmd=(sudo nixos-rebuild switch)
+    ;;
+  *)
+    echo "Unsupported OS: $os" >&2
+    exit 1
+    ;;
+esac
+
+if [[ -z "$host" ]]; then
+  echo "Could not detect a host name. Re-run with --host HOST." >&2
+  exit 1
+fi
+
+if [[ ! -d "$repo_dir" ]]; then
+  echo "Repo path does not exist: $repo_dir" >&2
+  echo "Re-run with --repo PATH if this machine uses a different checkout path." >&2
+  exit 1
+fi
+
+flake_ref="$repo_dir#$host"
+cmd=("${rebuild_cmd[@]}" --flake "$flake_ref" -L "${extra_args[@]}")
+
+printf 'Host: %s\n' "$host"
+printf 'Repo: %s\n' "$repo_dir"
+printf 'Command:'
+printf ' %q' "${cmd[@]}"
+printf '\n'
+
+if [[ "$print_command" == true ]]; then
+  exit 0
+fi
+
+exec "${cmd[@]}"
