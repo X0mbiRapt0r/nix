@@ -35,7 +35,7 @@
       ll = "lsd -lah"; # Long listing with hidden files.
       ls = "lsd"; # Use lsd for basic listings.
       lt = "lsd --tree"; # Tree-style listing.
-      ncg = "nix-env --delete-generations old && nix-store --gc && sudo nix-collect-garbage -d"; # Clean up old generations and unused store paths.
+      ngc = "nix-env --delete-generations old && nix-store --gc && sudo nix-collect-garbage -d"; # Clean up old generations and unused store paths.
       nfu = "nix flake update && gacp"; # Update flake inputs and commit the changes.
     };
 
