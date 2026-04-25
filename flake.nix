@@ -2,7 +2,7 @@
   description = "Irish's unified NixOS + macOS flake"; # Shown by `nix flake metadata`.
 
   inputs = {
-    darwin.url = "github:LnL7/nix-darwin"; # macOS system configuration module.
+    darwin.url = "github:nix-darwin/nix-darwin/master"; # macOS system configuration module.
     darwin.inputs.nixpkgs.follows = "nixpkgs"; # Keep nix-darwin on this flake's nixpkgs.
     home-manager.url = "github:nix-community/home-manager"; # User-level dotfiles and app settings.
     home-manager.inputs.nixpkgs.follows = "nixpkgs"; # Keep Home Manager on this flake's nixpkgs.
