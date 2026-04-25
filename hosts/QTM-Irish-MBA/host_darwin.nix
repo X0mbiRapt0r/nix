@@ -3,17 +3,10 @@
 {
   homebrew = {
     casks = [
-      "powershell"
-      "windows-app"
+      "powershell" # Microsoft PowerShell app/runtime.
+      "windows-app" # Microsoft Windows App for remote desktops/cloud PCs.
     ];
-    # Mac App Store apps via `mas`
-    # NOTE: keys = human-readable app name
-    #       values = numeric App Store ID (from `mas list` / `mas search`)
-    # masApps = {
-      # "Numbers"            = 409203825;
-      # "Pages"              = 409201541;
-    #};
   };
 
-  networking.hostName = "QTM-Irish-MBA";
+  networking.hostName = "QTM-Irish-MBA"; # Local network hostname for this Mac.
 }

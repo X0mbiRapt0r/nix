@@ -1,84 +1,72 @@
-{ config, pkgs, ... }:
+{ pkgs, ... }:
 
 {
-  # nix-darwin's Nix management
-  nix.enable = true;
+  nix.enable = true; # Let nix-darwin manage the Nix daemon and nix.conf.
   nix.gc = {
-    interval = { Weekday = 0; Hour = 0; Minute = 0; };
+    interval = { Weekday = 0; Hour = 0; Minute = 0; }; # Run GC weekly at Sunday 00:00 via launchd.
   };
-  # launchd StartCalendarInterval-style schedule
   nix.optimise.interval = [
-    { Weekday =0; Hour = 0; Minute = 0; }
+    { Weekday = 0; Hour = 0; Minute = 0; } # Run store optimisation weekly at Sunday 00:00.
   ];
 
-  system.primaryUser = "irish"; # primary user (needed for system.defaults etc)
+  system.primaryUser = "irish"; # User whose defaults are managed by system.defaults.
 
   environment.systemPackages = with pkgs; [
-    freerdp
-    go
-    mas
-    python3
-    uv
+    freerdp # RDP client.
+    go # Go toolchain.
+    mas # Mac App Store CLI, useful for discovering/installing App Store IDs.
+    python3 # Python runtime.
+    uv # Fast Python package/project manager.
   ];
 
   homebrew = {
-    enable = true;
+    enable = true; # Let nix-darwin produce and apply a Brewfile.
     onActivation = {
-      autoUpdate = true;  # or true if you like
-      cleanup    = "zap";  # or true to cleanup old stuff on switch
-      upgrade    = true;  # or true to upgrade outdated stuff on switch
+      autoUpdate = true; # Run `brew update` during activation.
+      cleanup = "zap"; # Remove casks/formulas no longer declared here, including zap cleanup.
+      upgrade = true; # Upgrade outdated Homebrew packages during activation.
     };
     casks = [
-      "chatgpt"
-      "gimp"
-      "obsidian"
-      "visual-studio-code"
-      "whatsapp"
-      "winbox"
+      "chatgpt" # ChatGPT desktop app.
+      "gimp" # Image editor.
+      "obsidian" # Notes/knowledge base.
+      "visual-studio-code" # VS Code app; settings are managed by Home Manager.
+      "whatsapp" # Messaging app.
+      "winbox" # MikroTik router management app.
     ];
-    # Mac App Store apps via `mas`
-    # NOTE: keys = human-readable app name
-    #       values = numeric App Store ID (from `mas list` / `mas search`)
-    # masApps = {
-    #   "AdGuard Mini"       = 1440147259;
-    #   "Numbers"            = 409203825;
-    #   "Pages"              = 409201541;
-    # };
   };
 
-  programs.zsh.enable = true; # Make sure zsh is enabled (macOS default shell)
+  programs.zsh.enable = true; # Register zsh as an available shell.
 
   users.users.irish = {
-    home = "/Users/irish";
-    shell = pkgs.zsh;
+    home = "/Users/irish"; # macOS home directory.
+    shell = pkgs.zsh; # Login shell managed by Nix.
   };
 
-  ids.gids.nixbld = 350;
+  ids.gids.nixbld = 350; # Stable nixbld group ID used by nix-darwin on macOS.
 
   system.defaults = {
     NSGlobalDomain = {
-      AppleShowAllExtensions = false;
-      AppleShowAllFiles = true;
-      NSAutomaticWindowAnimationsEnabled = false;
+      AppleShowAllExtensions = false; # Keep filename extensions hidden globally unless an app overrides it.
+      NSAutomaticWindowAnimationsEnabled = false; # Reduce window animation delays.
     };
     dock = {
-      tilesize = 64;
-      magnification = true;
-      largesize = 128;
-      autohide = true;
+      tilesize = 64; # Default Dock icon size.
+      magnification = true; # Enlarge icons under the pointer.
+      largesize = 128; # Maximum Dock magnification size.
+      autohide = true; # Hide the Dock until the pointer reaches the screen edge.
     };
-    finder  = {
-    _FXSortFoldersFirst = true;
-    _FXSortFoldersFirstOnDesktop = true;
-    AppleShowAllExtensions = false;
-    AppleShowAllFiles = false;
-    CreateDesktop = true;
-    FXDefaultSearchScope = "SCcf";
-    FXPreferredViewStyle = "icnv";
-    ShowPathbar = true;
+    finder = {
+      _FXSortFoldersFirst = true; # Show folders before files in Finder windows.
+      _FXSortFoldersFirstOnDesktop = true; # Show folders before files on the Desktop.
+      AppleShowAllExtensions = false; # Keep filename extensions hidden in Finder.
+      AppleShowAllFiles = true; # Show hidden dotfiles in Finder.
+      CreateDesktop = true; # Show Desktop icons.
+      FXDefaultSearchScope = "SCcf"; # Search the current folder by default.
+      FXPreferredViewStyle = "icnv"; # Use icon view by default.
+      ShowPathbar = true; # Show the Finder path bar.
     };
   };
 
-  # nix-darwin’s own state version (small integer, not the same as NixOS)
-  system.stateVersion = 4;
+  system.stateVersion = 4; # nix-darwin state version; do not bump casually.
 }

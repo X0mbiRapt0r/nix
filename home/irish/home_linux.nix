@@ -1,5 +1,5 @@
-{ config, pkgs, ... }:
+{ ... }:
 
 {
-  home.homeDirectory = "/home/irish";
+  home.homeDirectory = "/home/irish"; # Linux home directory.
 }
