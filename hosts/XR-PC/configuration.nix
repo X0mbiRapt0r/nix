@@ -81,6 +81,7 @@
       dedicatedServer.openFirewall = true; # Open firewall ports for Source dedicated servers.
       localNetworkGameTransfers.openFirewall = true; # Open firewall ports for LAN game transfers.
     };
+    zsh.enable = true; # Register zsh as an available login shell.
   };
 
   services.blueman.enable = true; # Bluetooth tray/GUI manager for Plasma.
@@ -112,6 +113,7 @@
     isNormalUser = true; # Create a regular login user.
     description = "Irish"; # Display name.
     extraGroups = [ "networkmanager" "render" "video" "wheel" ]; # Network, GPU, and sudo access.
+    shell = pkgs.zsh; # Use the Home Manager-managed zsh config for SSH and local shells.
     packages = with pkgs; [
       tree # Directory tree viewer.
     ];
