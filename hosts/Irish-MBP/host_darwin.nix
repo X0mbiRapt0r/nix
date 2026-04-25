@@ -5,7 +5,6 @@
     casks = [
       "audacity" # Audio editor.
       "calibre" # Ebook manager.
-      "codex-app" # Codex desktop app.
       "discord" # Chat/voice app.
       "godot" # Game engine.
       "steam" # Steam client.
