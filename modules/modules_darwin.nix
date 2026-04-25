@@ -28,6 +28,7 @@
     };
     casks = [
       "chatgpt" # ChatGPT desktop app.
+      "codex-app" # Codex desktop app.
       "obsidian" # Notes/knowledge base.
       "visual-studio-code" # VS Code app; settings are managed by Home Manager.
       "whatsapp" # Messaging app.
