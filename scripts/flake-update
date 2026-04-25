@@ -1,0 +1,122 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+program_name="${NIX_FLAKE_UPDATE_COMMAND_NAME:-${0##*/}}"
+
+usage() {
+  cat <<USAGE
+Usage:
+  $program_name [--repo PATH] [--message MESSAGE] [--no-push] [--print-command]
+
+Update this repo's flake inputs, commit flake.lock if it changed, and push.
+
+Options:
+  --repo PATH         Override the default repo path for this OS.
+  --message MESSAGE  Commit message to use when flake.lock changes.
+  --no-push          Commit but do not push.
+  --print-command    Print the commands without running them.
+  -h, --help         Show this help.
+USAGE
+}
+
+repo_dir=""
+commit_message="update flake inputs"
+push=true
+print_command=false
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --repo)
+      repo_dir="${2:?Missing value for --repo}"
+      shift 2
+      ;;
+    --message)
+      commit_message="${2:?Missing value for --message}"
+      shift 2
+      ;;
+    --no-push)
+      push=false
+      shift
+      ;;
+    --print-command)
+      print_command=true
+      shift
+      ;;
+    -h | --help)
+      usage
+      exit 0
+      ;;
+    *)
+      echo "Unknown argument: $1" >&2
+      usage >&2
+      exit 2
+      ;;
+  esac
+done
+
+case "$(uname -s)" in
+  Darwin)
+    repo_dir="${repo_dir:-$HOME/Library/Mobile Documents/com~apple~CloudDocs/Documents/github.com/X0mbiRapt0r/nix}"
+    ;;
+  Linux)
+    repo_dir="${repo_dir:-$HOME/Documents/github.com/X0mbiRapt0r/nix}"
+    ;;
+  *)
+    echo "Unsupported OS: $(uname -s)" >&2
+    exit 1
+    ;;
+esac
+
+if [[ ! -d "$repo_dir" ]]; then
+  echo "Repo path does not exist: $repo_dir" >&2
+  echo "Re-run with --repo PATH if this machine uses a different checkout path." >&2
+  exit 1
+fi
+
+if [[ ! -f "$repo_dir/flake.nix" ]]; then
+  echo "Repo path does not look like the nix flake repo: $repo_dir" >&2
+  exit 1
+fi
+
+run() {
+  printf '+'
+  printf ' %q' "$@"
+  printf '\n'
+
+  if [[ "$print_command" != true ]]; then
+    "$@"
+  fi
+}
+
+printf 'Repo: %s\n' "$repo_dir"
+
+if [[ "$print_command" == true ]]; then
+  run cd "$repo_dir"
+  run nix flake update
+  run git add flake.lock
+  run git commit -m "$commit_message"
+  if [[ "$push" == true ]]; then
+    run git push origin CURRENT_BRANCH
+  fi
+  exit 0
+fi
+
+cd "$repo_dir"
+run nix flake update
+run git add flake.lock
+
+if git diff --cached --quiet -- flake.lock; then
+  echo "No flake.lock changes to commit."
+  exit 0
+fi
+
+run git commit -m "$commit_message"
+
+if [[ "$push" == true ]]; then
+  branch="$(git branch --show-current)"
+  if [[ -z "$branch" ]]; then
+    echo "Cannot push from detached HEAD. Re-run with --no-push or check out a branch." >&2
+    exit 1
+  fi
+  run git push origin "$branch"
+fi
