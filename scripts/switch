@@ -6,14 +6,16 @@ program_name="${NIX_SWITCH_COMMAND_NAME:-${0##*/}}"
 usage() {
   cat <<USAGE
 Usage:
-  $program_name [HOST] [--repo PATH] [--print-command] [-- EXTRA_ARGS...]
-  $program_name --host HOST [--repo PATH] [--print-command] [-- EXTRA_ARGS...]
+  $program_name [HOST] [--repo PATH] [--pull|--no-pull] [--print-command] [-- EXTRA_ARGS...]
+  $program_name --host HOST [--repo PATH] [--pull|--no-pull] [--print-command] [-- EXTRA_ARGS...]
 
 Build and activate the Nix flake for the current machine.
 
 Options:
   --host HOST       Override the detected flake host name.
   --repo PATH       Override the default repo path for this OS.
+  --pull            Run git pull --ff-only before switching.
+  --no-pull         Skip the pre-switch git pull.
   --print-command   Print the rebuild command without running it.
   -h, --help        Show this help.
 
@@ -23,6 +25,7 @@ USAGE
 
 host=""
 repo_dir=""
+pull_before_switch=""
 print_command=false
 extra_args=()
 
@@ -35,6 +38,14 @@ while [[ $# -gt 0 ]]; do
     --repo)
       repo_dir="${2:?Missing value for --repo}"
       shift 2
+      ;;
+    --pull)
+      pull_before_switch=true
+      shift
+      ;;
+    --no-pull)
+      pull_before_switch=false
+      shift
       ;;
     --print-command)
       print_command=true
@@ -77,11 +88,13 @@ case "$os" in
   Darwin)
     repo_dir="${repo_dir:-$HOME/Library/Mobile Documents/com~apple~CloudDocs/Documents/github.com/X0mbiRapt0r/nix}"
     host="${host:-$detected_host}"
+    pull_before_switch="${pull_before_switch:-false}"
     rebuild_cmd=(sudo darwin-rebuild switch)
     ;;
   Linux)
     repo_dir="${repo_dir:-$HOME/Documents/github.com/X0mbiRapt0r/nix}"
     host="${host:-$detected_host}"
+    pull_before_switch="${pull_before_switch:-true}"
     rebuild_cmd=(sudo nixos-rebuild switch)
     ;;
   *)
@@ -106,12 +119,36 @@ cmd=("${rebuild_cmd[@]}" --flake "$flake_ref" -L "${extra_args[@]}")
 
 printf 'Host: %s\n' "$host"
 printf 'Repo: %s\n' "$repo_dir"
+printf 'Pull: %s\n' "$pull_before_switch"
+
+if [[ "$pull_before_switch" == true ]]; then
+  pull_cmd=(git -C "$repo_dir" pull --ff-only)
+  printf 'Pre-switch command:'
+  printf ' %q' "${pull_cmd[@]}"
+  printf '\n'
+fi
+
 printf 'Command:'
 printf ' %q' "${cmd[@]}"
 printf '\n'
 
 if [[ "$print_command" == true ]]; then
   exit 0
+fi
+
+if [[ "$pull_before_switch" == true ]]; then
+  if ! "${pull_cmd[@]}"; then
+    cat >&2 <<EOF
+
+Git pull failed. If the error mentions .git/FETCH_HEAD permission denied,
+fix the XR-PC checkout ownership once with:
+
+  sudo chown -R "\$(id -un):\$(id -gn)" "$repo_dir"
+
+Then re-run $program_name.
+EOF
+    exit 1
+  fi
 fi
 
 exec "${cmd[@]}"
