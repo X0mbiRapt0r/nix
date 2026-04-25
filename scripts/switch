@@ -1,11 +1,13 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+program_name="${NIX_SWITCH_COMMAND_NAME:-${0##*/}}"
+
 usage() {
-  cat <<'USAGE'
+  cat <<USAGE
 Usage:
-  scripts/switch [HOST] [--repo PATH] [--print-command] [-- EXTRA_ARGS...]
-  scripts/switch --host HOST [--repo PATH] [--print-command] [-- EXTRA_ARGS...]
+  $program_name [HOST] [--repo PATH] [--print-command] [-- EXTRA_ARGS...]
+  $program_name --host HOST [--repo PATH] [--print-command] [-- EXTRA_ARGS...]
 
 Build and activate the Nix flake for the current machine.
 
