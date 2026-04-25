@@ -1,148 +1,119 @@
-{ config, lib, pkgs, ... }:
+{ pkgs, ... }:
 
-{ 
+{
   boot = {
     loader = {
-      systemd-boot.enable = true;
-      efi.canTouchEfiVariables = true;
+      systemd-boot.enable = true; # Use systemd-boot as the EFI bootloader.
+      efi.canTouchEfiVariables = true; # Allow NixOS to update UEFI boot entries.
     };
 
-    # Follow the newest kernel series available in your pinned nixpkgs
-    # (on unstable this typically advances faster than the default LTS kernel).
-    kernelPackages = pkgs.linuxPackages_latest;
+    kernelPackages = pkgs.linuxPackages_latest; # Track the newest kernel series from pinned nixpkgs.
   };
 
-  environment.systemPackages = with pkgs; [ # List packages installed in system profile.
-    (btop.override { rocmSupport = true; }) # btop with AMD GPU support
-    rocmPackages.rocm-smi # provides rocm-smi
-    # firefox
-    # mangohud
-    # lm_sensors
-    # rustdesk
-    # wineWowPackages.waylandFull
-    # winetricks
+  environment.systemPackages = with pkgs; [
+    rocmPackages.rocm-smi # AMD GPU monitoring CLI.
   ];
 
   hardware = {
     bluetooth = {
-      enable = true;
+      enable = true; # Enable the Bluetooth service.
       settings = {
         General = {
-          Experimental = true; # Shows battery charge of connected devices on supported Bluetooth adapters. Defaults to 'false'.
-          FastConnectable = true; # When enabled other devices can connect faster to us, however the tradeoff is increased power consumption. Defaults to 'false'.
+          Experimental = true; # Show battery levels for supported Bluetooth devices.
+          FastConnectable = true; # Let controllers reconnect faster at the cost of some power use.
         };
         Policy = {
-          AutoEnable = true; # Enable all controllers when they are found. This includes adapters present on start as well as adapters that are plugged in later on. Defaults to 'true'.
+          AutoEnable = true; # Power on Bluetooth adapters when they appear.
         };
       };
-      powerOnBoot = true;
+      powerOnBoot = true; # Bring Bluetooth up during boot.
     };
     graphics = {
-      # amd = {
-      #   dpm = true; # Dynamic Power Management
-      #   enable = true;
-      # }; 
-      enable = true;
-      enable32Bit = true;
+      enable = true; # Enable Mesa/OpenGL/Vulkan graphics support.
+      enable32Bit = true; # Include 32-bit graphics libraries for Steam/Proton.
     };
-    steam-hardware.enable = true;
-    xpadneo.enable = true; # Xbox Series controller over Bluetooth (recommended)
+    steam-hardware.enable = true; # Add Steam controller/VR udev rules.
+    xpadneo.enable = true; # Better Xbox controller support over Bluetooth.
   };
 
-  i18n.defaultLocale = "en_GB.UTF-8";
+  i18n.defaultLocale = "en_GB.UTF-8"; # System language/formatting locale.
 
   networking = {
-    hostName = "XR-PC"; # Define your hostname.
-    networkmanager.enable = true;
-    # enableIPv6 = false;
+    hostName = "XR-PC"; # Local network hostname.
+    networkmanager.enable = true; # Manage networking through NetworkManager.
   };
 
   nix.gc = {
-    automatic = true;
-    dates = "daily";
+    automatic = true; # Enable scheduled garbage collection.
+    dates = "daily"; # Run GC daily via systemd timer.
   };
-  nix.optimise.dates = [ "daily" ];  # systemd.time(7) format
-  # nix.settings.auto-optimise-store = true;
-  # nix.settings.experimental-features = [ "nix-command" "flakes" ];
+  nix.optimise.dates = [ "daily" ]; # Deduplicate the store daily via systemd timer.
 
-  nixpkgs.config.allowUnfree = true; # Allow unfree packages
-  nixpkgs.config.rocmSupport = true; # Ensure packages that have optional ROCm support can enable it
+  nixpkgs.config.allowUnfree = true; # Allow unfree packages like Steam and Proton GE.
+  nixpkgs.config.rocmSupport = true; # Build optional AMD ROCm support where packages expose it.
 
-  programs = { # Install Steam
-    gamemode.enable = true;
+  programs = {
+    gamemode.enable = true; # Let games request performance-oriented CPU/GPU tuning.
     gamescope = {
-      enable = true;
-      capSysNice = true;
+      enable = true; # Install Gamescope for the Steam session.
+      capSysNice = true; # Allow Gamescope to raise scheduling priority.
     };
-    # gnupg.agent = {
-    #   enable = true;
-    #   enableSSHSupport = true;
-    # };
-    # mtr.enable = true;
     steam = {
-      enable = true;
+      enable = true; # Install and configure Steam.
       gamescopeSession = {
-        enable = true;
+        enable = true; # Add a dedicated Steam-in-Gamescope login session.
         args = [
-          "-r 120"
-          "--hdr-enabled"
-          "--rt"
+          "-r 120" # Target 120 Hz in Gamescope.
+          "--hdr-enabled" # Enable Gamescope HDR support.
+          "--rt" # Ask Gamescope to use real-time scheduling.
         ];
         env = {
-          # DSVK_ASYNC = "1";
-          AMD_VULKAN_ICD = "RADV";
-          DXVK_HDR = "1";
-          DSVK_LOG_LEVEL = "none";
-          VKD3D_DEBUG = "none";
-          ENABLE_GAMESCOPE_WSI = "1";
+          DXVK_HDR = "1"; # Allow DXVK HDR when the game/Proton path supports it.
+          DXVK_LOG_LEVEL = "none"; # Silence DXVK log files unless debugging.
+          VKD3D_DEBUG = "none"; # Silence VKD3D-Proton debug output unless debugging.
+          ENABLE_GAMESCOPE_WSI = "1"; # Use Gamescope's Vulkan WSI layer inside the session.
         };
       };
       extraCompatPackages = with pkgs; [
-        proton-ge-bin
+        proton-ge-bin # Add Proton GE as an available Steam compatibility tool.
       ];
-      remotePlay.openFirewall = true; # Open ports in the firewall for Steam Remote Play
-      dedicatedServer.openFirewall = true; # Open ports in the firewall for Source Dedicated Server
-      localNetworkGameTransfers.openFirewall = true; # Open ports in the firewall for Steam Local Network Game Transfers
+      remotePlay.openFirewall = true; # Open firewall ports for Steam Remote Play.
+      dedicatedServer.openFirewall = true; # Open firewall ports for Source dedicated servers.
+      localNetworkGameTransfers.openFirewall = true; # Open firewall ports for LAN game transfers.
     };
   };
 
-  services.blueman.enable = true; # Optional but handy: tray/GUI Bluetooth manager for Plasma
-  services.displayManager.defaultSession = "steam";
-  # services.desktopManager.cosmic.enable = true;
-  services.desktopManager.plasma6.enable = true;
-  # services.displayManager.cosmic-greeter.enable = true;
-  services.displayManager.sddm.enable = true;
-  services.displayManager.sddm.wayland.enable = true;
+  services.blueman.enable = true; # Bluetooth tray/GUI manager for Plasma.
+  services.displayManager.defaultSession = "steam"; # Auto-login lands in the Steam Gamescope session.
+  services.desktopManager.plasma6.enable = true; # Install Plasma as the fallback full desktop.
+  services.displayManager.sddm.enable = true; # Use SDDM as the graphical login manager.
+  services.displayManager.sddm.wayland.enable = true; # Run the SDDM greeter on Wayland.
   services.displayManager = {
-    autoLogin.enable = true;
-    autoLogin.user = "irish";
+    autoLogin.enable = true; # Skip the login prompt on boot.
+    autoLogin.user = "irish"; # User for the Steam-session auto-login.
   };
-  # services.getty.autologinUser = "irish"; # Enable automatic login for the user.
-  services.openssh.enable = true; # Enable the OpenSSH daemon.
-  services.pipewire = { # Enable sound.
-    enable = true;
-    pulse.enable = true;
+  services.openssh.enable = true; # Enable SSH for local remote access.
+  services.pipewire = {
+    enable = true; # Enable PipeWire audio.
+    pulse.enable = true; # Provide PulseAudio compatibility for apps/games.
   };
   services.xrdp = {
-    enable = true;
-    defaultWindowManager = "startplasma-x11";
-    openFirewall = true; # opens TCP 3389
+    enable = true; # Enable RDP access.
+    defaultWindowManager = "startplasma-x11"; # Start Plasma X11 for RDP sessions.
+    openFirewall = true; # Open TCP 3389.
   };
-  services.xserver.enable = true; # Enable the X11 windowing system.
-  # services.xserver.displayManager.steam.enable = true; # Enable SteamOS display manager
-  # services.xserver.xkb.layout = "us"; # Configure keymap in X11
-  # services.xserver.xkb.options = "eurosign:e,caps:escape";
+  services.xserver.enable = true; # Keep X11 available for SDDM, Plasma X11, and xrdp.
 
-  time.timeZone = "Africa/Johannesburg";  # Locale Settings
-  
-  system.stateVersion = "24.11";
+  time.timeZone = "Africa/Johannesburg"; # System time zone.
+
+  system.stateVersion = "24.11"; # NixOS compatibility version; do not bump casually.
 
   users.users.irish = {
-    isNormalUser = true;
-    description = "Irish";
-    extraGroups = [ "networkmanager" "render" "video" "wheel" ]; # Enable ‘sudo’ for the user.
+    isNormalUser = true; # Create a regular login user.
+    description = "Irish"; # Display name.
+    extraGroups = [ "networkmanager" "render" "video" "wheel" ]; # Network, GPU, and sudo access.
     packages = with pkgs; [
-      tree
+      tree # Directory tree viewer.
     ];
   };
 }

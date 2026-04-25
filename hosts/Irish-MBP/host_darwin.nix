@@ -1,26 +1,19 @@
 { ... }:
 
 {
-    homebrew = {
+  homebrew = {
     casks = [
-      "audacity"
-      "calibre"
-      "codex-app"
-      "discord"
-      "godot"
-      "porting-kit"
-      "steam"
-      "stremio"
-      "transmission"
+      "audacity" # Audio editor.
+      "calibre" # Ebook manager.
+      "codex-app" # Codex desktop app.
+      "discord" # Chat/voice app.
+      "godot" # Game engine.
+      "porting-kit" # Windows game/app wrapper for macOS.
+      "steam" # Steam client.
+      "stremio" # Media streaming app.
+      "transmission" # BitTorrent client.
     ];
-    # Mac App Store apps via `mas`
-    # NOTE: keys = human-readable app name
-    #       values = numeric App Store ID (from `mas list` / `mas search`)
-    # masApps = {
-      # "Numbers"            = 409203825;
-      # "Pages"              = 409201541;
-    # };
   };
 
-  networking.hostName = "Irish-MBP";
+  networking.hostName = "Irish-MBP"; # Local network hostname for this Mac.
 }
