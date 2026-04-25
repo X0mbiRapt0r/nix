@@ -36,8 +36,8 @@
       ls = "lsd"; # Use lsd for basic listings.
       lt = "lsd --tree"; # Tree-style listing.
       ngc = "nix-env --delete-generations old && nix-store --gc && sudo nix-collect-garbage -d"; # Clean up old generations and unused store paths.
-      nfu = "nix flake update && gacp"; # Update flake inputs and commit the changes.
-      nrs = "nix-switch"; # Switch to the latest system generation. Useful after a flake update.
+      nfu = "command nfu"; # Update this flake's inputs and push lockfile changes.
+      nrs = "command nix-switch"; # Switch to the latest system generation. Useful after a flake update.
     };
 
     initContent = ''
