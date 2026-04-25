@@ -22,7 +22,7 @@
       "editor.fontFamily" = "JetBrainsMono Nerd Font"; # Editor font.
       "editor.fontLigatures" = true; # Enable coding ligatures.
       "terminal.integrated.fontFamily" = "JetBrainsMono Nerd Font Mono"; # Integrated terminal font.
-      "terminal.integrated.shellIntegration.enabled": false; # Disable VS Code's shell integration, which can cause issues with zsh and Home Manager.
+      "terminal.integrated.shellIntegration.enabled" = false; # Disable VS Code's shell integration, which can cause issues with zsh and Home Manager.
       "window.restoreWindows" = "all"; # Reopen previous windows on launch.
     };
   };
