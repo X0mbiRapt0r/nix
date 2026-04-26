@@ -40,7 +40,7 @@
 
   users.users.irish = {
     home = "/Users/irish"; # macOS home directory.
-    shell = pkgs.zsh; # Login shell managed by Nix.
+    shell = "/bin/zsh"; # Use macOS zsh; Home Manager still owns the interactive config.
   };
 
   ids.gids.nixbld = 350; # Stable nixbld group ID used by nix-darwin on macOS.

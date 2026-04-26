@@ -22,6 +22,13 @@
       "editor.fontFamily" = "JetBrainsMono Nerd Font"; # Editor font.
       "editor.fontLigatures" = true; # Enable coding ligatures.
       "terminal.integrated.fontFamily" = "JetBrainsMono Nerd Font Mono"; # Integrated terminal font.
+      "terminal.integrated.defaultProfile.osx" = "zsh"; # Avoid VS Code auto-picking the Nix zsh path.
+      "terminal.integrated.profiles.osx" = {
+        zsh = {
+          path = "/bin/zsh";
+          args = [ "-l" ];
+        };
+      };
       "window.restoreWindows" = "all"; # Reopen previous windows on launch.
     };
   };
