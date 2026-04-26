@@ -14,6 +14,6 @@
   };
 
   networking.hostName = "Irish-MBP"; # Local network hostname for this Mac.
-  networking.computerName = config.networking.hostName;
-  networking.localHostName = config.networking.hostName;
+  networking.computerName = "Irish-MBP";
+  networking.localHostName = "Irish-MBP";
 }
