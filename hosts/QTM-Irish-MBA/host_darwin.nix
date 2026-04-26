@@ -9,4 +9,6 @@
   };
 
   networking.hostName = "QTM-Irish-MBA"; # Local network hostname for this Mac.
+  networking.computerName = "QTM-Irish-MBA";
+  networking.localHostName = "QTM-Irish-MBA";
 }
