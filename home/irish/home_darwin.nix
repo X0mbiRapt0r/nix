@@ -17,7 +17,7 @@
   programs.vscode = {
     enable = true; # Manage VS Code settings through Home Manager.
     package = null; # Do not install VS Code with Nix; Homebrew owns the app.
-    pname = "vscode"; # Tell HM which VS Code profile paths to use when package is null.
+    # pname = "vscode"; # Tell HM which VS Code profile paths to use when package is null.
     profiles.default.userSettings = {
       "editor.fontFamily" = "JetBrainsMono Nerd Font"; # Editor font.
       "editor.fontLigatures" = true; # Enable coding ligatures.
