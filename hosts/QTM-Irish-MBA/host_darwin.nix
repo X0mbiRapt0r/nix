@@ -3,6 +3,7 @@
 {
   homebrew = {
     casks = [
+      "docker-desktop" # Docker Desktop for Mac.
       "powershell" # Microsoft PowerShell app/runtime.
       "windows-app" # Microsoft Windows App for remote desktops/cloud PCs.
     ];
