@@ -1,5 +1,17 @@
 { pkgs, ... }:
 
+let
+  # Steam's own pre-cache data lives inside Steam library folders, but Mesa/RADV
+  # also keeps a driver shader cache under the user's cache directory by default.
+  # Put that driver-side cache on the roomy game/data disk and make the limit
+  # large enough that several Proton games do not constantly evict each other.
+  steamShaderCacheDir = "/mnt/data1/steam-shader-cache";
+  steamShaderCacheEnv = {
+    MESA_SHADER_CACHE_DISABLE = "false"; # Keep Mesa's persistent on-disk cache enabled explicitly.
+    MESA_SHADER_CACHE_DIR = steamShaderCacheDir; # Mesa will create/use `${steamShaderCacheDir}/mesa_shader_cache`.
+    MESA_SHADER_CACHE_MAX_SIZE = "12G"; # Mesa defaults to 1G per architecture, which is tight for a gaming box.
+  };
+in
 {
   boot = {
     loader = {
@@ -60,6 +72,9 @@
     };
     steam = {
       enable = true; # Install and configure Steam.
+      package = pkgs.steam.override {
+        extraEnv = steamShaderCacheEnv; # Make every Steam launch inherit the persistent shader-cache settings.
+      };
       gamescopeSession = {
         enable = true; # Add a dedicated Steam-in-Gamescope login session.
         args = [
@@ -67,7 +82,7 @@
           "--hdr-enabled" # Enable Gamescope HDR support.
           "--rt" # Ask Gamescope to use real-time scheduling.
         ];
-        env = {
+        env = steamShaderCacheEnv // {
           DXVK_HDR = "1"; # Allow DXVK HDR when the game/Proton path supports it.
           DXVK_LOG_LEVEL = "none"; # Silence DXVK log files unless debugging.
           VKD3D_DEBUG = "none"; # Silence VKD3D-Proton debug output unless debugging.
@@ -104,6 +119,10 @@
     openFirewall = true; # Open TCP 3389.
   };
   services.xserver.enable = true; # Keep X11 available for SDDM, Plasma X11, and xrdp.
+
+  systemd.tmpfiles.rules = [
+    "d ${steamShaderCacheDir} 0755 irish users - -" # Create the shared parent cache directory on boot/switch.
+  ];
 
   time.timeZone = "Africa/Johannesburg"; # System time zone.
 
