@@ -6,7 +6,10 @@
     darwin.inputs.nixpkgs.follows = "nixpkgs"; # Keep nix-darwin on this flake's nixpkgs.
     home-manager.url = "github:nix-community/home-manager"; # User-level dotfiles and app settings.
     home-manager.inputs.nixpkgs.follows = "nixpkgs"; # Keep Home Manager on this flake's nixpkgs.
+    brew-src.url = "github:Homebrew/brew/5.1.10"; # Pin the Homebrew code that nix-homebrew installs.
+    brew-src.flake = false; # Homebrew is a source checkout, not a Nix flake.
     nix-homebrew.url = "github:zhaofengli/nix-homebrew"; # Declarative Homebrew bootstrap for macOS.
+    nix-homebrew.inputs.brew-src.follows = "brew-src"; # Use the explicit Homebrew pin instead of nix-homebrew's default.
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable"; # Rolling package set used by all hosts.
   };
 
@@ -14,8 +17,12 @@
     extra-experimental-features = [ "nix-command" "flakes" ]; # Let this repo work on fresh Nix installs.
   };
 
-  outputs = { nixpkgs, darwin, home-manager, nix-homebrew, ... }:
+  outputs = { nixpkgs, darwin, home-manager, brew-src, nix-homebrew, ... }:
   let
+    brewPackage = brew-src // {
+      name = "brew-5.1.10"; # Label the pinned Homebrew source used by nix-homebrew.
+      version = "5.1.10"; # Report the same Homebrew version that is pinned in brew-src.
+    };
     forSystem = system: import nixpkgs {
       inherit system;
       config.allowUnfree = true; # Required for unfree packages on Darwin when pkgs is passed explicitly.
@@ -49,6 +56,7 @@
           nix-homebrew = {
             enable = true; # Install Homebrew under the default prefix.
             enableRosetta = true; # Also install the Intel prefix for Rosetta-only casks/formulas.
+            package = brewPackage; # Use the current Homebrew code instead of nix-homebrew's bundled default.
             user = "irish"; # User that owns the Homebrew prefix.
           };
         }
@@ -81,6 +89,7 @@
           nix-homebrew = {
             enable = true; # Install Homebrew under the default prefix.
             enableRosetta = true; # Also install the Intel prefix for Rosetta-only casks/formulas.
+            package = brewPackage; # Use the current Homebrew code instead of nix-homebrew's bundled default.
             user = "irish"; # User that owns the Homebrew prefix.
           };
         }
