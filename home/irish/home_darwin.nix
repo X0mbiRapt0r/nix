@@ -1,5 +1,20 @@
-{ config, ... }:
+{ config, pkgs, ... }:
 
+let
+  sharedCodeSettings = {
+    "editor.fontFamily" = "JetBrainsMono Nerd Font"; # Editor font.
+    "editor.fontLigatures" = true; # Enable coding ligatures.
+    "terminal.integrated.fontFamily" = "JetBrainsMono Nerd Font Mono"; # Integrated terminal font.
+    "terminal.integrated.defaultProfile.osx" = "zsh"; # Avoid VS Code auto-picking the Nix zsh path.
+    "terminal.integrated.profiles.osx" = {
+      zsh = {
+        path = "/bin/zsh";
+        args = [ "-l" ];
+      };
+    };
+    "window.restoreWindows" = "all"; # Reopen previous windows on launch.
+  };
+in
 {
   home.homeDirectory = "/Users/irish"; # macOS home directory.
   home.sessionPath = [ "$HOME/.local/bin" ]; # Put personal helper commands on PATH.
@@ -17,19 +32,17 @@
   programs.vscode = {
     enable = true; # Manage VS Code settings through Home Manager.
     package = null; # Do not install VS Code with Nix; Homebrew owns the app.
-    # pname = "vscode"; # Tell HM which VS Code profile paths to use when package is null.
-    profiles.default.userSettings = {
-      "editor.fontFamily" = "JetBrainsMono Nerd Font"; # Editor font.
-      "editor.fontLigatures" = true; # Enable coding ligatures.
-      "terminal.integrated.fontFamily" = "JetBrainsMono Nerd Font Mono"; # Integrated terminal font.
-      "terminal.integrated.defaultProfile.osx" = "zsh"; # Avoid VS Code auto-picking the Nix zsh path.
-      "terminal.integrated.profiles.osx" = {
-        zsh = {
-          path = "/bin/zsh";
-          args = [ "-l" ];
-        };
-      };
-      "window.restoreWindows" = "all"; # Reopen previous windows on launch.
+    profiles.default.userSettings = sharedCodeSettings;
+  };
+
+  programs.vscodium = {
+    enable = true; # Manage VSCodium settings through Home Manager.
+    package = null; # Do not install VSCodium with Nix; Homebrew owns the app.
+    profiles.default = {
+      userSettings = sharedCodeSettings;
+      extensions = [
+        pkgs.vscode-extensions.mechatroner.rainbow-csv # Example managed extension for future VSCodium additions.
+      ];
     };
   };
 }
