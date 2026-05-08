@@ -30,6 +30,7 @@
       "chatgpt" # ChatGPT desktop app.
       "codex-app" # Codex desktop app.
       "obsidian" # Notes/knowledge base.
+      "vscodium" # Open-source VS Code build; settings are managed by Home Manager.
       "visual-studio-code" # VS Code app; settings are managed by Home Manager.
       "whatsapp" # Messaging app.
       "winbox" # MikroTik router management app.
