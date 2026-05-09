@@ -1,4 +1,4 @@
-{ lib, pkgs, ... }:
+{ pkgs, ... }:
 
 let
   # Steam's own pre-cache data lives inside Steam library folders, but Mesa/RADV
@@ -11,12 +11,6 @@ let
     MESA_SHADER_CACHE_DIR = steamShaderCacheDir; # Mesa will create/use `${steamShaderCacheDir}/mesa_shader_cache`.
     MESA_SHADER_CACHE_MAX_SIZE = "12G"; # Mesa defaults to 1G per architecture, which is tight for a gaming box.
   };
-
-  # Desktop GPUs usually do not expose HDMI-CEC to Linux directly. Leave the
-  # automation disabled until XR-PC has real CEC hardware, for example a
-  # Pulse-Eight USB-CEC adapter sitting inline on the HDMI cable.
-  enableHdmiCecAutomation = false;
-  cecClient = "${pkgs.libcec}/bin/cec-client";
 in
 {
   boot = {
@@ -25,30 +19,16 @@ in
       efi.canTouchEfiVariables = true; # Allow NixOS to update UEFI boot entries.
     };
 
-    extraModprobeConfig = ''
-      # Keep the USB Bluetooth controller awake. Xbox controllers over Bluetooth
-      # are much less forgiving than the official Xbox wireless adapter when the
-      # host Bluetooth chip runtime-suspends during idle moments.
-      options btusb enable_autosuspend=0
-    '';
-
     kernelPackages = pkgs.linuxPackages_latest; # Track the newest kernel series from pinned nixpkgs.
   };
 
   environment.systemPackages = with pkgs; [
-    libcec # Provides `cec-client` for HDMI-CEC testing/automation once CEC hardware is present.
     rocmPackages.rocm-smi # AMD GPU monitoring CLI.
-    usbutils # Provides `lsusb`, useful for finding the Bluetooth adapter and its wake settings.
   ];
 
   hardware = {
     bluetooth = {
       enable = true; # Enable the Bluetooth service.
-      input = {
-        General = {
-          IdleTimeout = 0; # Never disconnect Bluetooth HID devices merely because they were idle.
-        };
-      };
       settings = {
         General = {
           Experimental = true; # Show battery levels for supported Bluetooth devices.
@@ -133,71 +113,12 @@ in
     enable = true; # Enable PipeWire audio.
     pulse.enable = true; # Provide PulseAudio compatibility for apps/games.
   };
-  services.udev.extraRules = ''
-    # When a USB Bluetooth adapter is added/rebound, reapply the power policy
-    # below. The service is harmless if no btusb device exists.
-    ACTION=="add|change", SUBSYSTEM=="usb", DRIVERS=="btusb", TAG+="systemd", ENV{SYSTEMD_WANTS}+="bluetooth-usb-power.service"
-  '';
   services.xrdp = {
     enable = true; # Enable RDP access.
     defaultWindowManager = "startplasma-x11"; # Start Plasma X11 for RDP sessions.
     openFirewall = true; # Open TCP 3389.
   };
   services.xserver.enable = true; # Keep X11 available for SDDM, Plasma X11, and xrdp.
-
-  systemd.services = {
-    bluetooth-usb-power = {
-      description = "Keep USB Bluetooth adapters awake for controller reliability";
-      after = [ "bluetooth.service" ];
-      wantedBy = [ "multi-user.target" ];
-      path = [ pkgs.coreutils ];
-      serviceConfig.Type = "oneshot";
-      script = ''
-        # btusb binds to USB interface paths like `1-9:1.0`; the parent
-        # directory is the actual USB device that owns the power controls.
-        for interface in /sys/bus/usb/drivers/btusb/*:*; do
-          [ -e "$interface" ] || continue
-          device="$(readlink -f "$interface/..")"
-
-          # `on` disables runtime autosuspend for this adapter instance.
-          if [ -w "$device/power/control" ]; then
-            echo on > "$device/power/control"
-          fi
-
-          # `enabled` lets a suspended PC wake when the adapter receives a
-          # supported remote wake event, assuming the firmware/BIOS allows it.
-          if [ -w "$device/power/wakeup" ]; then
-            echo enabled > "$device/power/wakeup"
-          fi
-        done
-      '';
-    };
-  } // lib.optionalAttrs enableHdmiCecAutomation {
-    hdmi-cec-tv-on = {
-      description = "Wake the TV and select XR-PC as the active HDMI source";
-      after = [ "display-manager.service" ];
-      wantedBy = [ "graphical.target" ];
-      serviceConfig.Type = "oneshot";
-      script = ''
-        # Logical address 0 is the TV. `as` announces this HDMI device as the
-        # active source, which is the CEC equivalent of a console taking input.
-        echo "on 0" | ${cecClient} -s -d 1 || true
-        echo "as" | ${cecClient} -s -d 1 || true
-      '';
-    };
-
-    hdmi-cec-tv-standby = {
-      description = "Put the TV in standby before XR-PC sleeps or powers off";
-      before = [ "sleep.target" "poweroff.target" ];
-      wantedBy = [ "sleep.target" "poweroff.target" ];
-      serviceConfig.Type = "oneshot";
-      script = ''
-        # Send standby before the machine goes away; a fully powered-off PC
-        # cannot send new CEC commands after shutdown completes.
-        echo "standby 0" | ${cecClient} -s -d 1 || true
-      '';
-    };
-  };
 
   systemd.tmpfiles.rules = [
     "d ${steamShaderCacheDir} 0755 irish users - -" # Create the shared parent cache directory on boot/switch.
