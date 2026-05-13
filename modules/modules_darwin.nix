@@ -34,6 +34,7 @@
       "visual-studio-code" # VS Code app; settings are managed by Home Manager.
       "whatsapp" # Messaging app.
       "winbox" # MikroTik router management app.
+      # "wireguard" # WireGuard VPN client.
     ];
   };
 
@@ -51,11 +52,17 @@
       AppleShowAllExtensions = false; # Keep filename extensions hidden globally unless an app overrides it.
       NSAutomaticWindowAnimationsEnabled = false; # Reduce window animation delays.
     };
+    CustomUserPreferences = {
+      "com.apple.dock" = {
+        "show-recent-count" = 5;
+      };
+    };
     dock = {
       tilesize = 64; # Default Dock icon size.
       magnification = true; # Enlarge icons under the pointer.
       largesize = 128; # Maximum Dock magnification size.
       autohide = true; # Hide the Dock until the pointer reaches the screen edge.
+      show-recents = true; # Show recently used apps in the Dock.
     };
     finder = {
       _FXSortFoldersFirst = true; # Show folders before files in Finder windows.
