@@ -24,6 +24,7 @@ in
 
   environment.systemPackages = with pkgs; [
     rocmPackages.rocm-smi # AMD GPU monitoring CLI.
+    usbutils # Provide `lsusb` for controller, adapter, and TV/CEC hardware diagnostics.
   ];
 
   hardware = {
@@ -45,7 +46,8 @@ in
       enable32Bit = true; # Include 32-bit graphics libraries for Steam/Proton.
     };
     steam-hardware.enable = true; # Add Steam controller/VR udev rules.
-    xpadneo.enable = true; # Better Xbox controller support over Bluetooth.
+    xone.enable = true; # Enable Xbox Wireless Adapter support for Xbox One/Series controllers.
+    xpadneo.enable = true; # Keep Xbox-over-Bluetooth support available for non-adapter controller use.
   };
 
   i18n.defaultLocale = "en_GB.UTF-8"; # System language/formatting locale.

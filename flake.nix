@@ -6,7 +6,7 @@
     darwin.inputs.nixpkgs.follows = "nixpkgs"; # Keep nix-darwin on this flake's nixpkgs.
     home-manager.url = "github:nix-community/home-manager"; # User-level dotfiles and app settings.
     home-manager.inputs.nixpkgs.follows = "nixpkgs"; # Keep Home Manager on this flake's nixpkgs.
-    brew-src.url = "github:Homebrew/brew/5.1.10"; # Pin the Homebrew code that nix-homebrew installs.
+    brew-src.url = "github:Homebrew/brew/master"; # Track Homebrew's rolling source; flake.lock records the tested revision.
     brew-src.flake = false; # Homebrew is a source checkout, not a Nix flake.
     nix-homebrew.url = "github:zhaofengli/nix-homebrew"; # Declarative Homebrew bootstrap for macOS.
     nix-homebrew.inputs.brew-src.follows = "brew-src"; # Use the explicit Homebrew pin instead of nix-homebrew's default.
@@ -19,9 +19,10 @@
 
   outputs = { nixpkgs, darwin, home-manager, brew-src, nix-homebrew, ... }:
   let
+    brewRevision = brew-src.shortRev or "source"; # Non-flake inputs expose the locked Git revision after `nix flake update`.
     brewPackage = brew-src // {
-      name = "brew-5.1.10"; # Label the pinned Homebrew source used by nix-homebrew.
-      version = "5.1.10"; # Report the same Homebrew version that is pinned in brew-src.
+      name = "brew-${brewRevision}"; # Label the Homebrew package by the locked source revision.
+      version = "unstable-${brewRevision}"; # Avoid pretending a rolling source is a fixed upstream release.
     };
     forSystem = system: import nixpkgs {
       inherit system;
