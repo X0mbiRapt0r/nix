@@ -35,7 +35,7 @@
       ll = "lsd -lah"; # Long listing with hidden files.
       ls = "lsd"; # Use lsd for basic listings.
       lt = "lsd --tree"; # Tree-style listing.
-      ngc = "nix-env --delete-generations old && nix-store --gc && sudo nix-collect-garbage -d"; # Clean up old generations and unused store paths.
+      ngc = "command ngc"; # Trim Nix generations and collect unused store paths.
       nfu = "command nfu"; # Update this flake's inputs and push lockfile changes.
       nrs = "command nix-switch"; # Switch to the latest system generation. Useful after a flake update.
     };

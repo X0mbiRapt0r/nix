@@ -1,0 +1,102 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+program_name="${NIX_GC_COMMAND_NAME:-${0##*/}}"
+
+usage() {
+  cat <<USAGE
+Usage:
+  $program_name [--keep GENERATIONS] [--print-command]
+
+Trim old Nix profile generations and collect unreachable store paths.
+
+Options:
+  --keep GENERATIONS  Number of recent generations to keep per profile. Default: 2.
+  --print-command     Print the cleanup plan without running it.
+  -h, --help          Show this help.
+USAGE
+}
+
+keep_generations=2
+print_command=false
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --keep)
+      keep_generations="${2:?Missing value for --keep}"
+      shift 2
+      ;;
+    --print-command)
+      print_command=true
+      shift
+      ;;
+    -h | --help)
+      usage
+      exit 0
+      ;;
+    *)
+      echo "Unknown argument: $1" >&2
+      usage >&2
+      exit 2
+      ;;
+  esac
+done
+
+if [[ ! "$keep_generations" =~ ^[1-9][0-9]*$ ]]; then
+  echo "--keep must be a positive integer, got: $keep_generations" >&2
+  exit 2
+fi
+
+shopt -s nullglob
+
+sudo_cmd=()
+if [[ "${EUID:-$(id -u)}" -ne 0 ]]; then
+  if ! command -v sudo >/dev/null 2>&1; then
+    echo "sudo is required for system profile cleanup when not running as root." >&2
+    exit 1
+  fi
+  sudo_cmd=(sudo)
+fi
+
+run() {
+  printf '+'
+  printf ' %q' "$@"
+  printf '\n'
+
+  if [[ "$print_command" != true ]]; then
+    "$@"
+  fi
+}
+
+delete_current_user_generations() {
+  # The active user's default profile is not always a simple path under
+  # /nix/var/nix/profiles, so ask nix-env to trim the current profile directly.
+  run nix-env --delete-generations "+$keep_generations"
+}
+
+delete_known_profile_generations() {
+  local profile
+  local profiles=(
+    /nix/var/nix/profiles/system
+    /nix/var/nix/profiles/default
+    /nix/var/nix/profiles/per-user/*/profile
+    /nix/var/nix/profiles/per-user/*/home-manager
+  )
+
+  for profile in "${profiles[@]}"; do
+    if [[ -e "$profile" ]]; then
+      run "${sudo_cmd[@]}" nix-env --profile "$profile" --delete-generations "+$keep_generations"
+    fi
+  done
+}
+
+collect_unreachable_store_paths() {
+  # Generation trimming above removes GC roots. This final pass actually frees
+  # store paths that nothing current can reach anymore.
+  run "${sudo_cmd[@]}" nix-store --gc
+}
+
+printf 'Keeping the latest %s Nix profile generations where possible.\n' "$keep_generations"
+delete_current_user_generations
+delete_known_profile_generations
+collect_unreachable_store_paths
