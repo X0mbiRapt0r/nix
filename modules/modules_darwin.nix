@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ config, lib, pkgs, ... }:
 
 let
   primaryUser = "irish";
@@ -83,6 +83,21 @@ in
     home = "/Users/${primaryUser}"; # macOS home directory.
     shell = "/bin/zsh"; # Use macOS zsh; Home Manager still owns the interactive config.
   };
+
+  system.activationScripts.postActivation.text = lib.mkAfter ''
+    if [ -x "${config.homebrew.prefix}/bin/brew" ]; then
+      echo >&2 "Cleaning Homebrew cache..."
+
+      # `homebrew.onActivation.cleanup = "zap"` removes packages/casks that no
+      # longer belong to the generated Brewfile. This separate cleanup trims the
+      # download cache that Homebrew keeps around for future reinstalls.
+      if ! PATH="${config.homebrew.prefix}/bin:$PATH" \
+        sudo --preserve-env=PATH --user=${primaryUser} --set-home \
+          brew cleanup --prune=all; then
+        echo >&2 "warning: Homebrew cache cleanup failed; continuing activation."
+      fi
+    fi
+  '';
 
   ids.gids.nixbld = 350; # Stable nixbld group ID used by nix-darwin on macOS.
 
