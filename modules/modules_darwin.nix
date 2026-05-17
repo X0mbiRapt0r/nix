@@ -1,5 +1,21 @@
-{ pkgs, ... }:
+{ config, pkgs, ... }:
 
+let
+  primaryUser = "irish";
+  autoUpdateRepo = "/Users/${primaryUser}/Library/Mobile Documents/com~apple~CloudDocs/Documents/github.com/X0mbiRapt0r/nix";
+  autoUpdatePath = builtins.concatStringsSep ":" [
+    "${config.nix.package}/bin"
+    "${config.system.build.darwin-rebuild}/bin"
+    "${pkgs.bash}/bin"
+    "${pkgs.coreutils}/bin"
+    "${pkgs.git}/bin"
+    "${pkgs.openssh}/bin"
+    "/usr/bin"
+    "/bin"
+    "/usr/sbin"
+    "/sbin"
+  ];
+in
 {
   nix.enable = true; # Let nix-darwin manage the Nix daemon and nix.conf.
   nix.gc = {
@@ -9,7 +25,7 @@
     { Weekday = 0; Hour = 0; Minute = 0; } # Run store optimisation weekly at Sunday 00:00.
   ];
 
-  system.primaryUser = "irish"; # User whose defaults are managed by system.defaults.
+  system.primaryUser = primaryUser; # User whose defaults are managed by system.defaults.
 
   environment.systemPackages = with pkgs; [
     freerdp # RDP client.
@@ -30,7 +46,6 @@
       "chatgpt" # ChatGPT desktop app.
       "codex-app" # Codex desktop app.
       "obsidian" # Notes/knowledge base.
-      "vscodium" # Open-source VS Code build; settings are managed by Home Manager.
       "visual-studio-code" # VS Code app; settings are managed by Home Manager.
       "whatsapp" # Messaging app.
       "winbox" # MikroTik router management app.
@@ -40,8 +55,32 @@
 
   programs.zsh.enable = true; # Register zsh as an available shell.
 
-  users.users.irish = {
-    home = "/Users/irish"; # macOS home directory.
+  launchd.daemons.nix-auto-update = {
+    script = ''
+      set -euo pipefail
+
+      export PATH="${autoUpdatePath}"
+
+      # Keep the Git checkout owned by Irish even though activation itself
+      # needs to run as root.
+      /usr/bin/sudo -H -u ${primaryUser} /usr/bin/env PATH="$PATH" git -C "${autoUpdateRepo}" pull --ff-only
+      /usr/bin/sudo -H -u ${primaryUser} /usr/bin/env PATH="$PATH" "${pkgs.bash}/bin/bash" "${autoUpdateRepo}/scripts/flake-update" --repo "${autoUpdateRepo}"
+
+      # Reuse the same switch helper as `nrs`. The pull already happened above,
+      # so do not repeat it here.
+      "${pkgs.bash}/bin/bash" "${autoUpdateRepo}/scripts/switch" --repo "${autoUpdateRepo}" --no-pull
+    '';
+    serviceConfig = {
+      RunAtLoad = false; # Do not update immediately after every nix-darwin activation.
+      StartCalendarInterval = { Hour = 2; Minute = 0; }; # Daily 02:00; launchd coalesces missed runs after wake.
+      StandardErrorPath = "/var/log/nix-auto-update.log";
+      StandardOutPath = "/var/log/nix-auto-update.log";
+      WorkingDirectory = autoUpdateRepo;
+    };
+  };
+
+  users.users.${primaryUser} = {
+    home = "/Users/${primaryUser}"; # macOS home directory.
     shell = "/bin/zsh"; # Use macOS zsh; Home Manager still owns the interactive config.
   };
 

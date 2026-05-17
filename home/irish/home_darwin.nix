@@ -8,12 +8,12 @@ let
     version = "2022.9.2";
     sha256 = "sha256-RlQbbWZfFfNJ/NTntCOO81IH1s2C0UU9tLHG9n/ttmI=";
   };
-  sharedCodeExtensions = [
+  vscodeExtensions = [
     mikrotikRouterosScript
     pkgs.vscode-extensions.jnoortheen.nix-ide
     pkgs.vscode-extensions.mechatroner.rainbow-csv
   ];
-  sharedCodeSettings = {
+  vscodeSettings = {
     "editor.fontFamily" = "JetBrainsMono Nerd Font"; # Editor font.
     "editor.fontLigatures" = true; # Enable coding ligatures.
     "nix.enableLanguageServer" = true; # Let nix-ide use a real Nix LSP instead of prompting for one.
@@ -64,17 +64,8 @@ in
     enable = true; # Manage VS Code settings through Home Manager.
     package = null; # Do not install VS Code with Nix; Homebrew owns the app.
     profiles.default = {
-      userSettings = sharedCodeSettings;
-      extensions = sharedCodeExtensions;
-    };
-  };
-
-  programs.vscodium = {
-    enable = true; # Manage VSCodium settings through Home Manager.
-    package = null; # Do not install VSCodium with Nix; Homebrew owns the app.
-    profiles.default = {
-      userSettings = sharedCodeSettings;
-      extensions = sharedCodeExtensions;
+      userSettings = vscodeSettings;
+      extensions = vscodeExtensions;
     };
   };
 }

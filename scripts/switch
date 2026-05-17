@@ -6,8 +6,8 @@ program_name="${NIX_SWITCH_COMMAND_NAME:-${0##*/}}"
 usage() {
   cat <<USAGE
 Usage:
-  $program_name [HOST] [--repo PATH] [--pull|--no-pull] [--gc|--no-gc] [--gc-keep GENERATIONS] [--print-command] [-- EXTRA_ARGS...]
-  $program_name --host HOST [--repo PATH] [--pull|--no-pull] [--gc|--no-gc] [--gc-keep GENERATIONS] [--print-command] [-- EXTRA_ARGS...]
+  $program_name [HOST] [--repo PATH] [--pull|--no-pull] [--no-gc] [--gc-keep GENERATIONS] [--print-command] [-- EXTRA_ARGS...]
+  $program_name --host HOST [--repo PATH] [--pull|--no-pull] [--no-gc] [--gc-keep GENERATIONS] [--print-command] [-- EXTRA_ARGS...]
 
 Build and activate the Nix flake for the current machine.
 
@@ -16,7 +16,6 @@ Options:
   --repo PATH       Override the default repo path for this OS.
   --pull            Run git pull --ff-only before switching.
   --no-pull         Skip the pre-switch git pull.
-  --gc              Run Nix garbage collection after a successful switch.
   --no-gc           Skip post-switch garbage collection.
   --gc-keep N       Keep N recent generations during post-switch cleanup. Default: 2.
   --print-command   Print the rebuild command without running it.
@@ -29,7 +28,7 @@ USAGE
 host=""
 repo_dir=""
 pull_before_switch=""
-gc_after_switch=""
+gc_after_switch=true
 gc_keep_generations=2
 print_command=false
 extra_args=()
@@ -50,10 +49,6 @@ while [[ $# -gt 0 ]]; do
       ;;
     --no-pull)
       pull_before_switch=false
-      shift
-      ;;
-    --gc)
-      gc_after_switch=true
       shift
       ;;
     --no-gc)
@@ -116,14 +111,12 @@ case "$os" in
     repo_dir="${repo_dir:-$HOME/Library/Mobile Documents/com~apple~CloudDocs/Documents/github.com/X0mbiRapt0r/nix}"
     host="${host:-$detected_host}"
     pull_before_switch="${pull_before_switch:-false}"
-    gc_after_switch="${gc_after_switch:-false}"
     rebuild_cmd=("${root_cmd[@]}" darwin-rebuild switch)
     ;;
   Linux)
     repo_dir="${repo_dir:-$HOME/Documents/github.com/X0mbiRapt0r/nix}"
     host="${host:-$detected_host}"
     pull_before_switch="${pull_before_switch:-true}"
-    gc_after_switch="${gc_after_switch:-true}"
     rebuild_cmd=("${root_cmd[@]}" nixos-rebuild switch)
     ;;
   *)
