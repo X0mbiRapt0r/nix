@@ -9,6 +9,8 @@ Usage:
   $program_name [--repo PATH] [--message MESSAGE] [--no-push] [--print-command]
 
 Update this repo's flake inputs, commit flake.lock if it changed, and push.
+The repo must be clean before updating so this helper never commits unrelated
+work by accident.
 
 Options:
   --repo PATH         Override the default repo path for this OS.
@@ -88,10 +90,30 @@ run() {
   fi
 }
 
+require_clean_worktree() {
+  local status
+
+  # This helper is used by unattended maintenance, so be deliberately boring:
+  # if anything is already modified, staged, or untracked, stop and let Irish
+  # decide what belongs in Git before we generate a lockfile commit.
+  status="$(git status --porcelain=v1)"
+
+  if [[ -n "$status" ]]; then
+    cat >&2 <<EOF
+Refusing to update flake.lock because the repo has uncommitted changes.
+Commit, stash, or remove these first, then re-run $program_name:
+
+$status
+EOF
+    exit 1
+  fi
+}
+
 printf 'Repo: %s\n' "$repo_dir"
 
 if [[ "$print_command" == true ]]; then
   run cd "$repo_dir"
+  run git status --porcelain=v1
   run nix flake update
   run git add flake.lock
   run git commit -m "$commit_message"
@@ -102,6 +124,7 @@ if [[ "$print_command" == true ]]; then
 fi
 
 cd "$repo_dir"
+require_clean_worktree
 run nix flake update
 run git add flake.lock
 

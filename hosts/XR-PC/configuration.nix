@@ -1,6 +1,8 @@
-{ pkgs, ... }:
+{ config, pkgs, ... }:
 
 let
+  autoUpdateRepo = "/home/irish/Documents/github.com/X0mbiRapt0r/nix";
+
   # Steam's own pre-cache data lives inside Steam library folders, but Mesa/RADV
   # also keeps a driver shader cache under the user's cache directory by default.
   # Put that driver-side cache on the roomy game/data disk and make the limit
@@ -125,6 +127,45 @@ in
   systemd.tmpfiles.rules = [
     "d ${steamShaderCacheDir} 0755 irish users - -" # Create the shared parent cache directory on boot/switch.
   ];
+
+  systemd.services.xr-pc-auto-update = {
+    description = "Update flake inputs, rebuild XR-PC, and run post-switch cleanup";
+    after = [ "network-online.target" ]; # Wait for GitHub/cache access before pulling or updating inputs.
+    wants = [ "network-online.target" ];
+    restartIfChanged = false; # Do not launch a maintenance run just because this unit changed during a switch.
+    path = [
+      config.nix.package # Provides nix commands used by the helper scripts.
+      config.system.build.nixos-rebuild # Provides nixos-rebuild for scripts/switch.
+      pkgs.bash # Run the repo helper scripts explicitly.
+      pkgs.coreutils # Basic utilities used by bash helpers.
+      pkgs.git # Pull, commit, and push flake.lock updates.
+      pkgs.openssh # Let Git remotes using SSH work from the systemd service.
+      pkgs.util-linux # Provides runuser so repository mutation happens as irish, not root.
+    ];
+    serviceConfig = {
+      Type = "oneshot";
+      WorkingDirectory = autoUpdateRepo;
+    };
+    script = ''
+      # Keep Git-owned files owned by the normal user even though the service
+      # itself runs as root for the rebuild step.
+      runuser -u irish -- git -C ${autoUpdateRepo} pull --ff-only
+      runuser -u irish -- bash ${autoUpdateRepo}/scripts/flake-update --repo ${autoUpdateRepo}
+
+      # Reuse the same switch path as the `nrs` alias. The pull already
+      # happened above, so avoid doing it twice.
+      bash ${autoUpdateRepo}/scripts/switch XR-PC --repo ${autoUpdateRepo} --no-pull
+    '';
+  };
+
+  systemd.timers.xr-pc-auto-update = {
+    wantedBy = [ "timers.target" ];
+    timerConfig = {
+      OnCalendar = "Sun 02:00"; # Weekly couch-console maintenance window.
+      Persistent = true; # If XR-PC was off, run once soon after it next boots.
+      Unit = "xr-pc-auto-update.service";
+    };
+  };
 
   time.timeZone = "Africa/Johannesburg"; # System time zone.
 

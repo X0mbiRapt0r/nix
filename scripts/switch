@@ -6,8 +6,8 @@ program_name="${NIX_SWITCH_COMMAND_NAME:-${0##*/}}"
 usage() {
   cat <<USAGE
 Usage:
-  $program_name [HOST] [--repo PATH] [--pull|--no-pull] [--print-command] [-- EXTRA_ARGS...]
-  $program_name --host HOST [--repo PATH] [--pull|--no-pull] [--print-command] [-- EXTRA_ARGS...]
+  $program_name [HOST] [--repo PATH] [--pull|--no-pull] [--gc|--no-gc] [--gc-keep GENERATIONS] [--print-command] [-- EXTRA_ARGS...]
+  $program_name --host HOST [--repo PATH] [--pull|--no-pull] [--gc|--no-gc] [--gc-keep GENERATIONS] [--print-command] [-- EXTRA_ARGS...]
 
 Build and activate the Nix flake for the current machine.
 
@@ -16,6 +16,9 @@ Options:
   --repo PATH       Override the default repo path for this OS.
   --pull            Run git pull --ff-only before switching.
   --no-pull         Skip the pre-switch git pull.
+  --gc              Run Nix garbage collection after a successful switch.
+  --no-gc           Skip post-switch garbage collection.
+  --gc-keep N       Keep N recent generations during post-switch cleanup. Default: 2.
   --print-command   Print the rebuild command without running it.
   -h, --help        Show this help.
 
@@ -26,6 +29,8 @@ USAGE
 host=""
 repo_dir=""
 pull_before_switch=""
+gc_after_switch=""
+gc_keep_generations=2
 print_command=false
 extra_args=()
 
@@ -46,6 +51,18 @@ while [[ $# -gt 0 ]]; do
     --no-pull)
       pull_before_switch=false
       shift
+      ;;
+    --gc)
+      gc_after_switch=true
+      shift
+      ;;
+    --no-gc)
+      gc_after_switch=false
+      shift
+      ;;
+    --gc-keep)
+      gc_keep_generations="${2:?Missing value for --gc-keep}"
+      shift 2
       ;;
     --print-command)
       print_command=true
@@ -84,18 +101,30 @@ detect_host() {
 os="$(uname -s)"
 detected_host="$(detect_host)"
 
+root_cmd=()
+if [[ "${EUID:-$(id -u)}" -ne 0 ]]; then
+  root_cmd=(sudo)
+fi
+
+if [[ ! "$gc_keep_generations" =~ ^[1-9][0-9]*$ ]]; then
+  echo "--gc-keep must be a positive integer, got: $gc_keep_generations" >&2
+  exit 2
+fi
+
 case "$os" in
   Darwin)
     repo_dir="${repo_dir:-$HOME/Library/Mobile Documents/com~apple~CloudDocs/Documents/github.com/X0mbiRapt0r/nix}"
     host="${host:-$detected_host}"
     pull_before_switch="${pull_before_switch:-false}"
-    rebuild_cmd=(sudo darwin-rebuild switch)
+    gc_after_switch="${gc_after_switch:-false}"
+    rebuild_cmd=("${root_cmd[@]}" darwin-rebuild switch)
     ;;
   Linux)
     repo_dir="${repo_dir:-$HOME/Documents/github.com/X0mbiRapt0r/nix}"
     host="${host:-$detected_host}"
     pull_before_switch="${pull_before_switch:-true}"
-    rebuild_cmd=(sudo nixos-rebuild switch)
+    gc_after_switch="${gc_after_switch:-true}"
+    rebuild_cmd=("${root_cmd[@]}" nixos-rebuild switch)
     ;;
   *)
     echo "Unsupported OS: $os" >&2
@@ -116,10 +145,13 @@ fi
 
 flake_ref="$repo_dir#$host"
 cmd=("${rebuild_cmd[@]}" --flake "$flake_ref" -L "${extra_args[@]}")
+cleanup_cmd=("$repo_dir/scripts/gc" --keep "$gc_keep_generations")
 
 printf 'Host: %s\n' "$host"
 printf 'Repo: %s\n' "$repo_dir"
 printf 'Pull: %s\n' "$pull_before_switch"
+printf 'Post-switch GC: %s\n' "$gc_after_switch"
+printf 'GC generations kept: %s\n' "$gc_keep_generations"
 
 if [[ "$pull_before_switch" == true ]]; then
   pull_cmd=(git -C "$repo_dir" pull --ff-only)
@@ -131,6 +163,17 @@ fi
 printf 'Command:'
 printf ' %q' "${cmd[@]}"
 printf '\n'
+
+if [[ "$gc_after_switch" == true ]]; then
+  if [[ ! -x "${cleanup_cmd[0]}" ]]; then
+    echo "Cleanup helper is not executable: ${cleanup_cmd[0]}" >&2
+    exit 1
+  fi
+
+  printf 'Post-switch cleanup command:'
+  printf ' %q' "${cleanup_cmd[@]}"
+  printf '\n'
+fi
 
 if [[ "$print_command" == true ]]; then
   exit 0
@@ -151,4 +194,8 @@ EOF
   fi
 fi
 
-exec "${cmd[@]}"
+"${cmd[@]}"
+
+if [[ "$gc_after_switch" == true ]]; then
+  "${cleanup_cmd[@]}"
+fi
