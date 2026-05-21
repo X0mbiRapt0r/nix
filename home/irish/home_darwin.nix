@@ -38,6 +38,7 @@ let
       };
     };
     "window.restoreWindows" = "all"; # Reopen previous windows on launch.
+    "extensions.ignoreRecommendations" = true; # Disable extension recommendations based on workspace files.
   };
 in
 {
