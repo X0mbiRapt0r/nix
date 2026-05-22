@@ -64,7 +64,7 @@ in
       # Keep the Git checkout owned by Irish even though activation itself
       # needs to run as root.
       /usr/bin/sudo -H -u ${primaryUser} /usr/bin/env PATH="$PATH" git -C "${autoUpdateRepo}" pull --ff-only
-      /usr/bin/sudo -H -u ${primaryUser} /usr/bin/env PATH="$PATH" "${pkgs.bash}/bin/bash" "${autoUpdateRepo}/scripts/flake-update" --repo "${autoUpdateRepo}"
+      /usr/bin/sudo -H -u ${primaryUser} /usr/bin/env PATH="$PATH" "${pkgs.bash}/bin/bash" "${autoUpdateRepo}/scripts/flake-update" --repo "${autoUpdateRepo}" --no-push
 
       # Reuse the same switch helper as `nrs`. The pull already happened above,
       # so do not repeat it here.
