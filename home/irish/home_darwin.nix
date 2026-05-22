@@ -37,7 +37,8 @@ let
         args = [ "-l" ];
       };
     };
-    "window.restoreWindows" = "all"; # Reopen previous windows on launch.
+    "window.restoreWindows" = "one"; # Prefer the last active workspace over VS Code's sometimes-empty opened-windows list.
+    "workbench.startupEditor" = "none"; # Keep restored workspaces from opening a welcome/getting-started editor.
     "extensions.ignoreRecommendations" = true; # Disable extension recommendations based on workspace files.
   };
 in
