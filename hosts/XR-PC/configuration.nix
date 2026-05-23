@@ -41,7 +41,6 @@ in
     kernelParams = [
       "quiet" # Ask the kernel to keep normal boot output quiet.
       "udev.log_level=3" # Show only udev errors during boot, not routine device discovery.
-      "usbcore.quirks=045e:02e6:k" # Disable USB link power management for the Xbox Wireless Adapter; it times out during radio init.
       "video=HDMI-A-1:e" # Keep the TV HDMI connector advertised so Steam/Gamescope autologin does not race a sleeping display.
     ];
 
@@ -166,14 +165,6 @@ in
       pulse.enable = true; # Provide PulseAudio compatibility for apps/games.
     };
     seatd.enable = true; # Give TTY-launched Wayland compositors a dedicated seat-management socket.
-    udev.extraRules = ''
-      # Keep the Xbox Wireless Adapter awake and wake-capable. It enumerates at
-      # boot, but xone currently times out initializing the radio unless the USB
-      # side is kept boring and fully powered.
-      ACTION=="add|change", SUBSYSTEM=="usb", ATTR{idVendor}=="045e", ATTR{idProduct}=="02e6", TEST=="power/autosuspend", ATTR{power/autosuspend}="-1"
-      ACTION=="add|change", SUBSYSTEM=="usb", ATTR{idVendor}=="045e", ATTR{idProduct}=="02e6", TEST=="power/control", ATTR{power/control}="on"
-      ACTION=="add|change", SUBSYSTEM=="usb", ATTR{idVendor}=="045e", ATTR{idProduct}=="02e6", TEST=="power/wakeup", ATTR{power/wakeup}="enabled"
-    '';
     xrdp = {
       defaultWindowManager = "startplasma-x11"; # Start Plasma X11 for RDP sessions.
       enable = true; # Enable RDP access.
