@@ -1,13 +1,18 @@
 { config, ... }:
 
+let
+  nixFlakePath = "${config.home.homeDirectory}/Documents/github.com/X0mbiRapt0r/nix";
+  mkRepoScriptLink =
+    scriptName: config.lib.file.mkOutOfStoreSymlink "${nixFlakePath}/scripts/${scriptName}";
+in
 {
-  home.homeDirectory = "/home/irish"; # Linux home directory.
-  home.sessionPath = [ "$HOME/.local/bin" ]; # Put personal helper commands on PATH.
-
-  home.file.".local/bin/nix-switch".source =
-    config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/Documents/github.com/X0mbiRapt0r/nix/scripts/switch"; # Expose the repo switch helper as `nix-switch`.
-  home.file.".local/bin/nfu".source =
-    config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/Documents/github.com/X0mbiRapt0r/nix/scripts/flake-update"; # Expose the flake update helper as `nfu`.
-  home.file.".local/bin/ngc".source =
-    config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/Documents/github.com/X0mbiRapt0r/nix/scripts/gc"; # Expose the Nix garbage-collection helper as `ngc`.
+  home = {
+    file = {
+      ".local/bin/ngc".source = mkRepoScriptLink "gc"; # Expose Nix garbage collection as `ngc`.
+      ".local/bin/nfu".source = mkRepoScriptLink "flake-update"; # Expose flake updates as `nfu`.
+      ".local/bin/nix-switch".source = mkRepoScriptLink "switch"; # Expose system switching as `nix-switch`.
+    };
+    homeDirectory = "/home/irish"; # Linux home directory.
+    sessionPath = [ "$HOME/.local/bin" ]; # Put personal helper commands on PATH.
+  };
 }

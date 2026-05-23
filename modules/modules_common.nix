@@ -1,4 +1,4 @@
-{ pkgs, nixpkgs, ... }:
+{ nixpkgs, pkgs, ... }:
 
 {
   environment.systemPackages = with pkgs; [
@@ -20,10 +20,13 @@
     nerd-fonts.jetbrains-mono # Nerd Font glyphs for terminals and editors.
   ];
 
-  nix.settings.experimental-features = [ "nix-command" "flakes" ]; # Enable modern Nix CLI and flakes on each host.
-  nix.gc = {
-    automatic = true; # Let each platform's scheduler run garbage collection.
+  nix = {
+    gc.automatic = true; # Let each platform's scheduler run garbage collection.
+    optimise.automatic = true; # Deduplicate identical store paths on the platform scheduler.
+    registry.nixpkgs.flake = nixpkgs; # Make `nixpkgs#pkg` resolve to this flake's pinned nixpkgs.
+    settings.experimental-features = [
+      "nix-command"
+      "flakes"
+    ]; # Enable modern Nix CLI and flakes on each host.
   };
-  nix.optimise.automatic = true; # Deduplicate identical store paths on the platform scheduler.
-  nix.registry.nixpkgs.flake = nixpkgs; # Make `nixpkgs#pkg` resolve to this flake's pinned nixpkgs.
 }

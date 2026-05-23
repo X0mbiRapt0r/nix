@@ -1,15 +1,15 @@
 { ... }:
 
 {
-  homebrew = {
-    casks = [
-      "docker-desktop" # Docker Desktop for Mac.
-      "powershell" # Microsoft PowerShell app/runtime.
-      "windows-app" # Microsoft Windows App for remote desktops/cloud PCs.
-    ];
-  };
+  homebrew.casks = [
+    "docker-desktop" # Docker Desktop for Mac.
+    "powershell" # Microsoft PowerShell app/runtime.
+    "windows-app" # Microsoft Windows App for remote desktops/cloud PCs.
+  ];
 
-  networking.hostName = "QTM-Irish-MBA"; # Local network hostname for this Mac.
-  networking.computerName = "QTM-Irish-MBA";
-  networking.localHostName = "QTM-Irish-MBA";
+  networking = {
+    computerName = "QTM-Irish-MBA"; # User-visible macOS computer name.
+    hostName = "QTM-Irish-MBA"; # Local network hostname for this Mac.
+    localHostName = "QTM-Irish-MBA"; # Bonjour/local hostname used by macOS sharing services.
+  };
 }

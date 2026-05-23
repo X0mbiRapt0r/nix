@@ -1,19 +1,19 @@
 { ... }:
 
 {
-  homebrew = {
-    casks = [
-      "audacity" # Audio editor.
-      "calibre" # Ebook manager.
-      "discord" # Chat/voice app.
-      "godot" # Game engine.
-      "steam" # Steam client.
-      "stremio" # Media streaming app.
-      "transmission" # BitTorrent client.
-    ];
-  };
+  homebrew.casks = [
+    "audacity" # Audio editor.
+    "calibre" # Ebook manager.
+    "discord" # Chat/voice app.
+    "godot" # Game engine.
+    "steam" # Steam client.
+    "stremio" # Media streaming app.
+    "transmission" # BitTorrent client.
+  ];
 
-  networking.hostName = "Irish-MBP"; # Local network hostname for this Mac.
-  networking.computerName = "Irish-MBP";
-  networking.localHostName = "Irish-MBP";
+  networking = {
+    computerName = "Irish-MBP"; # User-visible macOS computer name.
+    hostName = "Irish-MBP"; # Local network hostname for this Mac.
+    localHostName = "Irish-MBP"; # Bonjour/local hostname used by macOS sharing services.
+  };
 }
