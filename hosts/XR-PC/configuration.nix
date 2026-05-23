@@ -109,8 +109,12 @@ in
       ];
       gamescopeSession = {
         args = [
-          "-r 120" # Target 120 Hz in Gamescope.
+          "--allow-deferred-backend" # Give logind/DRM a chance to settle when greetd starts Steam very early in boot.
+          "--backend"
+          "drm" # Force the standalone TTY/KMS backend instead of a nested or headless fallback.
           "--hdr-enabled" # Enable Gamescope HDR support.
+          "-r"
+          "120" # Target 120 Hz in Gamescope.
         ];
         enable = true; # Add a dedicated Steam-in-Gamescope login session.
         env = steamShaderCacheEnv // {
