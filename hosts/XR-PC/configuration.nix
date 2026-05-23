@@ -16,12 +16,15 @@ let
 in
 {
   boot = {
+    kernelPackages = pkgs.linuxPackages_latest; # Track the newest kernel series from pinned nixpkgs.
+    kernelParams = [
+      "video=HDMI-A-1:e" # Keep the TV HDMI connector advertised so Steam/Gamescope autologin does not race a sleeping display.
+    ];
+
     loader = {
       efi.canTouchEfiVariables = true; # Allow NixOS to update UEFI boot entries.
       systemd-boot.enable = true; # Use systemd-boot as the EFI bootloader.
     };
-
-    kernelPackages = pkgs.linuxPackages_latest; # Track the newest kernel series from pinned nixpkgs.
   };
 
   environment.systemPackages = with pkgs; [
@@ -118,7 +121,7 @@ in
       defaultSession = "steam"; # Auto-login lands in the Steam Gamescope session.
       sddm = {
         enable = true; # Use SDDM as the graphical login manager.
-        wayland.enable = false; # Keep the greeter on X11; the Steam session itself still launches through Gamescope/Wayland.
+        wayland.enable = true; # Run the SDDM greeter on Wayland so autologin can hand off to the Steam Gamescope session.
       };
     };
     openssh.enable = true; # Enable SSH for local remote access.
