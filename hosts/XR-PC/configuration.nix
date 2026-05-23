@@ -149,6 +149,7 @@ in
           DXVK_LOG_LEVEL = "none"; # Silence DXVK log files unless debugging.
           ENABLE_GAMESCOPE_WSI = "1"; # Use Gamescope's Vulkan WSI layer inside the session.
           VKD3D_DEBUG = "none"; # Silence VKD3D-Proton debug output unless debugging.
+          VK_ICD_FILENAMES = "/run/opengl-driver/share/vulkan/icd.d/radeon_icd.x86_64.json"; # Force RADV so early boot cannot pick Mesa's llvmpipe ICD.
         };
       };
       localNetworkGameTransfers.openFirewall = true; # Open firewall ports for LAN game transfers.
