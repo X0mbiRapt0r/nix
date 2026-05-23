@@ -22,8 +22,32 @@ let
   # starts initial sessions with a slimmer environment, so keep that small bit
   # of display-manager behavior here without bringing SDDM back.
   steamGamescopeSession = pkgs.writeShellScriptBin "xr-steam-gamescope-session" ''
+    logFile=/tmp/xr-steam-gamescope-session.log
     export PATH="/run/current-system/sw/bin:/run/current-system/sw/sbin:$PATH"
-    exec /run/current-system/sw/bin/steam-gamescope
+
+    {
+      printf 'started=%s\n' "$(date --iso-8601=seconds)"
+      id
+      printf 'PATH=%s\n' "$PATH"
+      printf 'XDG_RUNTIME_DIR=%s\n' "''${XDG_RUNTIME_DIR:-}"
+      printf 'XDG_SESSION_ID=%s\n' "''${XDG_SESSION_ID:-}"
+      command -v gamescope || true
+      command -v steam || true
+      ls -l /run/seatd.sock || true
+      if [ -n "''${XDG_SESSION_ID:-}" ]; then
+        loginctl show-session "$XDG_SESSION_ID" \
+          -p Active \
+          -p Class \
+          -p Leader \
+          -p Remote \
+          -p Service \
+          -p State \
+          -p TTY \
+          -p Type || true
+      fi
+
+      exec /run/current-system/sw/bin/steam-gamescope
+    } >"$logFile" 2>&1
   '';
   steamGamescopeCommand = "${steamGamescopeSession}/bin/xr-steam-gamescope-session";
   tuigreetCommand = "${pkgs.tuigreet}/bin/tuigreet --time --remember --remember-user-session --user-menu --sessions ${displayManagerSessions}/share/wayland-sessions --xsessions ${displayManagerSessions}/share/xsessions --cmd ${steamGamescopeCommand}";
