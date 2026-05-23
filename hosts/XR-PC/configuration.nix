@@ -137,11 +137,14 @@ in
           "--backend"
           "drm" # Force the standalone TTY/KMS backend instead of a nested or headless fallback.
           "--hdr-enabled" # Enable Gamescope HDR support.
+          "--prefer-vk-device"
+          "1002:73bf" # Prefer the RX 6800 XT instead of Mesa's software Vulkan device during early boot.
           "-r"
           "120" # Target 120 Hz in Gamescope.
         ];
         enable = true; # Add a dedicated Steam-in-Gamescope login session.
         env = steamShaderCacheEnv // {
+          AMD_VULKAN_ICD = "RADV"; # Keep AMD hardware rendering ahead of Mesa software fallbacks.
           DXVK_HDR = "1"; # Allow DXVK HDR when the game/Proton path supports it.
           DXVK_LOG_LEVEL = "none"; # Silence DXVK log files unless debugging.
           ENABLE_GAMESCOPE_WSI = "1"; # Use Gamescope's Vulkan WSI layer inside the session.
