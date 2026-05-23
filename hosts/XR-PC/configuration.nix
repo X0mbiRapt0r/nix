@@ -55,7 +55,12 @@ in
 {
   boot = {
     consoleLogLevel = 0; # Keep kernel messages off the TV unless the boot is badly broken.
-    initrd.verbose = false; # Suppress NixOS initrd status chatter on the console.
+    initrd = {
+      kernelModules = [
+        "amdgpu" # Bring the RX 6800 XT up before greetd starts, avoiding the early Gamescope/RADV race.
+      ];
+      verbose = false; # Suppress NixOS initrd status chatter on the console.
+    };
     kernelPackages = pkgs.linuxPackages_latest; # Track the newest kernel series from pinned nixpkgs.
     kernelParams = [
       "quiet" # Ask the kernel to keep normal boot output quiet.
