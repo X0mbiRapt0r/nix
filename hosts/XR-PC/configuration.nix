@@ -156,6 +156,7 @@ in
       enable = true; # Enable PipeWire audio.
       pulse.enable = true; # Provide PulseAudio compatibility for apps/games.
     };
+    seatd.enable = true; # Give TTY-launched Wayland compositors a dedicated seat-management socket.
     udev.extraRules = ''
       # Keep the Xbox Wireless Adapter awake and wake-capable. It enumerates at
       # boot, but xone currently times out initializing the radio unless the USB
@@ -173,6 +174,11 @@ in
   };
 
   systemd = {
+    services.greetd = {
+      after = [ "seatd.service" ]; # Start Steam/Gamescope only after seatd can grant KMS/input access.
+      wants = [ "seatd.service" ]; # Pull seatd in with greetd even if target ordering changes later.
+    };
+
     services.xr-pc-auto-update = {
       after = [ "network-online.target" ]; # Wait for GitHub/cache access before pulling or updating inputs.
       description = "Update flake inputs, rebuild XR-PC, and run post-switch cleanup";
@@ -226,6 +232,7 @@ in
     extraGroups = [
       "networkmanager"
       "render"
+      "seat"
       "video"
       "wheel"
     ]; # Network, GPU, and sudo access.
