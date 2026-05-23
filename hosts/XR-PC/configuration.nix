@@ -78,7 +78,7 @@ in
   programs = {
     gamemode.enable = true; # Let games request performance-oriented CPU/GPU tuning.
     gamescope = {
-      capSysNice = true; # Allow Gamescope to raise scheduling priority.
+      capSysNice = false; # Keep Steam on normal user-namespace bubblewrap; the setuid wrapper currently aborts before Steam starts.
       enable = true; # Install Gamescope for the Steam session.
     };
     steam = {
@@ -91,7 +91,6 @@ in
         args = [
           "-r 120" # Target 120 Hz in Gamescope.
           "--hdr-enabled" # Enable Gamescope HDR support.
-          "--rt" # Ask Gamescope to use real-time scheduling.
         ];
         enable = true; # Add a dedicated Steam-in-Gamescope login session.
         env = steamShaderCacheEnv // {
