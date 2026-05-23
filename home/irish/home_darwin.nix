@@ -37,7 +37,12 @@ let
         args = [ "-l" ];
       };
     };
-    "window.restoreWindows" = "one"; # Prefer the last active workspace over VS Code's sometimes-empty opened-windows list.
+    "files.hotExit" = "onExitAndWindowClose"; # Keep dirty editors recoverable even when a folder window is closed.
+    "terminal.integrated.enablePersistentSessions" = true; # Let VS Code restore terminal sessions when it reopens a workspace.
+    "terminal.integrated.persistentSessionReviveProcess" = "onExitAndWindowClose"; # Revive terminal processes after app quit or window close.
+    "window.restoreWindows" = "folders"; # Reopen folder workspaces and ignore empty windows that can strand us on a blank launch.
+    "workbench.editor.restoreEditors" = true; # Make restored folder windows bring their editor tabs back too.
+    "workbench.editor.restoreViewState" = true; # Preserve cursor/scroll state for reopened editors where VS Code can.
     "workbench.startupEditor" = "none"; # Keep restored workspaces from opening a welcome/getting-started editor.
     "extensions.ignoreRecommendations" = true; # Disable extension recommendations based on workspace files.
   };

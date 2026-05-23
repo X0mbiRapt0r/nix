@@ -75,7 +75,6 @@ in
       StartCalendarInterval = { Hour = 2; Minute = 0; }; # Daily 02:00; launchd coalesces missed runs after wake.
       StandardErrorPath = "/var/log/nix-auto-update.log";
       StandardOutPath = "/var/log/nix-auto-update.log";
-      WorkingDirectory = autoUpdateRepo;
     };
   };
 
