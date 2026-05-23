@@ -13,17 +13,28 @@ let
     MESA_SHADER_CACHE_DIR = steamShaderCacheDir; # Mesa will create/use `${steamShaderCacheDir}/mesa_shader_cache`.
     MESA_SHADER_CACHE_MAX_SIZE = "12G"; # Mesa defaults to 1G per architecture, which is tight for a gaming box.
   };
+
+  # The NixOS Steam module installs this wrapper into the system profile when
+  # `programs.steam.gamescopeSession.enable` is true.
+  steamGamescopeCommand = "/run/current-system/sw/bin/steam-gamescope";
+  tuigreetCommand = "${pkgs.tuigreet}/bin/tuigreet --time --remember --remember-user-session --user-menu --sessions /run/current-system/sw/share/wayland-sessions --xsessions /run/current-system/sw/share/xsessions --cmd ${steamGamescopeCommand}";
 in
 {
   boot = {
+    consoleLogLevel = 0; # Keep kernel messages off the TV unless the boot is badly broken.
+    initrd.verbose = false; # Suppress NixOS initrd status chatter on the console.
     kernelPackages = pkgs.linuxPackages_latest; # Track the newest kernel series from pinned nixpkgs.
     kernelParams = [
+      "quiet" # Ask the kernel to keep normal boot output quiet.
+      "udev.log_level=3" # Show only udev errors during boot, not routine device discovery.
+      "usbcore.quirks=045e:02e6:k" # Disable USB link power management for the Xbox Wireless Adapter; it times out during radio init.
       "video=HDMI-A-1:e" # Keep the TV HDMI connector advertised so Steam/Gamescope autologin does not race a sleeping display.
     ];
 
     loader = {
       efi.canTouchEfiVariables = true; # Allow NixOS to update UEFI boot entries.
       systemd-boot.enable = true; # Use systemd-boot as the EFI bootloader.
+      timeout = 0; # Skip the visible boot menu during normal couch-console startup.
     };
   };
 
@@ -112,22 +123,34 @@ in
   services = {
     blueman.enable = true; # Bluetooth tray/GUI manager for Plasma.
     desktopManager.plasma6.enable = true; # Install Plasma as the fallback full desktop.
-    displayManager = {
-      autoLogin = {
-        enable = true; # Skip the login prompt on boot.
-        user = "irish"; # User for the Steam-session auto-login.
+    displayManager.sddm.enable = false; # Use greetd for the Steam console path instead of SDDM's experimental Wayland greeter.
+    greetd = {
+      enable = true; # Run the minimal login manager for local console sessions.
+      settings = {
+        default_session = {
+          command = tuigreetCommand; # Text fallback if Steam exits or autologin is unavailable.
+          user = "greeter"; # Unprivileged greeter account created by the greetd module.
+        };
+        initial_session = {
+          command = steamGamescopeCommand; # Boot straight into the generated Steam Gamescope session.
+          user = "irish"; # Match the previous SDDM autologin user.
+        };
       };
-      defaultSession = "steam"; # Auto-login lands in the Steam Gamescope session.
-      sddm = {
-        enable = true; # Use SDDM as the graphical login manager.
-        wayland.enable = true; # Run the SDDM greeter on Wayland so autologin can hand off to the Steam Gamescope session.
-      };
+      useTextGreeter = true; # Tell systemd to keep tty1 clean for tuigreet fallback prompts.
     };
     openssh.enable = true; # Enable SSH for local remote access.
     pipewire = {
       enable = true; # Enable PipeWire audio.
       pulse.enable = true; # Provide PulseAudio compatibility for apps/games.
     };
+    udev.extraRules = ''
+      # Keep the Xbox Wireless Adapter awake and wake-capable. It enumerates at
+      # boot, but xone currently times out initializing the radio unless the USB
+      # side is kept boring and fully powered.
+      ACTION=="add|change", SUBSYSTEM=="usb", ATTR{idVendor}=="045e", ATTR{idProduct}=="02e6", TEST=="power/autosuspend", ATTR{power/autosuspend}="-1"
+      ACTION=="add|change", SUBSYSTEM=="usb", ATTR{idVendor}=="045e", ATTR{idProduct}=="02e6", TEST=="power/control", ATTR{power/control}="on"
+      ACTION=="add|change", SUBSYSTEM=="usb", ATTR{idVendor}=="045e", ATTR{idProduct}=="02e6", TEST=="power/wakeup", ATTR{power/wakeup}="enabled"
+    '';
     xrdp = {
       defaultWindowManager = "startplasma-x11"; # Start Plasma X11 for RDP sessions.
       enable = true; # Enable RDP access.
