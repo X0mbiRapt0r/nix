@@ -118,7 +118,7 @@ in
       defaultSession = "steam"; # Auto-login lands in the Steam Gamescope session.
       sddm = {
         enable = true; # Use SDDM as the graphical login manager.
-        wayland.enable = true; # Run the SDDM greeter on Wayland.
+        wayland.enable = false; # Keep the greeter on X11; the Steam session itself still launches through Gamescope/Wayland.
       };
     };
     openssh.enable = true; # Enable SSH for local remote access.
