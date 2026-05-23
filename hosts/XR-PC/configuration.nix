@@ -41,7 +41,7 @@ in
     kernelParams = [
       "quiet" # Ask the kernel to keep normal boot output quiet.
       "udev.log_level=3" # Show only udev errors during boot, not routine device discovery.
-      "usbcore.quirks=045e:02e6:gk" # Delay Xbox Wireless Adapter USB init and disable LPM; xone times out during radio init otherwise.
+      "usbcore.quirks=045e:02e6:k" # Disable USB link power management for the Xbox Wireless Adapter; it times out during radio init.
       "video=HDMI-A-1:e" # Keep the TV HDMI connector advertised so Steam/Gamescope autologin does not race a sleeping display.
     ];
 
