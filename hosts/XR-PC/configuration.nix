@@ -14,10 +14,19 @@ let
     MESA_SHADER_CACHE_MAX_SIZE = "12G"; # Mesa defaults to 1G per architecture, which is tight for a gaming box.
   };
 
-  # The NixOS Steam module installs this wrapper into the system profile when
-  # `programs.steam.gamescopeSession.enable` is true.
-  steamGamescopeCommand = "/run/current-system/sw/bin/steam-gamescope";
-  tuigreetCommand = "${pkgs.tuigreet}/bin/tuigreet --time --remember --remember-user-session --user-menu --sessions /run/current-system/sw/share/wayland-sessions --xsessions /run/current-system/sw/share/xsessions --cmd ${steamGamescopeCommand}";
+  displayManagerSessions = config.services.displayManager.sessionData.desktops;
+
+  # The NixOS Steam module installs `steam-gamescope` into the system profile,
+  # but that wrapper calls `gamescope` and `steam` by name. Graphical display
+  # managers normally provide the profile PATH before launching sessions; greetd
+  # starts initial sessions with a slimmer environment, so keep that small bit
+  # of display-manager behavior here without bringing SDDM back.
+  steamGamescopeSession = pkgs.writeShellScriptBin "xr-steam-gamescope-session" ''
+    export PATH="/run/current-system/sw/bin:/run/current-system/sw/sbin:$PATH"
+    exec /run/current-system/sw/bin/steam-gamescope
+  '';
+  steamGamescopeCommand = "${steamGamescopeSession}/bin/xr-steam-gamescope-session";
+  tuigreetCommand = "${pkgs.tuigreet}/bin/tuigreet --time --remember --remember-user-session --user-menu --sessions ${displayManagerSessions}/share/wayland-sessions --xsessions ${displayManagerSessions}/share/xsessions --cmd ${steamGamescopeCommand}";
 in
 {
   boot = {
