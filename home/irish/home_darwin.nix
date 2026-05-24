@@ -44,7 +44,9 @@ let
         path = "/bin/zsh";
       };
     };
-    "window.restoreWindows" = "folders"; # Reopen folder workspaces and ignore empty windows that can strand us on a blank launch.
+    "window.openWithoutArgumentsInNewWindow" = "off"; # Reuse the last Code instance instead of creating a new empty window from a Dock/CLI no-argument launch.
+    "window.restoreFullscreen" = true; # Preserve fullscreen state when restoring the last working window.
+    "window.restoreWindows" = "one"; # Red-button window close clears openedWindows but keeps lastActiveWindow, so restore the last real workspace.
     "workbench.editor.restoreEditors" = true; # Make restored folder windows bring their editor tabs back too.
     "workbench.editor.restoreViewState" = true; # Preserve cursor/scroll state for reopened editors where VS Code can.
     "workbench.startupEditor" = "none"; # Keep restored workspaces from opening a welcome/getting-started editor.
