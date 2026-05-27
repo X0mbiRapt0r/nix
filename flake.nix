@@ -12,7 +12,7 @@
     };
     home-manager = {
       inputs.nixpkgs.follows = "nixpkgs"; # Keep Home Manager on this flake's nixpkgs.
-      url = "github:nix-community/home-manager"; # User-level dotfiles and app settings.
+      url = "github:nix-community/home-manager/master"; # User-level dotfiles and app settings.
     };
     nix-homebrew = {
       inputs.brew-src.follows = "brew-src"; # Use the explicit Homebrew pin instead of nix-homebrew's default.
