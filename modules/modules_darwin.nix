@@ -7,19 +7,6 @@
 
 let
   primaryUser = "irish";
-  autoUpdateRepo = "/Users/${primaryUser}/Library/Mobile Documents/com~apple~CloudDocs/Documents/github.com/X0mbiRapt0r/nix";
-  autoUpdatePath = builtins.concatStringsSep ":" [
-    "${config.nix.package}/bin"
-    "${config.system.build.darwin-rebuild}/bin"
-    "${pkgs.bash}/bin"
-    "${pkgs.coreutils}/bin"
-    "${pkgs.git}/bin"
-    "${pkgs.openssh}/bin"
-    "/usr/bin"
-    "/bin"
-    "/usr/sbin"
-    "/sbin"
-  ];
 in
 {
   environment.systemPackages = with pkgs; [
@@ -53,32 +40,6 @@ in
   };
 
   ids.gids.nixbld = 350; # Stable nixbld group ID used by nix-darwin on macOS.
-
-  launchd.daemons.nix-auto-update = {
-    script = ''
-      set -euo pipefail
-
-      export PATH="${autoUpdatePath}"
-
-      # Keep the Git checkout owned by Irish even though activation itself
-      # needs to run as root.
-      /usr/bin/sudo -H -u ${primaryUser} /usr/bin/env PATH="$PATH" git -C "${autoUpdateRepo}" pull --ff-only
-      /usr/bin/sudo -H -u ${primaryUser} /usr/bin/env PATH="$PATH" "${pkgs.bash}/bin/bash" "${autoUpdateRepo}/scripts/flake-update" --repo "${autoUpdateRepo}" --no-push
-
-      # Reuse the same switch helper as `nrs`. The pull already happened above,
-      # so do not repeat it here.
-      "${pkgs.bash}/bin/bash" "${autoUpdateRepo}/scripts/switch" --repo "${autoUpdateRepo}" --no-pull
-    '';
-    serviceConfig = {
-      RunAtLoad = false; # Do not update immediately after every nix-darwin activation.
-      StartCalendarInterval = {
-        Hour = 2;
-        Minute = 0;
-      }; # Daily 02:00; launchd coalesces missed runs after wake.
-      StandardErrorPath = "/var/log/nix-auto-update.log";
-      StandardOutPath = "/var/log/nix-auto-update.log";
-    };
-  };
 
   nix = {
     enable = true; # Let nix-darwin manage the Nix daemon and nix.conf.
