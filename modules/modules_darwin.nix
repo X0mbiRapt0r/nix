@@ -45,6 +45,9 @@ in
     onActivation = {
       autoUpdate = true; # Run `brew update` during activation.
       cleanup = "zap"; # Remove casks/formulas no longer declared here, including zap cleanup.
+      extraFlags = [
+        "--force-cleanup" # Homebrew Bundle now requires explicit confirmation for `--cleanup` during install.
+      ];
       upgrade = true; # Upgrade outdated Homebrew packages during activation.
     };
   };
