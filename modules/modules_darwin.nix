@@ -18,6 +18,9 @@ in
   ];
 
   homebrew = {
+    brews = [
+      "mole" 
+    ];
     casks = [
       "chatgpt" # ChatGPT desktop app.
       "codex-app" # Codex desktop app.
