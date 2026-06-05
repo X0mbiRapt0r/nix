@@ -81,7 +81,7 @@ in
     defaults = {
       CustomUserPreferences = {
         "com.apple.dock" = {
-          "show-recent-count" = 5;
+          "show-recent-count" = 4;
         };
       };
       NSGlobalDomain = {
