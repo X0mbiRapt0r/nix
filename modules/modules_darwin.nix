@@ -27,6 +27,7 @@ in
       "gimp" # Image editor.
       "obsidian" # Notes/knowledge base.
       "visual-studio-code" # VS Code app; settings are managed by Home Manager.
+      "vlc" # Media player.
       "whatsapp" # Messaging app.
       "winbox" # MikroTik router management app.
       # "wireguard" # WireGuard VPN client.
