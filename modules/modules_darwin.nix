@@ -31,7 +31,6 @@ in
       "whatsapp" # Messaging app.
       "winbox" # MikroTik router management app.
       # "wireguard" # WireGuard VPN client.
-      "zed" # Zed text editor.
     ];
     enable = true; # Let nix-darwin produce and apply a Brewfile.
     onActivation = {
