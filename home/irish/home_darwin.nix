@@ -2,7 +2,7 @@
 
 let
   nixFlakePath = "${config.home.homeDirectory}/Library/Mobile Documents/com~apple~CloudDocs/Documents/github.com/X0mbiRapt0r/nix";
-  nixFlakeExpr = "builtins.getFlake \"${nixFlakePath}\"";
+  # nixFlakeExpr = "builtins.getFlake \"${nixFlakePath}\"";
   mkRepoScriptLink =
     scriptName: config.lib.file.mkOutOfStoreSymlink "${nixFlakePath}/scripts/${scriptName}";
   #codexIdeExtension = pkgs.vscode-utils.extensionFromVscodeMarketplace {
@@ -18,15 +18,15 @@ let
    # sha256 = "sha256-RlQbbWZfFfNJ/NTntCOO81IH1s2C0UU9tLHG9n/ttmI=";
    # version = "2022.9.2";
   #};
-  nixdSettings = {
-    formatting.command = [ "${pkgs.nixfmt}/bin/nixfmt" ];
-    nixpkgs.expr = "import (${nixFlakeExpr}).inputs.nixpkgs { config.allowUnfree = true; }";
-    options = {
-      home-manager.expr = "(${nixFlakeExpr}).darwinConfigurations.Irish-MBP.options.home-manager.users.type.getSubOptions []";
-      nix-darwin.expr = "(${nixFlakeExpr}).darwinConfigurations.Irish-MBP.options";
-      nixos.expr = "(${nixFlakeExpr}).nixosConfigurations.XR-PC.options";
-    };
-  };
+  #nixdSettings = {
+   # formatting.command = [ "${pkgs.nixfmt}/bin/nixfmt" ];
+   # nixpkgs.expr = "import (${nixFlakeExpr}).inputs.nixpkgs { config.allowUnfree = true; }";
+   # options = {
+   #   home-manager.expr = "(${nixFlakeExpr}).darwinConfigurations.Irish-MBP.options.home-manager.users.type.getSubOptions []";
+   #   nix-darwin.expr = "(${nixFlakeExpr}).darwinConfigurations.Irish-MBP.options";
+   #   nixos.expr = "(${nixFlakeExpr}).nixosConfigurations.XR-PC.options";
+   # };
+  # };
   #vscodeExtensions = [
    # codexIdeExtension
     #mikrotikRouterosScript
@@ -50,9 +50,9 @@ let
     }; # Disable Copilot completions if the extension is ever present.
     "nix.enableLanguageServer" = true; # Let nix-ide use a real Nix LSP instead of prompting for one.
     "nix.serverPath" = "${pkgs.nixd}/bin/nixd"; # Use a store path so GUI-launched editors do not depend on shell PATH.
-    "nix.serverSettings" = {
-      nixd = nixdSettings;
-    };
+    #"nix.serverSettings" = {
+    #  nixd = nixdSettings;
+    #};
     "terminal.integrated.defaultProfile.osx" = "zsh"; # Avoid VS Code auto-picking the Nix zsh path.
     "terminal.integrated.enablePersistentSessions" = true; # Let VS Code restore terminal sessions when it reopens a workspace.
     "terminal.integrated.fontFamily" = "JetBrainsMono Nerd Font Mono"; # Integrated terminal font.
@@ -106,5 +106,8 @@ in
     mutableExtensionsDir = true; # Let VS Code update/install extensions while HM still seeds the declared set.
     # package = null; # Do not install VS Code with Nix; Homebrew owns the app.
     profiles.default = vscodeProfile;
+  };
+  programs.vscodium = {
+    enable = true;
   };
 }
