@@ -5,6 +5,13 @@ let
   nixFlakeExpr = "builtins.getFlake \"${nixFlakePath}\"";
   mkRepoScriptLink =
     scriptName: config.lib.file.mkOutOfStoreSymlink "${nixFlakePath}/scripts/${scriptName}";
+  codexIdeExtension = pkgs.vscode-utils.extensionFromVscodeMarketplace {
+    arch = "darwin-arm64";
+    hash = "sha256-dTnuo3bDXuhqgeT/ORnaR737TxFFC6DGvzvnypCueRQ=";
+    name = "chatgpt";
+    publisher = "openai";
+    version = "26.5609.30741";
+  };
   mikrotikRouterosScript = pkgs.vscode-utils.extensionFromVscodeMarketplace {
     name = "mikrotik-routeros-script";
     publisher = "devMike";
@@ -21,6 +28,7 @@ let
     };
   };
   codeFamilyExtensions = [
+    codexIdeExtension
     mikrotikRouterosScript
     pkgs.vscode-extensions.jnoortheen.nix-ide
     pkgs.vscode-extensions.mechatroner.rainbow-csv
