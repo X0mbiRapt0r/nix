@@ -27,13 +27,13 @@ let
       nixos.expr = "(${nixFlakeExpr}).nixosConfigurations.XR-PC.options";
     };
   };
-  codeFamilyExtensions = [
+  vscodeExtensions = [
     codexIdeExtension
     mikrotikRouterosScript
     pkgs.vscode-extensions.jnoortheen.nix-ide
     pkgs.vscode-extensions.mechatroner.rainbow-csv
   ];
-  codeFamilySettings = {
+  vscodeSettings = {
     "chat.titleBar.signIn.enabled" = false; # Hide the Copilot/sign-in prompt in the chat title bar.
     # Avoid chat.disableAIFeatures here; it may also block non-Copilot chat extensions we still want to test.
     "editor.fontFamily" = "JetBrainsMono Nerd Font"; # Editor font.
@@ -74,51 +74,11 @@ let
     "workbench.settings.enableNaturalLanguageSearch" = false; # Avoid settings-search calls into online/NL services.
     "workbench.startupEditor" = "none"; # Keep restored workspaces from opening a welcome/getting-started editor.
   };
-  codeFamilyProfile = {
+  vscodeProfile = {
     enableExtensionUpdateCheck = false; # Nix owns managed extension updates.
     enableUpdateCheck = false; # Homebrew/Nix own app updates, not the editor's updater.
-    extensions = codeFamilyExtensions;
-    userSettings = codeFamilySettings;
-  };
-  zedExtensions = [
-    "csv"
-    "nix"
-    "rainbow-csv"
-  ];
-  zedSettings = {
-    auto_update = false; # Let Nix update Zed rather than Zed updating itself.
-    base_keymap = "VSCode"; # Keep common shortcut muscle memory while testing editors side-by-side.
-    buffer_font_family = "JetBrainsMono Nerd Font"; # Match the Code-family editor font.
-    # Keep Zed's agent surface available for testing; only predictive edits are disabled here.
-    edit_predictions.provider = "none"; # Leave predictive AI edits off unless explicitly enabled later.
-    format_on_save = "off"; # Match the current VS Code setup, which does not force format-on-save.
-    languages.Nix = {
-      formatter.external = {
-        arguments = [ ];
-        command = "${pkgs.nixfmt}/bin/nixfmt";
-      };
-      language_servers = [
-        "nixd"
-        "!nil"
-      ];
-    };
-    load_direnv = "shell_hook"; # Match shell-hook based project environments when Zed opens a workspace.
-    lsp.nixd = {
-      binary.path = "${pkgs.nixd}/bin/nixd";
-      settings = nixdSettings;
-    };
-    restore_on_startup = "last_workspace"; # Closest Zed match for restoring folder/workspace windows.
-    telemetry = {
-      diagnostics = false;
-      metrics = false;
-    };
-    terminal = {
-      font_family = "JetBrainsMono Nerd Font Mono";
-      shell = {
-        args = [ "-l" ];
-        program = "/bin/zsh";
-      };
-    };
+    extensions = vscodeExtensions;
+    userSettings = vscodeSettings;
   };
 in
 {
@@ -143,28 +103,8 @@ in
 
   programs.vscode = {
     enable = true; # Manage VS Code settings through Home Manager.
-    mutableExtensionsDir = false; # Keep managed extensions reproducible instead of letting the app mutate them.
+    mutableExtensionsDir = true; # Let VS Code update/install extensions while HM still seeds the declared set.
     package = null; # Do not install VS Code with Nix; Homebrew owns the app.
-    profiles.default = codeFamilyProfile;
-  };
-
-  programs.vscodium = {
-    enable = true; # Install/manage VSCodium alongside VS Code for a non-Microsoft build.
-    mutableExtensionsDir = false; # Use the same immutable extension model as VS Code.
-    profiles.default = codeFamilyProfile;
-  };
-
-  programs.zed-editor = {
-    enable = true; # Install/manage Zed as another editor candidate.
-    extensions = zedExtensions;
-    extraPackages = with pkgs; [
-      nixd # Put nixd on PATH for Zed's wrapped launcher.
-      nixfmt # Put nixfmt on PATH for Zed's wrapped launcher.
-    ];
-    mutableUserDebug = false; # Keep Zed config files fully Home Manager managed.
-    mutableUserKeymaps = false; # Keep Zed config files fully Home Manager managed.
-    mutableUserSettings = false; # Keep Zed config files fully Home Manager managed.
-    mutableUserTasks = false; # Keep Zed config files fully Home Manager managed.
-    userSettings = zedSettings;
+    profiles.default = vscodeProfile;
   };
 }
