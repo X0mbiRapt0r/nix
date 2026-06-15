@@ -6,20 +6,19 @@
 }:
 
 let
-  homebrewBrewfile = pkgs.writeText "Brewfile" config.homebrew.brewfile;
   primaryUser = "irish";
 in
 {
   environment.systemPackages = with pkgs; [
     freerdp # RDP client.
     go # Go toolchain.
-    mas # Mac App Store CLI, useful for discovering/installing App Store IDs.
     python3 # Python runtime.
     uv # Fast Python package/project manager.
   ];
 
   homebrew = {
     brews = [
+      "mas" # Mac App Store CLI used by Homebrew Bundle for MAS apps.
       "mole"
     ];
     casks = [
@@ -38,8 +37,20 @@ in
       "WireGuard" = 1451685025;
     };
     onActivation = {
-      autoUpdate = true; # Run `brew update` during activation.
-      cleanup = "none"; # Avoid deprecated `brew bundle install --cleanup`; postActivation runs cleanup separately.
+      autoUpdate = false; # Keep rebuilds reproducible; run flake/Homebrew updates intentionally instead.
+      cleanup = "uninstall"; # Remove Homebrew packages not declared in this flake during activation.
+      extraEnv.PATH = lib.concatStringsSep ":" [
+        "${config.homebrew.prefix}/bin"
+        "${config.homebrew.prefix}/sbin"
+        "${pkgs.mas}/bin"
+        "/usr/bin"
+        "/bin"
+        "/usr/sbin"
+        "/sbin"
+      ]; # Keep Homebrew Bundle's MAS helper discoverable even when launchd/sudo provides a sparse PATH.
+      extraFlags = [
+        "--force-cleanup" # Required by Homebrew Bundle when nix-darwin asks it to remove undeclared packages.
+      ];
       upgrade = true; # Upgrade outdated Homebrew packages during activation.
     };
   };
@@ -65,32 +76,6 @@ in
   programs.zsh.enable = true; # Register zsh as an available shell.
 
   system = {
-    activationScripts.postActivation.text = lib.mkAfter ''
-      if [ -x "${config.homebrew.prefix}/bin/brew" ]; then
-        echo >&2 "Cleaning Homebrew bundle drift..."
-
-        # Homebrew Bundle deprecated `brew bundle install --cleanup`. Keep
-        # nix-darwin's install step warning-free, then clean undeclared
-        # Homebrew-managed packages with the supported cleanup subcommand.
-        if ! PATH="${config.homebrew.prefix}/bin:$PATH" \
-          sudo --preserve-env=PATH --user=${primaryUser} --set-home \
-            brew bundle cleanup --file='${homebrewBrewfile}' \
-              --force --zap --brews --casks --mas --taps; then
-          echo >&2 "warning: Homebrew bundle cleanup failed; continuing activation."
-        fi
-
-        echo >&2 "Cleaning Homebrew cache..."
-
-        # This trims the download cache that Homebrew keeps around for future
-        # reinstalls. It is separate from the Brewfile drift cleanup above.
-        if ! PATH="${config.homebrew.prefix}/bin:$PATH" \
-          sudo --preserve-env=PATH --user=${primaryUser} --set-home \
-            brew cleanup --prune=all; then
-          echo >&2 "warning: Homebrew cache cleanup failed; continuing activation."
-        fi
-      fi
-    '';
-
     defaults = {
       CustomUserPreferences = {
         "com.apple.dock" = {
