@@ -30,7 +30,6 @@ in
       "vlc" # Media player.
       "whatsapp" # Messaging app.
       "winbox" # MikroTik router management app.
-      # "wireguard" # WireGuard VPN client.
     ];
     enable = true; # Let nix-darwin produce and apply a Brewfile.
     masApps = {
@@ -38,16 +37,16 @@ in
     };
     onActivation = {
       autoUpdate = false; # Keep rebuilds reproducible; run flake/Homebrew updates intentionally instead.
-      cleanup = "uninstall"; # Remove Homebrew packages not declared in this flake during activation.
-      extraEnv.PATH = lib.concatStringsSep ":" [
-        "${config.homebrew.prefix}/bin"
-        "${config.homebrew.prefix}/sbin"
-        "${pkgs.mas}/bin"
-        "/usr/bin"
-        "/bin"
-        "/usr/sbin"
-        "/sbin"
-      ]; # Keep Homebrew Bundle's MAS helper discoverable even when launchd/sudo provides a sparse PATH.
+      cleanup = "zap"; # Remove Homebrew packages not declared in this flake during activation.
+      #extraEnv.PATH = lib.concatStringsSep ":" [
+      #  "${config.homebrew.prefix}/bin"
+      #  "${config.homebrew.prefix}/sbin"
+      #  "${pkgs.mas}/bin"
+      #  "/usr/bin"
+      #  "/bin"
+      #  "/usr/sbin"
+      #  "/sbin"
+      #]; # Keep Homebrew Bundle's MAS helper discoverable even when launchd/sudo provides a sparse PATH.
       extraFlags = [
         "--force-cleanup" # Required by Homebrew Bundle when nix-darwin asks it to remove undeclared packages.
       ];

@@ -5,19 +5,19 @@ let
   nixFlakeExpr = "builtins.getFlake \"${nixFlakePath}\"";
   mkRepoScriptLink =
     scriptName: config.lib.file.mkOutOfStoreSymlink "${nixFlakePath}/scripts/${scriptName}";
-  codexIdeExtension = pkgs.vscode-utils.extensionFromVscodeMarketplace {
-    arch = "darwin-arm64";
-    hash = "sha256-dTnuo3bDXuhqgeT/ORnaR737TxFFC6DGvzvnypCueRQ=";
-    name = "chatgpt";
-    publisher = "openai";
-    version = "26.5609.30741";
-  };
-  mikrotikRouterosScript = pkgs.vscode-utils.extensionFromVscodeMarketplace {
-    name = "mikrotik-routeros-script";
-    publisher = "devMike";
-    sha256 = "sha256-RlQbbWZfFfNJ/NTntCOO81IH1s2C0UU9tLHG9n/ttmI=";
-    version = "2022.9.2";
-  };
+  #codexIdeExtension = pkgs.vscode-utils.extensionFromVscodeMarketplace {
+   # arch = "darwin-arm64";
+    #hash = "sha256-dTnuo3bDXuhqgeT/ORnaR737TxFFC6DGvzvnypCueRQ=";
+    #name = "chatgpt";
+    #publisher = "openai";
+    #version = "26.5609.30741";
+  #};
+  #mikrotikRouterosScript = pkgs.vscode-utils.extensionFromVscodeMarketplace {
+   # name = "mikrotik-routeros-script";
+   # publisher = "devMike";
+   # sha256 = "sha256-RlQbbWZfFfNJ/NTntCOO81IH1s2C0UU9tLHG9n/ttmI=";
+   # version = "2022.9.2";
+  #};
   nixdSettings = {
     formatting.command = [ "${pkgs.nixfmt}/bin/nixfmt" ];
     nixpkgs.expr = "import (${nixFlakeExpr}).inputs.nixpkgs { config.allowUnfree = true; }";
@@ -27,12 +27,12 @@ let
       nixos.expr = "(${nixFlakeExpr}).nixosConfigurations.XR-PC.options";
     };
   };
-  vscodeExtensions = [
-    codexIdeExtension
-    mikrotikRouterosScript
-    pkgs.vscode-extensions.jnoortheen.nix-ide
-    pkgs.vscode-extensions.mechatroner.rainbow-csv
-  ];
+  #vscodeExtensions = [
+   # codexIdeExtension
+    #mikrotikRouterosScript
+    #pkgs.vscode-extensions.jnoortheen.nix-ide
+    #pkgs.vscode-extensions.mechatroner.rainbow-csv
+  #];
   vscodeSettings = {
     "chat.titleBar.signIn.enabled" = false; # Hide the Copilot/sign-in prompt in the chat title bar.
     # Avoid chat.disableAIFeatures here; it may also block non-Copilot chat extensions we still want to test.
@@ -75,9 +75,9 @@ let
     "workbench.startupEditor" = "none"; # Keep restored workspaces from opening a welcome/getting-started editor.
   };
   vscodeProfile = {
-    enableExtensionUpdateCheck = false; # Nix owns managed extension updates.
-    enableUpdateCheck = false; # Homebrew/Nix own app updates, not the editor's updater.
-    extensions = vscodeExtensions;
+    enableExtensionUpdateCheck = true; # Nix owns managed extension updates.
+    enableUpdateCheck = true; # Homebrew/Nix own app updates, not the editor's updater.
+    #extensions = vscodeExtensions;
     userSettings = vscodeSettings;
   };
 in
