@@ -33,6 +33,9 @@ in
       # "wireguard" # WireGuard VPN client.
     ];
     enable = true; # Let nix-darwin produce and apply a Brewfile.
+    masApps = {
+      "Wireguard" = 1451685025;
+    };
     onActivation = {
       autoUpdate = true; # Run `brew update` during activation.
       cleanup = "zap"; # Remove casks/formulas no longer declared here, including zap cleanup.
