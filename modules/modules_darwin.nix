@@ -6,6 +6,7 @@
 }:
 
 let
+  homebrewBrewfile = pkgs.writeText "Brewfile" config.homebrew.brewfile;
   primaryUser = "irish";
 in
 {
@@ -19,7 +20,7 @@ in
 
   homebrew = {
     brews = [
-      "mole" 
+      "mole"
     ];
     casks = [
       "chatgpt" # ChatGPT desktop app.
@@ -34,14 +35,11 @@ in
     ];
     enable = true; # Let nix-darwin produce and apply a Brewfile.
     masApps = {
-      "Wireguard" = 1451685025;
+      "WireGuard" = 1451685025;
     };
     onActivation = {
       autoUpdate = true; # Run `brew update` during activation.
-      cleanup = "zap"; # Remove casks/formulas no longer declared here, including zap cleanup.
-      extraFlags = [
-        "--force-cleanup" # Homebrew Bundle now requires explicit confirmation for `--cleanup` during install.
-      ];
+      cleanup = "none"; # Avoid deprecated `brew bundle install --cleanup`; postActivation runs cleanup separately.
       upgrade = true; # Upgrade outdated Homebrew packages during activation.
     };
   };
@@ -69,11 +67,22 @@ in
   system = {
     activationScripts.postActivation.text = lib.mkAfter ''
       if [ -x "${config.homebrew.prefix}/bin/brew" ]; then
+        echo >&2 "Cleaning Homebrew bundle drift..."
+
+        # Homebrew Bundle deprecated `brew bundle install --cleanup`. Keep
+        # nix-darwin's install step warning-free, then clean undeclared
+        # Homebrew-managed packages with the supported cleanup subcommand.
+        if ! PATH="${config.homebrew.prefix}/bin:$PATH" \
+          sudo --preserve-env=PATH --user=${primaryUser} --set-home \
+            brew bundle cleanup --file='${homebrewBrewfile}' \
+              --force --zap --brews --casks --mas --taps; then
+          echo >&2 "warning: Homebrew bundle cleanup failed; continuing activation."
+        fi
+
         echo >&2 "Cleaning Homebrew cache..."
 
-        # `homebrew.onActivation.cleanup = "zap"` removes packages/casks that no
-        # longer belong to the generated Brewfile. This separate cleanup trims the
-        # download cache that Homebrew keeps around for future reinstalls.
+        # This trims the download cache that Homebrew keeps around for future
+        # reinstalls. It is separate from the Brewfile drift cleanup above.
         if ! PATH="${config.homebrew.prefix}/bin:$PATH" \
           sudo --preserve-env=PATH --user=${primaryUser} --set-home \
             brew cleanup --prune=all; then
