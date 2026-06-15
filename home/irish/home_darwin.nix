@@ -104,7 +104,7 @@ in
   programs.vscode = {
     enable = true; # Manage VS Code settings through Home Manager.
     mutableExtensionsDir = true; # Let VS Code update/install extensions while HM still seeds the declared set.
-    package = null; # Do not install VS Code with Nix; Homebrew owns the app.
+    # package = null; # Do not install VS Code with Nix; Homebrew owns the app.
     profiles.default = vscodeProfile;
   };
 }
