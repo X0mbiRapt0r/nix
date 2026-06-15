@@ -2,12 +2,12 @@
 
 {
   homebrew = {
+    brews = [
+      "powershell" # Microsoft Azure CLI tool.
+    ];
     casks = [
       "docker-desktop" # Docker Desktop for Mac.
       "windows-app" # Microsoft Windows App for remote desktops/cloud PCs.
-    ];
-    formulas = [
-      "powershell" # Microsoft Azure CLI tool.
     ];
   };
 
