@@ -11,7 +11,6 @@
     git # Version control.
     jq # JSON query tool.
     lsd # Modern `ls` replacement used by shell aliases.
-    neovim # Main terminal editor.
     ripgrep # Fast text search.
     rsync # File sync/copy tool.
     tmux # Terminal multiplexer.

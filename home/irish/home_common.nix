@@ -22,12 +22,6 @@
       };
     };
 
-    neovim = {
-      defaultEditor = true; # Set EDITOR/VISUAL to nvim through HM.
-      enable = true; # Install/manage Neovim.
-      vimAlias = true; # Make `vim` open Neovim.
-    };
-
     zsh = {
       autosuggestion.enable = true; # Suggest commands from history as you type.
       enable = true; # Manage ~/.zshrc with Home Manager.
@@ -37,9 +31,6 @@
         PROMPT='%n@%m:%1~ > '
       '';
 
-      sessionVariables = {
-        EDITOR = "nvim"; # Preferred editor for terminal programs.
-      };
       shellAliases = {
         gacp = "git add . && git commit -m 'quick update' && git push origin main"; # Quick personal commit/push helper.
         gs = "git status"; # Short git status.

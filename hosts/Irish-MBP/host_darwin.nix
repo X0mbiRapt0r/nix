@@ -3,7 +3,6 @@
 {
   homebrew = {
     casks = [
-      "audacity" # Audio editor.
       "calibre" # Ebook manager.
       "discord" # Chat/voice app.
       "godot" # Game engine.

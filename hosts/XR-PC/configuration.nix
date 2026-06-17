@@ -196,9 +196,6 @@ in
       "wheel"
     ]; # Network, GPU, and sudo access.
     isNormalUser = true; # Create a regular login user.
-    packages = with pkgs; [
-      tree # Directory tree viewer.
-    ];
     shell = pkgs.zsh; # Use the Home Manager-managed zsh config for SSH and local shells.
   };
 }
