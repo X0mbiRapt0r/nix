@@ -5,7 +5,6 @@ let
 in
 {
   environment.systemPackages = with pkgs; [
-    freerdp # RDP client.
     go # Go toolchain.
     python3 # Python runtime.
     uv # Fast Python package/project manager.
@@ -13,7 +12,6 @@ in
 
   homebrew = {
     brews = [
-      "mas" # Mac App Store CLI used by Homebrew Bundle for MAS apps.
       "mole"
     ];
     casks = [
@@ -27,9 +25,6 @@ in
       "winbox" # MikroTik router management app.
     ];
     enable = true; # Let nix-darwin produce and apply a Brewfile.
-    masApps = {
-      "WireGuard" = 1451685025;
-    };
     onActivation = {
       autoUpdate = false; # Keep rebuilds reproducible; run flake/Homebrew updates intentionally instead.
       cleanup = "zap"; # Remove Homebrew packages not declared in this flake during activation.

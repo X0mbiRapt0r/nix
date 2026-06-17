@@ -1,38 +1,9 @@
-{ config, pkgs, ... }:
+{ config, ... }:
 
 let
   nixFlakePath = "${config.home.homeDirectory}/Library/Mobile Documents/com~apple~CloudDocs/Documents/github.com/X0mbiRapt0r/nix";
-  # nixFlakeExpr = "builtins.getFlake \"${nixFlakePath}\"";
   mkRepoScriptLink =
     scriptName: config.lib.file.mkOutOfStoreSymlink "${nixFlakePath}/scripts/${scriptName}";
-  #codexIdeExtension = pkgs.vscode-utils.extensionFromVscodeMarketplace {
-   # arch = "darwin-arm64";
-    #hash = "sha256-dTnuo3bDXuhqgeT/ORnaR737TxFFC6DGvzvnypCueRQ=";
-    #name = "chatgpt";
-    #publisher = "openai";
-    #version = "26.5609.30741";
-  #};
-  #mikrotikRouterosScript = pkgs.vscode-utils.extensionFromVscodeMarketplace {
-   # name = "mikrotik-routeros-script";
-   # publisher = "devMike";
-   # sha256 = "sha256-RlQbbWZfFfNJ/NTntCOO81IH1s2C0UU9tLHG9n/ttmI=";
-   # version = "2022.9.2";
-  #};
-  #nixdSettings = {
-   # formatting.command = [ "${pkgs.nixfmt}/bin/nixfmt" ];
-   # nixpkgs.expr = "import (${nixFlakeExpr}).inputs.nixpkgs { config.allowUnfree = true; }";
-   # options = {
-   #   home-manager.expr = "(${nixFlakeExpr}).darwinConfigurations.Irish-MBP.options.home-manager.users.type.getSubOptions []";
-   #   nix-darwin.expr = "(${nixFlakeExpr}).darwinConfigurations.Irish-MBP.options";
-   #   nixos.expr = "(${nixFlakeExpr}).nixosConfigurations.XR-PC.options";
-   # };
-  # };
-  #vscodeExtensions = [
-   # codexIdeExtension
-    #mikrotikRouterosScript
-    #pkgs.vscode-extensions.jnoortheen.nix-ide
-    #pkgs.vscode-extensions.mechatroner.rainbow-csv
-  #];
   vscodeSettings = {
     "chat.titleBar.signIn.enabled" = false; # Hide the Copilot/sign-in prompt in the chat title bar.
     # Avoid chat.disableAIFeatures here; it may also block non-Copilot chat extensions we still want to test.
@@ -48,11 +19,6 @@ let
     "github.copilot.enable" = {
       "*" = false;
     }; # Disable Copilot completions if the extension is ever present.
-    "nix.enableLanguageServer" = true; # Let nix-ide use a real Nix LSP instead of prompting for one.
-    "nix.serverPath" = "${pkgs.nixd}/bin/nixd"; # Use a store path so GUI-launched editors do not depend on shell PATH.
-    #"nix.serverSettings" = {
-    #  nixd = nixdSettings;
-    #};
     "terminal.integrated.defaultProfile.osx" = "zsh"; # Avoid VS Code auto-picking the Nix zsh path.
     "terminal.integrated.enablePersistentSessions" = true; # Let VS Code restore terminal sessions when it reopens a workspace.
     "terminal.integrated.fontFamily" = "JetBrainsMono Nerd Font Mono"; # Integrated terminal font.
@@ -77,7 +43,6 @@ let
   vscodeProfile = {
     enableExtensionUpdateCheck = true; # Nix owns managed extension updates.
     enableUpdateCheck = true; # Homebrew/Nix own app updates, not the editor's updater.
-    #extensions = vscodeExtensions;
     userSettings = vscodeSettings;
   };
 in
@@ -89,10 +54,6 @@ in
       ".local/bin/nix-switch".source = mkRepoScriptLink "switch"; # Expose system switching as `nix-switch`.
     };
     homeDirectory = "/Users/irish"; # macOS home directory.
-    packages = with pkgs; [
-      nixd # Nix language server used by the nix-ide VS Code extension.
-      nixfmt # Formatter used by nixd for Nix files.
-    ];
     sessionPath = [ "$HOME/.local/bin" ]; # Put personal helper commands on PATH.
   };
 
@@ -107,7 +68,4 @@ in
     package = null; # Do not install VS Code with Nix; Homebrew owns the app.
     profiles.default = vscodeProfile;
   };
-  #programs.vscodium = {
-  #  enable = true;
-  #};
 }
