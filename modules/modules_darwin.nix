@@ -18,6 +18,7 @@ in
       "chatgpt" # ChatGPT desktop app.
       "codex-app" # Codex desktop app.
       "gimp" # Image editor.
+      "logseq"
       "obsidian" # Notes/knowledge base.
       "visual-studio-code" # VS Code app; settings are managed by Home Manager.
       "vlc" # Media player.
