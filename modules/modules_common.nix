@@ -3,6 +3,7 @@
 {
   environment.systemPackages = with pkgs; [
     btop # System monitor.
+    caligula
     cmatrix # Terminal toy.
     curl # HTTP client and download helper.
     fastfetch # System info summary.
