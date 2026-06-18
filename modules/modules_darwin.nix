@@ -20,7 +20,7 @@ in
       "gimp" # Image editor.
       "logseq"
       "obsidian" # Notes/knowledge base.
-      "visual-studio-code" # VS Code app; settings are managed by Home Manager.
+      "visual-studio-code" # VS Code app; preferences and extensions use its built-in Settings Sync.
       "vlc" # Media player.
       "whatsapp" # Messaging app.
       "winbox" # MikroTik router management app.
