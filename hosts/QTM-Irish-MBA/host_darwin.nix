@@ -1,6 +1,10 @@
 { ... }:
 
 {
+  # home-manager.users.irish.imports = [
+  #   ./home_darwin.nix # Host-specific user files and activation tasks.
+  # ];
+
   homebrew = {
     brews = [
       "powershell" # Microsoft Azure CLI tool.

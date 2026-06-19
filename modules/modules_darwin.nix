@@ -13,6 +13,7 @@ in
   homebrew = {
     brews = [
       "mole"
+      "wireshark"
     ];
     casks = [
       "chatgpt" # ChatGPT desktop app.
