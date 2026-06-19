@@ -24,7 +24,6 @@ in
       "vlc" # Media player.
       "whatsapp" # Messaging app.
       "winbox" # MikroTik router management app.
-      "wireshark-app"
     ];
     enable = true; # Let nix-darwin produce and apply a Brewfile.
     onActivation = {
