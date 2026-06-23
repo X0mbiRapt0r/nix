@@ -3,7 +3,7 @@
 {
   home = {
     sessionPath = [ "$HOME/go/bin" ]; # Add Go-installed binaries to PATH.
-    stateVersion = "26.05"; # Home Manager compatibility baseline; change only after a deliberate migration.
+    stateVersion = "24.05"; # Original Home Manager compatibility baseline; do not follow input updates.
     username = "irish"; # Account name managed by Home Manager.
   };
 

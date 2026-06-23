@@ -21,7 +21,10 @@
   ];
 
   nix = {
-    gc.automatic = true; # Let each platform's scheduler run garbage collection.
+    gc = {
+      automatic = true; # Let each platform's native scheduler run garbage collection.
+      options = "--delete-older-than 30d"; # Keep recent generations available for rollback.
+    };
     optimise.automatic = true; # Deduplicate identical store paths on the platform scheduler.
     registry.nixpkgs.flake = nixpkgs; # Make `nixpkgs#pkg` resolve to this flake's pinned nixpkgs.
     settings.experimental-features = [
