@@ -168,7 +168,7 @@ in
       enable = true; # Enable RDP access.
       openFirewall = true; # Open TCP 3389.
     };
-    xserver.enable = true; # Keep X11 available for SDDM, Plasma X11, and xrdp.
+    xserver.enable = true; # Keep X11 available for the Plasma X11 fallback and xrdp sessions.
   };
 
   systemd = {

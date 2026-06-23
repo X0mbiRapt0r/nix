@@ -12,13 +12,13 @@ in
 
   homebrew = {
     brews = [
-      "mole"
+      "mole" # macOS cleanup and maintenance CLI.
     ];
     casks = [
       "chatgpt" # ChatGPT desktop app.
       "codex-app" # Codex desktop app.
       "gimp" # Image editor.
-      "logseq"
+      "logseq" # Local-first notes and knowledge-base app.
       "obsidian" # Notes/knowledge base.
       "visual-studio-code" # VS Code app; preferences and extensions use its built-in Settings Sync.
       "vlc" # Media player.
@@ -27,12 +27,9 @@ in
     ];
     enable = true; # Let nix-darwin produce and apply a Brewfile.
     onActivation = {
-      autoUpdate = false; # Keep rebuilds reproducible; run flake/Homebrew updates intentionally instead.
-      cleanup = "zap"; # Remove Homebrew packages not declared in this flake during activation.
-      extraFlags = [
-        "--force-cleanup" # Required by Homebrew Bundle when nix-darwin asks it to remove undeclared packages.
-      ];
-      upgrade = true; # Upgrade outdated Homebrew packages during activation.
+      autoUpdate = false; # Do not refresh Homebrew metadata implicitly during activation.
+      cleanup = "zap"; # Remove undeclared packages and associated cask files during activation.
+      upgrade = true; # Upgrade declared packages using the currently available Homebrew metadata.
     };
   };
 
