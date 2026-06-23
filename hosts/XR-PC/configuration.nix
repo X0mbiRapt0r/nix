@@ -86,15 +86,21 @@ in
 
   nix = {
     gc = {
-      automatic = true; # Enable scheduled garbage collection.
-      dates = "daily"; # Run GC daily via systemd timer.
+      dates = "weekly"; # Run age-based GC weekly via systemd.
+      persistent = true; # Catch up after boot if the machine missed its scheduled run.
     };
     optimise.dates = [ "daily" ]; # Deduplicate the store daily via systemd timer.
   };
 
-  nixpkgs.config = {
-    allowUnfree = true; # Allow unfree packages like Steam and Proton GE.
-    rocmSupport = true; # Build optional AMD ROCm support where packages expose it.
+  nixpkgs = {
+    config.allowUnfree = true; # Allow unfree packages like Steam and Proton GE.
+    overlays = [
+      (_final: previous: {
+        btop = previous.btop.override {
+          rocmSupport = true; # Enable AMD GPU monitoring without globally rebuilding ROCm-capable packages.
+        };
+      })
+    ];
   };
 
   programs = {

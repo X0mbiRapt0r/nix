@@ -41,7 +41,7 @@ in
       Weekday = 0;
       Hour = 0;
       Minute = 0;
-    }; # Run GC weekly at Sunday 00:00 via launchd.
+    }; # Run age-based GC weekly at Sunday 00:00 via launchd; missed sleep events run after wake.
     optimise.interval = [
       {
         Weekday = 0;
