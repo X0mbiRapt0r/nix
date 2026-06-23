@@ -2,10 +2,8 @@
 
 {
   home = {
-    sessionVariables = {
-      PATH = "$PATH:$HOME/go/bin"; # Include Go-installed binaries.
-    };
-    stateVersion = "26.05"; # Home Manager compatibility version; do not bump casually.
+    sessionPath = [ "$HOME/go/bin" ]; # Add Go-installed binaries to PATH.
+    stateVersion = "26.05"; # Home Manager compatibility baseline; change only after a deliberate migration.
     username = "irish"; # Account name managed by Home Manager.
   };
 
@@ -37,9 +35,7 @@
         ll = "lsd -lah"; # Long listing with hidden files.
         ls = "lsd"; # Use lsd for basic listings.
         lt = "lsd --tree"; # Tree-style listing.
-        ngc = "command ngc"; # Trim Nix generations and collect unused store paths.
-        nfu = "command nfu"; # Update this flake's inputs and push lockfile changes.
-        nrs = "command nix-switch"; # Switch to the latest system generation. Useful after a flake update.
+        nrs = "command nix-switch"; # Build and activate this host's flake configuration.
       };
 
       syntaxHighlighting.enable = true; # Highlight commands while typing.

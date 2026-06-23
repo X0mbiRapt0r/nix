@@ -3,12 +3,12 @@
 {
   homebrew = {
     brews = [
-      "powershell" # Microsoft Azure CLI tool.
+      "powershell" # Cross-platform shell and scripting runtime.
     ];
     casks = [
       "docker-desktop" # Docker Desktop for Mac.
       "windows-app" # Microsoft Windows App for remote desktops/cloud PCs.
-      "wireshark-app"
+      "wireshark-app" # Network protocol analyser.
     ];
   };
 
