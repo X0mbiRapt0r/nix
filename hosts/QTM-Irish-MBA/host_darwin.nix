@@ -7,6 +7,7 @@
     ];
     casks = [
       "docker-desktop" # Docker Desktop for Mac.
+      "stillcolor"
       "windows-app" # Microsoft Windows App for remote desktops/cloud PCs.
       "wireshark-app" # Network protocol analyser.
     ];
