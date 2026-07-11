@@ -8,9 +8,10 @@ usage() {
 Usage:
   $program_name [--repo PATH] [--message MESSAGE] [--no-push] [--print-command]
 
-Update and validate this repo's flake inputs, commit flake.lock if it changed,
-and push. The repo must be on a branch and clean before updating so this helper
-never creates an unreachable commit or commits unrelated work by accident.
+Fast-forward the current branch, update and validate this repo's flake inputs,
+commit flake.lock if it changed, and push. The repo must be on a branch and
+clean before updating so this helper never creates an unreachable commit or
+commits unrelated work by accident.
 
 Options:
   --repo PATH         Override the default repo path for this OS.
@@ -55,6 +56,11 @@ while [[ $# -gt 0 ]]; do
       ;;
   esac
 done
+
+if [[ "${EUID:-$(id -u)}" -eq 0 ]]; then
+  echo "Run $program_name as your normal user; it modifies the Git checkout." >&2
+  exit 1
+fi
 
 case "$(uname -s)" in
   Darwin)
@@ -131,6 +137,7 @@ if [[ "$print_command" == true ]]; then
   run cd "$repo_dir"
   run git status --porcelain=v1
   run git branch --show-current
+  run git pull --ff-only origin CURRENT_BRANCH
   run nix flake update
   run nix flake check --no-build --all-systems --no-write-lock-file
   run nix flake check --no-write-lock-file
@@ -145,6 +152,7 @@ fi
 cd "$repo_dir"
 require_clean_worktree
 require_branch
+run git pull --ff-only origin "$branch"
 run nix flake update
 
 if ! run nix flake check --no-build --all-systems --no-write-lock-file; then

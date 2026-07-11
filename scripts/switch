@@ -78,6 +78,11 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
+if [[ "${EUID:-$(id -u)}" -eq 0 ]]; then
+  echo "Run $program_name as your normal user; it uses sudo only for the system rebuild." >&2
+  exit 1
+fi
+
 detect_host() {
   if [[ "$(uname -s)" == "Darwin" ]] && command -v scutil >/dev/null 2>&1; then
     scutil --get LocalHostName 2>/dev/null && return 0
@@ -89,17 +94,12 @@ detect_host() {
 os="$(uname -s)"
 detected_host="$(detect_host)"
 
-root_cmd=()
-if [[ "${EUID:-$(id -u)}" -ne 0 ]]; then
-  root_cmd=(sudo)
-fi
-
 case "$os" in
   Darwin)
     repo_dir="${repo_dir:-$HOME/Library/Mobile Documents/com~apple~CloudDocs/Documents/github.com/X0mbiRapt0r/nix}"
     host="${host:-$detected_host}"
     pull_before_switch="${pull_before_switch:-false}"
-    rebuild_cmd=("${root_cmd[@]}" darwin-rebuild switch)
+    rebuild_cmd=(sudo darwin-rebuild switch)
     ;;
   Linux)
     repo_dir="${repo_dir:-$HOME/Documents/github.com/X0mbiRapt0r/nix}"
@@ -113,7 +113,7 @@ case "$os" in
         pull_before_switch=false
       fi
     fi
-    rebuild_cmd=("${root_cmd[@]}" nixos-rebuild switch)
+    rebuild_cmd=(sudo nixos-rebuild switch)
     ;;
   *)
     echo "Unsupported OS: $os" >&2
@@ -179,15 +179,7 @@ EOF
   fi
 
   if ! "${pull_cmd[@]}"; then
-    cat >&2 <<EOF
-
-Git pull failed. If the error mentions .git/FETCH_HEAD permission denied,
-fix the XR-PC checkout ownership once with:
-
-  sudo chown -R "\$(id -un):\$(id -gn)" "$repo_dir"
-
-Then re-run $program_name.
-EOF
+    echo "Git pull failed. Resolve the checkout state reported above, then re-run $program_name." >&2
     exit 1
   fi
 fi
