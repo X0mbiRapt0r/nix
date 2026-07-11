@@ -20,9 +20,9 @@ let
   '';
   steamGamescopeCommand = "${steamGamescopeSession}/bin/xr-steam-gamescope-session";
 
-  # Steam calls this SteamOS-compatible command for "Switch to Desktop". The
-  # same command backs Plasma's return shortcut, keeping the public interface
-  # familiar while the router below owns the actual compositor lifecycle.
+  # Steam calls this SteamOS-compatible command for "Switch to Desktop". Keep
+  # its public interface familiar while the router below owns the actual
+  # compositor lifecycle instead of SteamOS's SDDM-based session manager.
   steamSessionSelect = pkgs.writeShellApplication {
     name = "steamos-session-select";
     text = ''
@@ -37,9 +37,9 @@ let
         game|gamescope|gaming)
           printf 'gamescope\n' > "$state_file"
           ${lib.getExe' pkgs.kdePackages.qttools "qdbus"} \
-            org.kde.ksmserver \
-            /KSMServer \
-            org.kde.KSMServerInterface.closeSession
+            org.kde.Shutdown \
+            /Shutdown \
+            org.kde.Shutdown.logout
           ;;
         *)
           printf 'Usage: steamos-session-select {plasma|gamescope}\n' >&2
@@ -95,7 +95,6 @@ let
     '';
   };
   steamSessionRouterCommand = lib.getExe steamSessionRouter;
-  steamSessionSelectCommand = lib.getExe steamSessionSelect;
   tuigreetCommand = "${pkgs.tuigreet}/bin/tuigreet --time --remember --remember-user-session --user-menu --sessions ${waylandSessions} --cmd ${steamSessionRouterCommand}";
 in
 {
@@ -150,7 +149,7 @@ in
       [Desktop Entry]
       Categories=Game;System;
       Comment=Leave Plasma and return to the Steam Gamescope session
-      Exec=${steamSessionSelectCommand} gamescope
+      Exec=${lib.getExe' pkgs.kdePackages.qttools "qdbus"} org.kde.Shutdown /Shutdown org.kde.Shutdown.logout
       Icon=steam
       Name=Return to Gaming Mode
       StartupNotify=false
