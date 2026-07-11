@@ -256,9 +256,12 @@ in
     seatd.enable = true; # Give TTY-launched Wayland compositors a dedicated seat-management socket.
   };
 
-  systemd.services.greetd = {
-    after = [ "seatd.service" ]; # Start Steam/Gamescope only after seatd can grant KMS/input access.
-    wants = [ "seatd.service" ]; # Pull seatd in with greetd even if target ordering changes later.
+  systemd.services = {
+    "drkonqi-coredump-processor@".enable = false; # Keep systemd coredumps without recursively launching a GUI crash handler in Gamescope.
+    greetd = {
+      after = [ "seatd.service" ]; # Start Steam/Gamescope only after seatd can grant KMS/input access.
+      wants = [ "seatd.service" ]; # Pull seatd in with greetd even if target ordering changes later.
+    };
   };
 
   time.timeZone = "Africa/Johannesburg"; # System time zone.
