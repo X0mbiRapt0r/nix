@@ -14,7 +14,8 @@ Usage:
 Bootstrap a fresh macOS install into this nix-darwin flake.
 
 Options:
-  --host HOST       Darwin flake host to deploy. Prompts when omitted.
+  --host HOST       Darwin flake host to deploy. Prompts when omitted except
+                    in print-only mode, which uses the detected host name.
   --repo PATH       Repo checkout to use. Defaults to the iCloud checkout when
                     present, then the repo this script is in, then the iCloud
                     checkout path as a clone target.
@@ -75,6 +76,23 @@ find_default_repo_dir() {
   fi
 }
 
+canonicalize_checkout_path() {
+  local path="$1"
+  local parent
+
+  if [[ -d "$path" ]]; then
+    (cd "$path" && pwd -P)
+    return
+  fi
+
+  parent="$(dirname "$path")"
+  if [[ -d "$parent" ]]; then
+    printf '%s/%s\n' "$(cd "$parent" && pwd -P)" "$(basename "$path")"
+  else
+    printf '%s\n' "$path"
+  fi
+}
+
 confirm() {
   local prompt="$1"
   local answer
@@ -109,14 +127,20 @@ load_nix_profile() {
     if [[ -r "$profile" ]]; then
       # shellcheck disable=SC1090
       . "$profile"
+      command -v nix >/dev/null 2>&1 && return 0
     fi
   done
+
+  return 1
 }
 
 ensure_nix() {
-  load_nix_profile
-
   if command -v nix >/dev/null 2>&1; then
+    log "Nix already installed: $(nix --version)"
+    return
+  fi
+
+  if load_nix_profile; then
     log "Nix already installed: $(nix --version)"
     return
   fi
@@ -127,7 +151,7 @@ ensure_nix() {
   log "The installer may ask for sudo and confirmation."
   curl --proto '=https' --tlsv1.2 -L "$nix_install_url" | NIX_INSTALLER_NO_MODIFY_PROFILE=1 sh -s -- --daemon
 
-  load_nix_profile
+  load_nix_profile || true
   command -v nix >/dev/null 2>&1 || die "Nix installed, but this shell cannot find nix yet. Open a new terminal and rerun $program_name."
 
   log "Installed Nix: $(nix --version)"
@@ -138,19 +162,31 @@ nix_command() {
 }
 
 git_command() {
-  if command -v git >/dev/null 2>&1; then
-    git "$@"
+  local git_bin
+
+  git_bin="$(command -v git || true)"
+  if [[ -n "$git_bin" ]] && { [[ "$git_bin" != "/usr/bin/git" ]] || xcode-select -p >/dev/null 2>&1; }; then
+    "$git_bin" "$@"
   else
+    # A fresh Mac exposes /usr/bin/git before Command Line Tools are installed;
+    # use Nix's Git instead of triggering or depending on Apple's installer.
     nix_command shell nixpkgs#git -c git "$@"
   fi
 }
 
 ensure_repo() {
+  local status
+
   if [[ -f "$repo_dir/flake.nix" ]]; then
     log "Using flake repo: $repo_dir"
 
     if [[ "$pull_repo" == true ]]; then
       [[ -d "$repo_dir/.git" ]] || die "--pull was requested, but $repo_dir is not a git checkout."
+      status="$(git_command -C "$repo_dir" status --porcelain=v1)"
+      if [[ -n "$status" ]]; then
+        printf '%s\n' "$status" >&2
+        die "Refusing to pull a checkout with uncommitted changes."
+      fi
       log "Pulling latest changes with git pull --ff-only."
       git_command -C "$repo_dir" pull --ff-only
     fi
@@ -274,6 +310,25 @@ validate_host_system() {
   fi
 }
 
+build_switch_command() {
+  flake_ref="$repo_dir#$host"
+  switch_cmd=(
+    sudo -H "$nix_bin"
+    --extra-experimental-features "nix-command flakes"
+    --accept-flake-config
+    run "github:nix-darwin/nix-darwin/master#darwin-rebuild"
+    --
+    switch
+    --flake "$flake_ref"
+    -L
+  )
+}
+
+print_switch_command() {
+  printf 'First-switch command:\n  '
+  quote_command "${switch_cmd[@]}"
+}
+
 backup_for_nix_darwin() {
   local path="$1"
   local target
@@ -362,13 +417,27 @@ done
 [[ "$(uname -s)" == "Darwin" ]] || die "$program_name is for macOS only."
 [[ "$(id -u)" -ne 0 ]] || die "Run this as your normal user. The script uses sudo when needed."
 
-canonical_repo_dir="$(default_macos_repo_dir)"
-repo_dir="${repo_dir:-$(find_default_repo_dir)}"
+canonical_repo_dir="$(canonicalize_checkout_path "$(default_macos_repo_dir)")"
+repo_dir="$(canonicalize_checkout_path "${repo_dir:-$(find_default_repo_dir)}")"
 
 log "Bootstrap repo: $repo_dir"
 if [[ "$repo_dir" != "$canonical_repo_dir" ]]; then
-  warn "Darwin helper symlinks currently point at $canonical_repo_dir."
-  warn "Make sure that checkout exists after activation."
+  warn "Helper commands default to the standard checkout at $canonical_repo_dir."
+  warn "Pass --repo PATH when running a helper against this checkout."
+fi
+
+if [[ "$print_command" == true ]]; then
+  if [[ -z "$host" ]]; then
+    host="$(detect_macos_host)"
+    [[ -n "$host" ]] || die "Could not detect a host name. Re-run with --host HOST."
+  fi
+
+  nix_bin="$(command -v nix || true)"
+  nix_bin="${nix_bin:-nix}"
+  build_switch_command
+  print_switch_command
+  log "Print-only mode did not install Nix, clone or pull the repo, validate the host, back up files, or activate nix-darwin."
+  exit 0
 fi
 
 ensure_nix
@@ -378,24 +447,8 @@ ensure_repo
 choose_host
 validate_host_system
 
-flake_ref="$repo_dir#$host"
-switch_cmd=(
-  sudo -H "$nix_bin"
-  --extra-experimental-features "nix-command flakes"
-  --accept-flake-config
-  run "github:nix-darwin/nix-darwin/master#darwin-rebuild"
-  --
-  switch
-  --flake "$flake_ref"
-  -L
-)
-
-printf 'First-switch command:\n  '
-quote_command "${switch_cmd[@]}"
-
-if [[ "$print_command" == true ]]; then
-  exit 0
-fi
+build_switch_command
+print_switch_command
 
 prepare_for_nix_darwin
 

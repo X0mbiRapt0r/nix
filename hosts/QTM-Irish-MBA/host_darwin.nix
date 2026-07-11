@@ -7,7 +7,7 @@
     ];
     casks = [
       "docker-desktop" # Docker Desktop for Mac.
-      "stillcolor"
+      "stillcolor" # Disable temporal dithering on supported Apple Silicon displays.
       "windows-app" # Microsoft Windows App for remote desktops/cloud PCs.
       "wireshark-app" # Network protocol analyser.
     ];

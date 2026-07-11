@@ -1,16 +1,16 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-program_name="${NIX_FLAKE_UPDATE_COMMAND_NAME:-${0##*/}}"
+program_name="${0##*/}"
 
 usage() {
   cat <<USAGE
 Usage:
   $program_name [--repo PATH] [--message MESSAGE] [--no-push] [--print-command]
 
-Update this repo's flake inputs, commit flake.lock if it changed, and push.
-The repo must be clean before updating so this helper never commits unrelated
-work by accident.
+Update and validate this repo's flake inputs, commit flake.lock if it changed,
+and push. The repo must be on a branch and clean before updating so this helper
+never creates an unreachable commit or commits unrelated work by accident.
 
 Options:
   --repo PATH         Override the default repo path for this OS.
@@ -93,9 +93,8 @@ run() {
 require_clean_worktree() {
   local status
 
-  # This helper is used by unattended maintenance, so be deliberately boring:
-  # if anything is already modified, staged, or untracked, stop and let Irish
-  # decide what belongs in Git before we generate a lockfile commit.
+  # Updating is an explicit maintenance action. Leave any existing work for
+  # Irish to classify instead of folding it into a generated lockfile commit.
   status="$(git status --porcelain=v1)"
 
   if [[ -n "$status" ]]; then
@@ -109,12 +108,32 @@ EOF
   fi
 }
 
+require_branch() {
+  branch="$(git branch --show-current)"
+
+  if [[ -z "$branch" ]]; then
+    echo "Refusing to update flake.lock from detached HEAD. Check out a branch first." >&2
+    exit 1
+  fi
+}
+
+validation_failed() {
+  cat >&2 <<EOF
+Flake validation failed. flake.lock remains modified for inspection, but it
+was not staged, committed, or pushed.
+EOF
+  exit 1
+}
+
 printf 'Repo: %s\n' "$repo_dir"
 
 if [[ "$print_command" == true ]]; then
   run cd "$repo_dir"
   run git status --porcelain=v1
+  run git branch --show-current
   run nix flake update
+  run nix flake check --no-build --all-systems --no-write-lock-file
+  run nix flake check --no-write-lock-file
   run git add flake.lock
   run git commit -m "$commit_message"
   if [[ "$push" == true ]]; then
@@ -125,7 +144,17 @@ fi
 
 cd "$repo_dir"
 require_clean_worktree
+require_branch
 run nix flake update
+
+if ! run nix flake check --no-build --all-systems --no-write-lock-file; then
+  validation_failed
+fi
+
+if ! run nix flake check --no-write-lock-file; then
+  validation_failed
+fi
+
 run git add flake.lock
 
 if git diff --cached --quiet -- flake.lock; then
@@ -136,10 +165,5 @@ fi
 run git commit -m "$commit_message"
 
 if [[ "$push" == true ]]; then
-  branch="$(git branch --show-current)"
-  if [[ -z "$branch" ]]; then
-    echo "Cannot push from detached HEAD. Re-run with --no-push or check out a branch." >&2
-    exit 1
-  fi
   run git push origin "$branch"
 fi
