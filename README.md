@@ -25,9 +25,9 @@ Home Manager exposes these scripts in `~/.local/bin`:
 
 - `nix-switch` builds and activates the selected host. On `XR-PC`, it first
   fast-forwards a clean checkout by default; use `--no-pull` to skip that step.
-- `nfu` updates `flake.lock`, validates it, commits the lock-file change, and
-  pushes the current branch. It requires a clean checkout; use `--no-push` to
-  keep the commit local.
+- `nfu` fast-forwards the current branch, updates `flake.lock`, validates it,
+  commits the lock-file change, and pushes. It requires a clean publishing
+  checkout; use `--no-push` to keep the commit local.
 - `ngc` trims old generations across known user and system profiles, then runs
   store garbage collection. It keeps two generations by default and may use
   `sudo` for system-owned profiles.
@@ -77,6 +77,17 @@ The flake follows rolling nixpkgs, Home Manager, and nix-darwin inputs while
 `system.stateVersion` and `home.stateVersion` are compatibility baselines, not
 package-version selectors, and should only change after reviewing the relevant
 migration notes.
+
+The normal deployment flow is deliberately one-way:
+
+1. Make configuration changes on a Mac, then commit and push them.
+2. When intentionally updating flake inputs, run `nfu` separately from the
+   clean Mac checkout; it commits and pushes `flake.lock` itself.
+3. Run `nrs` on `XR-PC`; it fast-forwards the checkout and activates the
+   already-published configuration and lock file.
+
+Avoid running `nfu` on deployment-only hosts unless that machine is
+deliberately taking over as the publishing checkout.
 
 This is a public repository. Do not commit secrets, credentials, private keys,
 or machine-local state.
