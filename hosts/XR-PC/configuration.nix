@@ -1,18 +1,13 @@
-{ config, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 let
-  # Steam's own pre-cache data lives inside Steam library folders, but Mesa/RADV
-  # also keeps a driver shader cache under the user's cache directory by default.
-  # Put that driver-side cache on the roomy game/data disk and make the limit
-  # large enough that several Proton games do not constantly evict each other.
-  steamShaderCacheDir = "/mnt/data1/steam-shader-cache";
-  steamShaderCacheEnv = {
-    MESA_SHADER_CACHE_DISABLE = "false"; # Keep Mesa's persistent on-disk cache enabled explicitly.
-    MESA_SHADER_CACHE_DIR = steamShaderCacheDir; # Mesa will create/use `${steamShaderCacheDir}/mesa_shader_cache`.
-    MESA_SHADER_CACHE_MAX_SIZE = "12G"; # Mesa defaults to 1G per architecture, which is tight for a gaming box.
-  };
-
-  displayManagerSessions = config.services.displayManager.sessionData.desktops;
+  sessionStateFile = "$XDG_RUNTIME_DIR/xr-session-next";
+  waylandSessions = "${config.services.displayManager.sessionData.desktops}/share/wayland-sessions";
 
   # The NixOS Steam module installs `steam-gamescope` into the system profile,
   # but that wrapper calls `gamescope` and `steam` by name. Graphical display
@@ -24,18 +19,95 @@ let
     exec /run/current-system/sw/bin/steam-gamescope
   '';
   steamGamescopeCommand = "${steamGamescopeSession}/bin/xr-steam-gamescope-session";
-  tuigreetCommand = "${pkgs.tuigreet}/bin/tuigreet --time --remember --remember-user-session --user-menu --sessions ${displayManagerSessions}/share/wayland-sessions --xsessions ${displayManagerSessions}/share/xsessions --cmd ${steamGamescopeCommand}";
+
+  # Steam calls this SteamOS-compatible command for "Switch to Desktop". The
+  # same command backs Plasma's return shortcut, keeping the public interface
+  # familiar while the router below owns the actual compositor lifecycle.
+  steamSessionSelect = pkgs.writeShellApplication {
+    name = "steamos-session-select";
+    text = ''
+      state_file="${sessionStateFile}"
+      target="''${1:-plasma}"
+
+      case "$target" in
+        desktop|plasma|plasma-wayland|plasma-wayland-persistent)
+          printf 'plasma\n' > "$state_file"
+          steam -shutdown
+          ;;
+        game|gamescope|gaming)
+          printf 'gamescope\n' > "$state_file"
+          ${lib.getExe' pkgs.kdePackages.qttools "qdbus"} \
+            org.kde.ksmserver \
+            /KSMServer \
+            org.kde.KSMServerInterface.closeSession
+          ;;
+        *)
+          printf 'Usage: steamos-session-select {plasma|gamescope}\n' >&2
+          exit 2
+          ;;
+      esac
+    '';
+  };
+
+  # Keep greetd's authenticated session alive while Gamescope and Plasma take
+  # turns as its foreground child. This avoids nested desktops, privileged
+  # display-manager restarts, and a login prompt between modes.
+  steamSessionRouter = pkgs.writeShellApplication {
+    name = "xr-session-router";
+    runtimeInputs = [ pkgs.coreutils ];
+    text = ''
+      state_file="${sessionStateFile}"
+      next_session="gamescope"
+
+      export PATH="/run/current-system/sw/bin:/run/current-system/sw/sbin:$PATH"
+
+      while true; do
+        rm -f "$state_file"
+
+        case "$next_session" in
+          plasma)
+            env \
+              XDG_CURRENT_DESKTOP=KDE \
+              XDG_SESSION_DESKTOP=KDE \
+              XDG_SESSION_TYPE=wayland \
+              ${lib.getExe' pkgs.dbus "dbus-run-session"} -- \
+              ${lib.getExe' pkgs.kdePackages.plasma-workspace "startplasma-wayland"} || true
+            ;;
+          *)
+            ${steamGamescopeCommand} || true
+            ;;
+        esac
+
+        next_session="gamescope"
+        if [[ -r "$state_file" ]]; then
+          requested_session=""
+          IFS= read -r requested_session < "$state_file" || true
+          case "$requested_session" in
+            gamescope|plasma)
+              next_session="$requested_session"
+              ;;
+          esac
+        else
+          # Avoid a tight restart loop if a compositor fails before it can run.
+          sleep 1
+        fi
+      done
+    '';
+  };
+  steamSessionRouterCommand = lib.getExe steamSessionRouter;
+  steamSessionSelectCommand = lib.getExe steamSessionSelect;
+  tuigreetCommand = "${pkgs.tuigreet}/bin/tuigreet --time --remember --remember-user-session --user-menu --sessions ${waylandSessions} --cmd ${steamSessionRouterCommand}";
 in
 {
   boot = {
-    consoleLogLevel = 0; # Keep kernel messages off the TV unless the boot is badly broken.
+    consoleLogLevel = 0; # Suppress kernel console chatter; diagnostics remain available in the journal.
     initrd = {
       kernelModules = [
         "amdgpu" # Bring the RX 6800 XT up before greetd starts, avoiding the early Gamescope/RADV race.
       ];
       verbose = false; # Suppress NixOS initrd status chatter on the console.
     };
-    kernelPackages = pkgs.linuxPackages_latest; # Track the newest kernel series from pinned nixpkgs.
+    kernelPackages = pkgs.linuxPackages_latest; # Track the newest kernel series available in the current nixpkgs lock.
     kernelParams = [
       "quiet" # Ask the kernel to keep normal boot output quiet.
       "udev.log_level=3" # Show only udev errors during boot, not routine device discovery.
@@ -68,13 +140,23 @@ in
         };
       };
     };
-    graphics = {
-      enable = true; # Enable Mesa/OpenGL/Vulkan graphics support.
-      enable32Bit = true; # Include 32-bit graphics libraries for Steam/Proton.
-    };
-    steam-hardware.enable = true; # Add Steam controller/VR udev rules.
     xone.enable = true; # Enable Xbox Wireless Adapter support for Xbox One/Series controllers.
     xpadneo.enable = true; # Keep Xbox-over-Bluetooth support available for non-adapter controller use.
+  };
+
+  home-manager.users.irish.home.file."Desktop/Return to Gaming Mode.desktop" = {
+    executable = true;
+    text = ''
+      [Desktop Entry]
+      Categories=Game;System;
+      Comment=Leave Plasma and return to the Steam Gamescope session
+      Exec=${steamSessionSelectCommand} gamescope
+      Icon=steam
+      Name=Return to Gaming Mode
+      StartupNotify=false
+      Terminal=false
+      Type=Application
+    '';
   };
 
   i18n.defaultLocale = "en_GB.UTF-8"; # System language/formatting locale.
@@ -105,15 +187,15 @@ in
 
   programs = {
     gamemode.enable = true; # Let games request performance-oriented CPU/GPU tuning.
-    gamescope = {
-      capSysNice = false; # Keep Steam on normal user-namespace bubblewrap; the setuid wrapper currently aborts before Steam starts.
-      enable = true; # Install Gamescope for the Steam session.
-    };
+    gamescope.enableWsi = true; # Install the 64-bit and 32-bit Gamescope Vulkan WSI layers used by the session.
     steam = {
       dedicatedServer.openFirewall = true; # Open firewall ports for Source dedicated servers.
       enable = true; # Install and configure Steam.
       extraCompatPackages = with pkgs; [
         proton-ge-bin # Add Proton GE as an available Steam compatibility tool.
+      ];
+      extraPackages = [
+        steamSessionSelect # Provide the hook Steam invokes for "Switch to Desktop" inside its FHS environment.
       ];
       gamescopeSession = {
         args = [
@@ -127,38 +209,41 @@ in
           "120" # Target 120 Hz in Gamescope.
         ];
         enable = true; # Add a dedicated Steam-in-Gamescope login session.
-        env = steamShaderCacheEnv // {
+        env = {
           AMD_VULKAN_ICD = "RADV"; # Keep AMD hardware rendering ahead of Mesa software fallbacks.
           DXVK_HDR = "1"; # Allow DXVK HDR when the game/Proton path supports it.
           DXVK_LOG_LEVEL = "none"; # Silence DXVK log files unless debugging.
           ENABLE_GAMESCOPE_WSI = "1"; # Use Gamescope's Vulkan WSI layer inside the session.
           VKD3D_DEBUG = "none"; # Silence VKD3D-Proton debug output unless debugging.
-          VK_ICD_FILENAMES = "/run/opengl-driver/share/vulkan/icd.d/radeon_icd.x86_64.json"; # Force RADV so early boot cannot pick Mesa's llvmpipe ICD.
         };
+        # Match Valve's SteamOS launcher order; `-steamos3` exposes the
+        # `steamos-session-select` hook used by "Switch to Desktop".
+        steamArgs = [
+          "-steamos3"
+          "-steampal"
+          "-steamdeck"
+          "-gamepadui"
+          "-pipewire-dmabuf"
+        ];
       };
       localNetworkGameTransfers.openFirewall = true; # Open firewall ports for LAN game transfers.
-      package = pkgs.steam.override {
-        extraEnv = steamShaderCacheEnv; # Make every Steam launch inherit the persistent shader-cache settings.
-      };
       remotePlay.openFirewall = true; # Open firewall ports for Steam Remote Play.
     };
     zsh.enable = true; # Register zsh as an available login shell.
   };
 
   services = {
-    blueman.enable = true; # Bluetooth tray/GUI manager for Plasma.
-    desktopManager.plasma6.enable = true; # Install Plasma as the fallback full desktop.
-    displayManager.sddm.enable = false; # Use greetd for the Steam console path instead of SDDM's experimental Wayland greeter.
+    desktopManager.plasma6.enable = true; # Install Plasma Wayland for desktop mode.
     greetd = {
       enable = true; # Run the minimal login manager for local console sessions.
       settings = {
         default_session = {
-          command = tuigreetCommand; # Text fallback if Steam exits or autologin is unavailable.
+          command = tuigreetCommand; # Text fallback if the session router or initial login cannot start.
           user = "greeter"; # Unprivileged greeter account created by the greetd module.
         };
         initial_session = {
-          command = steamGamescopeCommand; # Boot straight into the generated Steam Gamescope session.
-          user = "irish"; # Match the previous SDDM autologin user.
+          command = steamSessionRouterCommand; # Boot into Gamescope and keep both graphical modes under one login session.
+          user = "irish"; # Run both graphical modes as the regular gaming user.
         };
       };
       useTextGreeter = true; # Tell systemd to keep tty1 clean for tuigreet fallback prompts.
@@ -169,23 +254,11 @@ in
       pulse.enable = true; # Provide PulseAudio compatibility for apps/games.
     };
     seatd.enable = true; # Give TTY-launched Wayland compositors a dedicated seat-management socket.
-    xrdp = {
-      defaultWindowManager = "startplasma-x11"; # Start Plasma X11 for RDP sessions.
-      enable = true; # Enable RDP access.
-      openFirewall = true; # Open TCP 3389.
-    };
-    xserver.enable = true; # Keep X11 available for the Plasma X11 fallback and xrdp sessions.
   };
 
-  systemd = {
-    services.greetd = {
-      after = [ "seatd.service" ]; # Start Steam/Gamescope only after seatd can grant KMS/input access.
-      wants = [ "seatd.service" ]; # Pull seatd in with greetd even if target ordering changes later.
-    };
-
-    tmpfiles.rules = [
-      "d ${steamShaderCacheDir} 0755 irish users - -" # Create the shared parent cache directory on boot/switch.
-    ];
+  systemd.services.greetd = {
+    after = [ "seatd.service" ]; # Start Steam/Gamescope only after seatd can grant KMS/input access.
+    wants = [ "seatd.service" ]; # Pull seatd in with greetd even if target ordering changes later.
   };
 
   time.timeZone = "Africa/Johannesburg"; # System time zone.

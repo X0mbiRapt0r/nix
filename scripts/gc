@@ -1,14 +1,15 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-program_name="${NIX_GC_COMMAND_NAME:-${0##*/}}"
+program_name="${0##*/}"
 
 usage() {
   cat <<USAGE
 Usage:
   $program_name [--keep GENERATIONS] [--print-command]
 
-Trim old Nix profile generations and collect unreachable store paths.
+Trim old generations from current, system, and per-user Nix profiles, then
+collect unreachable store paths.
 
 Options:
   --keep GENERATIONS  Number of recent generations to keep per profile. Default: 2.
@@ -69,12 +70,28 @@ run() {
 }
 
 delete_current_user_generations() {
-  # The active user's default profile is not always a simple path under
-  # /nix/var/nix/profiles, so ask nix-env to trim the current profile directly.
-  run nix-env --delete-generations "+$keep_generations"
+  local current_user_profile
+  local home_manager_profile="${XDG_STATE_HOME:-$HOME/.local/state}/nix/profiles/home-manager"
+
+  current_user_profile="/nix/var/nix/profiles/per-user/$(id -un)/profile"
+
+  # Use the explicit path when available so the whole-system scan below can
+  # skip this same profile instead of trimming it twice.
+  if [[ -e "$current_user_profile" ]]; then
+    run nix-env --profile "$current_user_profile" --delete-generations "+$keep_generations"
+  else
+    run nix-env --delete-generations "+$keep_generations"
+  fi
+
+  # Current Home Manager releases keep their profile in XDG state rather than
+  # under the legacy per-user profile directory.
+  if [[ -e "$home_manager_profile" ]]; then
+    run nix-env --profile "$home_manager_profile" --delete-generations "+$keep_generations"
+  fi
 }
 
 delete_known_profile_generations() {
+  local current_user_profile
   local profile
   local profiles=(
     /nix/var/nix/profiles/system
@@ -83,7 +100,13 @@ delete_known_profile_generations() {
     /nix/var/nix/profiles/per-user/*/home-manager
   )
 
+  current_user_profile="/nix/var/nix/profiles/per-user/$(id -un)/profile"
+
   for profile in "${profiles[@]}"; do
+    if [[ "$profile" == "$current_user_profile" ]]; then
+      continue
+    fi
+
     if [[ -e "$profile" ]]; then
       run "${sudo_cmd[@]}" nix-env --profile "$profile" --delete-generations "+$keep_generations"
     fi

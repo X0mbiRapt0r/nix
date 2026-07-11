@@ -2,7 +2,15 @@
 
 {
   home = {
-    sessionPath = [ "$HOME/go/bin" ]; # Add Go-installed binaries to PATH.
+    file = {
+      ".local/bin/ngc".source = ../../scripts/gc; # Expose Nix garbage collection as `ngc`.
+      ".local/bin/nfu".source = ../../scripts/flake-update; # Expose flake updates as `nfu`.
+      ".local/bin/nix-switch".source = ../../scripts/switch; # Expose system switching as `nix-switch`.
+    };
+    sessionPath = [
+      "$HOME/.local/bin" # Prefer personal helper commands over language-specific binaries.
+      "$HOME/go/bin"
+    ];
     stateVersion = "24.05"; # Original Home Manager compatibility baseline; do not follow input updates.
     username = "irish"; # Account name managed by Home Manager.
   };

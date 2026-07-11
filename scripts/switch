@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-program_name="${NIX_SWITCH_COMMAND_NAME:-${0##*/}}"
+program_name="${0##*/}"
 
 usage() {
   cat <<USAGE
@@ -14,9 +14,9 @@ Build and activate the Nix flake for the current machine.
 Options:
   --host HOST       Override the detected flake host name.
   --repo PATH       Override the default repo path for this OS.
-  --pull            Run git pull --ff-only before switching.
+  --pull            Run git pull --ff-only from a clean checkout before switching.
   --no-pull         Skip the pre-switch git pull.
-  --print-command   Print the rebuild command without running it.
+  --print-command   Print the planned commands without running them.
   -h, --help        Show this help.
 
 Any arguments after -- are passed through to darwin-rebuild or nixos-rebuild.
@@ -60,6 +60,11 @@ while [[ $# -gt 0 ]]; do
       extra_args+=("$@")
       break
       ;;
+    -*)
+      echo "Unknown option: $1" >&2
+      usage >&2
+      exit 2
+      ;;
     *)
       if [[ -z "$host" ]]; then
         host="$1"
@@ -99,7 +104,15 @@ case "$os" in
   Linux)
     repo_dir="${repo_dir:-$HOME/Documents/github.com/X0mbiRapt0r/nix}"
     host="${host:-$detected_host}"
-    pull_before_switch="${pull_before_switch:-true}"
+    if [[ -z "$pull_before_switch" ]]; then
+      # XR-PC is expected to follow the shared checkout before each rebuild.
+      # Other Linux hosts opt in explicitly so future hosts are not surprised.
+      if [[ "$host" == "XR-PC" ]]; then
+        pull_before_switch=true
+      else
+        pull_before_switch=false
+      fi
+    fi
     rebuild_cmd=("${root_cmd[@]}" nixos-rebuild switch)
     ;;
   *)
@@ -119,6 +132,11 @@ if [[ ! -d "$repo_dir" ]]; then
   exit 1
 fi
 
+if [[ ! -f "$repo_dir/flake.nix" ]]; then
+  echo "Repo path does not look like the nix flake repo: $repo_dir" >&2
+  exit 1
+fi
+
 flake_ref="$repo_dir#$host"
 cmd=("${rebuild_cmd[@]}" --flake "$flake_ref" -L "${extra_args[@]}")
 
@@ -127,7 +145,11 @@ printf 'Repo: %s\n' "$repo_dir"
 printf 'Pull: %s\n' "$pull_before_switch"
 
 if [[ "$pull_before_switch" == true ]]; then
+  status_cmd=(git -C "$repo_dir" status --porcelain=v1)
   pull_cmd=(git -C "$repo_dir" pull --ff-only)
+  printf 'Pre-switch check:'
+  printf ' %q' "${status_cmd[@]}"
+  printf '\n'
   printf 'Pre-switch command:'
   printf ' %q' "${pull_cmd[@]}"
   printf '\n'
@@ -142,6 +164,20 @@ if [[ "$print_command" == true ]]; then
 fi
 
 if [[ "$pull_before_switch" == true ]]; then
+  if ! worktree_status="$("${status_cmd[@]}")"; then
+    echo "Cannot inspect Git checkout: $repo_dir" >&2
+    exit 1
+  fi
+
+  if [[ -n "$worktree_status" ]]; then
+    cat >&2 <<EOF
+Refusing to pull because the repo has uncommitted changes:
+
+$worktree_status
+EOF
+    exit 1
+  fi
+
   if ! "${pull_cmd[@]}"; then
     cat >&2 <<EOF
 

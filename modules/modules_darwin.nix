@@ -16,6 +16,7 @@ in
     ];
     casks = [
       "chatgpt" # ChatGPT desktop app.
+      "codex" # OpenAI Codex coding agent for the terminal.
       "codex-app" # Codex desktop app.
       "gimp" # Image editor.
       "logseq" # Local-first notes and knowledge-base app.
@@ -27,7 +28,7 @@ in
     ];
     enable = true; # Let nix-darwin produce and apply a Brewfile.
     onActivation = {
-      autoUpdate = true; # Do not refresh Homebrew metadata implicitly during activation.
+      autoUpdate = true; # Refresh Homebrew metadata during activation.
       cleanup = "zap"; # Remove undeclared packages and associated cask files during activation.
       upgrade = true; # Upgrade declared packages using the currently available Homebrew metadata.
     };
@@ -57,7 +58,7 @@ in
     defaults = {
       CustomUserPreferences = {
         "com.apple.dock" = {
-          "show-recent-count" = 4;
+          "show-recent-count" = 4; # Limit the Dock's recent-app section to four items.
         };
       };
       NSGlobalDomain = {
