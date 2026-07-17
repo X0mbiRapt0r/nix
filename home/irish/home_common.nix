@@ -18,6 +18,33 @@
   programs = {
     git = {
       enable = true; # Generate ~/.gitconfig.
+      ignores = [
+        # Keep OS-generated noise global; project and tool artefacts belong in each repo.
+
+        # Linux desktop and filesystem metadata.
+        ".directory"
+        ".fuse_hidden*"
+        ".nfs*"
+        ".Trash-*"
+
+        # macOS desktop and filesystem metadata.
+        "._*"
+        ".AppleDouble"
+        ".DS_Store"
+        ".localized"
+        ".LSOverride"
+        ".Spotlight-V100"
+        ".Trashes"
+        "__MACOSX/"
+
+        # Windows desktop and filesystem metadata.
+        "$RECYCLE.BIN/"
+        "[Dd]esktop.ini"
+        "ehthumbs.db"
+        "ehthumbs_vista.db"
+        "Thumbs.db"
+        "Thumbs.db:encryptable"
+      ];
       settings = {
         init.defaultBranch = "main"; # New repos start on main.
         pull.rebase = true; # Rebase local commits when pulling.
