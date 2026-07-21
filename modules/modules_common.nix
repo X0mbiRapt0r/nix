@@ -8,6 +8,7 @@
     curl # HTTP client and download helper.
     fastfetch # System info summary.
     fd # Fast `find` replacement.
+    gh
     git # Version control.
     jq # JSON query tool.
     lsd # Modern `ls` replacement used by shell aliases.
