@@ -105,7 +105,6 @@
         }
       );
       darwinConfigurations.Irish-MBP = mkDarwinConfiguration ./hosts/Irish-MBP/host_darwin.nix;
-      darwinConfigurations.QTM-Irish-MBA = mkDarwinConfiguration ./hosts/QTM-Irish-MBA/host_darwin.nix;
       formatter = forAllSystems (system: (forSystem system).nixfmt);
 
       nixosConfigurations.XR-PC = nixpkgs.lib.nixosSystem {
