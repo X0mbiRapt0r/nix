@@ -2,23 +2,24 @@
 
 {
   environment.systemPackages = with pkgs; [
-    btop # System monitor.
-    # caligula # Terminal disk-imaging tool.
-    cmatrix # Terminal toy.
-    curl # HTTP client and download helper.
-    fastfetch # System info summary.
-    fd # Fast `find` replacement.
+    btop
+    # Disabled after a build failure; retry after a future nixpkgs update.
+    # caligula
+    cmatrix
+    curl
+    fastfetch
+    fd
     gh
-    git # Version control.
-    jq # JSON query tool.
+    git
+    jq
     lsd # Modern `ls` replacement used by shell aliases.
-    ripgrep # Fast text search.
-    rsync # File sync/copy tool.
-    tmux # Terminal multiplexer.
+    ripgrep
+    rsync
+    tmux
   ];
 
   fonts.packages = with pkgs; [
-    nerd-fonts.jetbrains-mono # Nerd Font glyphs for terminals and editors.
+    nerd-fonts.jetbrains-mono
   ];
 
   nix = {

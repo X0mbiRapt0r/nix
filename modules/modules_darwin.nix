@@ -5,26 +5,26 @@ let
 in
 {
   environment.systemPackages = with pkgs; [
-    go # Go toolchain.
-    python3 # Python runtime.
-    uv # Fast Python package/project manager.
+    go
+    python3
+    uv
   ];
 
   homebrew = {
     brews = [
-      "mole" # macOS cleanup and maintenance CLI.
+      "mole"
     ];
     casks = [
-      "chatgpt" # ChatGPT desktop app.
-      "codex" # OpenAI Codex coding agent for the terminal.
-      "codex-app" # Codex desktop app.
-      "gimp" # Image editor.
-      "logseq" # Local-first notes and knowledge-base app.
-      "obsidian" # Notes/knowledge base.
+      "chatgpt"
+      "codex"
+      "codex-app"
+      "gimp"
+      "logseq"
+      "obsidian"
       "visual-studio-code" # VS Code app; preferences and extensions use its built-in Settings Sync.
-      "vlc" # Media player.
-      "whatsapp" # Messaging app.
-      "winbox" # MikroTik router management app.
+      "vlc"
+      "whatsapp"
+      "winbox"
     ];
     enable = true; # Let nix-darwin produce and apply a Brewfile.
     onActivation = {
@@ -34,10 +34,10 @@ in
     };
   };
 
-  ids.gids.nixbld = 350; # Stable nixbld group ID used by nix-darwin on macOS.
+  # Keep the existing group ID despite stateVersion 4's legacy default of 30000.
+  ids.gids.nixbld = 350;
 
   nix = {
-    enable = true; # Let nix-darwin manage the Nix daemon and nix.conf.
     gc.interval = {
       Weekday = 0;
       Hour = 0;
