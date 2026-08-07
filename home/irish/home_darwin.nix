@@ -1,7 +1,7 @@
 { ... }:
 
 {
-  home.homeDirectory = "/Users/irish"; # macOS home directory.
+  home.homeDirectory = "/Users/irish";
 
   targets.darwin.defaults.NSGlobalDomain = {
     AppleLanguages = [ "en-GB" ]; # Preferred UI language list.

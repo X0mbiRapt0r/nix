@@ -188,7 +188,6 @@ in
     gamemode.enable = true; # Let games request performance-oriented CPU/GPU tuning.
     gamescope.enableWsi = true; # Install the 64-bit and 32-bit Gamescope Vulkan WSI layers used by the session.
     steam = {
-      dedicatedServer.openFirewall = true; # Open firewall ports for Source dedicated servers.
       enable = true; # Install and configure Steam.
       extraCompatPackages = with pkgs; [
         proton-ge-bin # Add Proton GE as an available Steam compatibility tool.

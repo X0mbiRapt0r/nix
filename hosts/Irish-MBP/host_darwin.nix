@@ -3,12 +3,13 @@
 {
   homebrew = {
     casks = [
-      "calibre" # Ebook manager.
-      "discord" # Chat/voice app.
-      "godot" # Game engine.
-      "steam" # Steam client.
-      "stremio" # Media streaming app.
-      "transmission" # BitTorrent client.
+      "audacity"
+      "calibre"
+      "discord"
+      "godot"
+      "steam"
+      "stremio"
+      "transmission"
     ];
   };
 

@@ -1,5 +1,5 @@
 { ... }:
 
 {
-  home.homeDirectory = "/home/irish"; # Linux home directory.
+  home.homeDirectory = "/home/irish";
 }
