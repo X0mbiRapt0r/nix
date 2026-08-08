@@ -4,7 +4,7 @@
   environment.systemPackages = with pkgs; [
     btop
     # Disabled after a build failure; retry after a future nixpkgs update.
-    # caligula
+    caligula
     cmatrix
     curl
     fastfetch
