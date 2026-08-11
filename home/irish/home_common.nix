@@ -17,6 +17,8 @@
 
   programs = {
     git = {
+      # On Darwin, packaged Git already enables `credential.helper = osxkeychain` at system scope;
+      # keep it out of Home Manager because credential helpers are additive.
       enable = true; # Generate $XDG_CONFIG_HOME/git/config.
       ignores = [
         # Keep OS-generated noise global; project and tool artefacts belong in each repo.
