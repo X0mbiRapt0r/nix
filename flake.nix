@@ -43,6 +43,32 @@
         };
       };
 
+      mkDarwinConfiguration =
+        hostModule:
+        darwin.lib.darwinSystem {
+          pkgs = forSystem "aarch64-darwin"; # Share one pinned package set across Darwin modules.
+          specialArgs = { inherit nixpkgs; }; # Passed to modules that need the original flake input.
+          system = "aarch64-darwin"; # Apple Silicon macOS.
+
+          modules = [
+            ./modules/modules_common.nix # Shared packages and Nix settings.
+            ./modules/modules_darwin.nix # Shared macOS defaults, Homebrew, and user setup.
+            hostModule # Host-specific apps and host naming.
+
+            home-manager.darwinModules.home-manager # Embed Home Manager in the Darwin switch.
+            (mkHomeManagerModule ./home/irish/home_darwin.nix)
+
+            nix-homebrew.darwinModules.nix-homebrew # Install and manage the Homebrew prefix declaratively.
+            {
+              nix-homebrew = {
+                enable = true; # Install Homebrew under the default prefix.
+                enableRosetta = true; # Also install the Intel prefix for Rosetta-only casks/formulas.
+                user = "irish"; # User that owns the Homebrew prefix.
+              };
+            }
+          ];
+        };
+
     in
     {
       checks = forAllSystems (
@@ -66,29 +92,8 @@
           '';
         }
       );
-      darwinConfigurations.Irish-MBP = darwin.lib.darwinSystem {
-        pkgs = forSystem "aarch64-darwin"; # Share one pinned package set across Darwin modules.
-        specialArgs = { inherit nixpkgs; }; # Passed to modules that need the original flake input.
-        system = "aarch64-darwin"; # Apple Silicon macOS.
-
-        modules = [
-          ./modules/modules_common.nix # Shared packages and Nix settings.
-          ./modules/modules_darwin.nix # Shared macOS defaults, Homebrew, and user setup.
-          ./hosts/Irish-MBP/host_darwin.nix # Host-specific apps and host naming.
-
-          home-manager.darwinModules.home-manager # Embed Home Manager in the Darwin switch.
-          (mkHomeManagerModule ./home/irish/home_darwin.nix)
-
-          nix-homebrew.darwinModules.nix-homebrew # Install and manage the Homebrew prefix declaratively.
-          {
-            nix-homebrew = {
-              enable = true; # Install Homebrew under the default prefix.
-              enableRosetta = true; # Also install the Intel prefix for Rosetta-only casks/formulas.
-              user = "irish"; # User that owns the Homebrew prefix.
-            };
-          }
-        ];
-      };
+      darwinConfigurations.Irish-MBP = mkDarwinConfiguration ./hosts/Irish-MBP/host_darwin.nix;
+      darwinConfigurations.QTM-Irish-MBA = mkDarwinConfiguration ./hosts/QTM-Irish-MBA/host_darwin.nix;
       formatter = forAllSystems (system: (forSystem system).nixfmt);
 
       nixosConfigurations.XR-PC = nixpkgs.lib.nixosSystem {

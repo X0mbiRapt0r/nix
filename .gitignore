@@ -3,4 +3,7 @@
 AGENTS.md
 result
 result-*
+
+# Local iCloud-synced data that must never be published.
+/hosts/QTM-Irish-MBA/.gitconfig-qtm.inc
 /import
