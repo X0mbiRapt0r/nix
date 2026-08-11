@@ -15,10 +15,7 @@ in
       "mole"
     ];
     casks = [
-      "chatgpt"
-      "codex"
       "gimp"
-      "logseq"
       "obsidian"
       "visual-studio-code" # VS Code app; preferences and extensions use its built-in Settings Sync.
       "vlc"
