@@ -6,6 +6,7 @@
       "audacity"
       "calibre"
       "discord"
+      "freecad"
       "godot"
       "steam"
       "stremio"
