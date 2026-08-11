@@ -17,7 +17,6 @@ in
     casks = [
       "chatgpt"
       "codex"
-      "codex-app"
       "gimp"
       "logseq"
       "obsidian"
