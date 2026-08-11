@@ -15,7 +15,6 @@
     ];
     casks = [
       "claude"
-      "claude-code"
       "docker-desktop" # Docker Desktop for Mac.
       "stillcolor" # Disable temporal dithering on supported Apple Silicon displays.
       "windows-app" # Microsoft Windows App for remote desktops/cloud PCs.
