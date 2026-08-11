@@ -8,6 +8,7 @@ host that needs it.
 ## Hosts
 
 - `Irish-MBP`: an Apple Silicon macOS system managed by nix-darwin.
+- `QTM-Irish-MBA`: an Apple Silicon work Mac managed by nix-darwin.
 - `XR-PC`: an x86_64 NixOS gaming system.
 
 ## Layout
