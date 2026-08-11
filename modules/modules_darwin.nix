@@ -15,6 +15,7 @@ in
       "mole"
     ];
     casks = [
+      "chatgpt"
       "codex"
       "codex-app"
       "gimp"
