@@ -62,7 +62,7 @@
             {
               nix-homebrew = {
                 enable = true; # Install Homebrew under the default prefix.
-                enableRosetta = true; # Also install the Intel prefix for Rosetta-only casks/formulas.
+                enableRosetta = false; # Keep only the native Apple Silicon Homebrew prefix.
                 user = "irish"; # User that owns the Homebrew prefix.
               };
             }
