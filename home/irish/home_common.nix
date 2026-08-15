@@ -11,7 +11,6 @@
       "$HOME/.local/bin" # Prefer personal helper commands over language-specific binaries.
       "$HOME/go/bin"
     ];
-    stateVersion = "24.05"; # Original Home Manager compatibility baseline; do not follow input updates.
     username = "irish";
   };
 

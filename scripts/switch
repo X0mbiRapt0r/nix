@@ -104,15 +104,7 @@ case "$os" in
   Linux)
     repo_dir="${repo_dir:-$HOME/Documents/github.com/X0mbiRapt0r/nix}"
     host="${host:-$detected_host}"
-    if [[ -z "$pull_before_switch" ]]; then
-      # XR-PC is expected to follow the shared checkout before each rebuild.
-      # Other Linux hosts opt in explicitly so future hosts are not surprised.
-      if [[ "$host" == "XR-PC" ]]; then
-        pull_before_switch=true
-      else
-        pull_before_switch=false
-      fi
-    fi
+    pull_before_switch="${pull_before_switch:-true}" # Deploy the published Git state by default on NixOS.
     rebuild_cmd=(sudo nixos-rebuild switch)
     ;;
   *)
