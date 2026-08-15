@@ -6,7 +6,7 @@
 }:
 
 let
-  sessionStateFile = "$XDG_RUNTIME_DIR/xr-session-next";
+  sessionStateFile = "$XDG_RUNTIME_DIR/irish-pc-session-next";
   waylandSessions = "${config.services.displayManager.sessionData.desktops}/share/wayland-sessions";
 
   # The NixOS Steam module installs `steam-gamescope` into the system profile,
@@ -14,11 +14,11 @@ let
   # managers normally provide the profile PATH before launching sessions; greetd
   # starts initial sessions with a slimmer environment, so keep that small bit
   # of display-manager behavior here without bringing SDDM back.
-  steamGamescopeSession = pkgs.writeShellScriptBin "xr-steam-gamescope-session" ''
+  steamGamescopeSession = pkgs.writeShellScriptBin "irish-pc-steam-gamescope-session" ''
     export PATH="/run/current-system/sw/bin:/run/current-system/sw/sbin:$PATH"
     exec /run/current-system/sw/bin/steam-gamescope
   '';
-  steamGamescopeCommand = "${steamGamescopeSession}/bin/xr-steam-gamescope-session";
+  steamGamescopeCommand = "${steamGamescopeSession}/bin/irish-pc-steam-gamescope-session";
 
   # Steam calls this SteamOS-compatible command for "Switch to Desktop". Keep
   # its public interface familiar while the router below owns the actual
@@ -53,7 +53,7 @@ let
   # turns as its foreground child. This avoids nested desktops, privileged
   # display-manager restarts, and a login prompt between modes.
   steamSessionRouter = pkgs.writeShellApplication {
-    name = "xr-session-router";
+    name = "irish-pc-session-router";
     runtimeInputs = [ pkgs.coreutils ];
     text = ''
       state_file="${sessionStateFile}"
@@ -161,7 +161,7 @@ in
   i18n.defaultLocale = "en_GB.UTF-8"; # System language/formatting locale.
 
   networking = {
-    hostName = "XR-PC"; # Local network hostname.
+    hostName = "Irish-PC"; # Local network hostname.
     networkmanager.enable = true; # Manage networking through NetworkManager.
   };
 

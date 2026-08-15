@@ -8,8 +8,9 @@ host that needs it.
 ## Hosts
 
 - `Irish-MBP`: an Apple Silicon macOS system managed by nix-darwin.
+- `Irish-MBP-2013`: a 2013 Intel MacBook Pro running NixOS with COSMIC and Steam.
+- `Irish-PC`: an x86_64 NixOS gaming system.
 - `QTM-Irish-MBA`: an Apple Silicon work Mac managed by nix-darwin.
-- `XR-PC`: an x86_64 NixOS gaming system.
 
 ## Layout
 
@@ -23,7 +24,7 @@ host that needs it.
 
 Home Manager exposes these scripts in `~/.local/bin`:
 
-- `nix-switch` builds and activates the selected host. On `XR-PC`, it first
+- `nix-switch` builds and activates the selected host. On NixOS, it first
   fast-forwards a clean checkout by default; use `--no-pull` to skip that step.
 - `nfu` fast-forwards the current branch, updates `flake.lock`, validates it,
   commits the lock-file change, and pushes. It requires a clean publishing
@@ -64,6 +65,27 @@ the initial nix-darwin activation. nix-homebrew installs Homebrew as part of
 that activation. The Mac's local hostname is the default, but `--host` is
 recommended for a new machine. Use `--repo PATH` for a non-standard checkout.
 
+## Bootstrapping NixOS
+
+Clone the repository once, then activate the matching flake host from the
+checkout. The explicit Nix option is needed only for a fresh installation that
+has not enabled flakes yet:
+
+```sh
+mkdir -p "$HOME/Documents/github.com/X0mbiRapt0r"
+nix-shell -p git --run \
+  'git clone https://github.com/X0mbiRapt0r/nix.git "$HOME/Documents/github.com/X0mbiRapt0r/nix"'
+cd "$HOME/Documents/github.com/X0mbiRapt0r/nix"
+sudo nixos-rebuild switch \
+  --flake ".#Irish-MBP-2013" \
+  --option experimental-features "nix-command flakes" \
+  -L
+```
+
+The first activation installs the shared Home Manager configuration and `nrs`
+helper. Later deployments are simply `nrs`, which fast-forwards a clean Linux
+checkout before rebuilding.
+
 ## Validation
 
 These checks are safe to run before activation:
@@ -95,8 +117,8 @@ The normal deployment flow is deliberately one-way:
 1. Make configuration changes on a Mac, then commit and push them.
 2. When intentionally updating flake inputs, run `nfu` separately from the
    clean Mac checkout; it commits and pushes `flake.lock` itself.
-3. Run `nrs` on `XR-PC`; it fast-forwards the checkout and activates the
-   already-published configuration and lock file.
+3. Run `nrs` on either NixOS host; it fast-forwards the checkout and activates
+   the already-published configuration and lock file.
 
 Avoid running `nfu` on deployment-only hosts unless that machine is
 deliberately taking over as the publishing checkout.
