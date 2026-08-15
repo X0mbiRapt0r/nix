@@ -21,10 +21,6 @@
     brightnessctl # Control the display and Apple SMC keyboard backlights from the CLI.
     usbutils # Provide `lsusb` for hardware diagnostics.
   ];
-  environment.sessionVariables = {
-    WGPU_ADAPTER_NAME = "llvmpipe";
-    WGPU_BACKEND = "vulkan";
-  };
 
   hardware = {
     bluetooth = {
@@ -76,13 +72,9 @@
   };
 
   services = {
-    desktopManager.cosmic.enable = true; # Install the COSMIC Wayland desktop.
-    displayManager = {
-      autoLogin = {
-        enable = true; # Start COSMIC directly for this single-user test laptop.
-        user = "irish";
-      };
-      cosmic-greeter.enable = true; # Use System76's greeter when automatic login is bypassed.
+    displayManager.autoLogin = {
+      enable = true; # Start Xfce directly for this single-user test laptop.
+      user = "irish";
     };
     mbpfan.enable = true; # Keep Apple-specific fan control active under sustained gaming loads.
     openssh.enable = true; # Enable SSH for local remote access.
@@ -90,10 +82,14 @@
       enable = true; # Enable PipeWire audio.
       pulse.enable = true; # Provide PulseAudio compatibility for apps and games.
     };
-    switcherooControl.enable = true; # Let COSMIC launch applications on the discrete GPU on demand.
-    xserver.xkb = {
-      layout = "us";
-      variant = "";
+    xserver = {
+      desktopManager.xfce.enable = true; # Use the mature, lightweight X11 desktop on this legacy NVIDIA GPU.
+      displayManager.lightdm.enable = true; # Provide a conventional fallback greeter when auto-login is bypassed.
+      enable = true;
+      xkb = {
+        layout = "us";
+        variant = "";
+      };
     };
   };
 
