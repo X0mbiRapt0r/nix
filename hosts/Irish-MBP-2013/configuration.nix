@@ -21,6 +21,10 @@
     brightnessctl # Control the display and Apple SMC keyboard backlights from the CLI.
     usbutils # Provide `lsusb` for hardware diagnostics.
   ];
+  environment.sessionVariables = {
+    WGPU_ADAPTER_NAME = "llvmpipe";
+    WGPU_BACKEND = "vulkan";
+  };
 
   hardware = {
     bluetooth = {
