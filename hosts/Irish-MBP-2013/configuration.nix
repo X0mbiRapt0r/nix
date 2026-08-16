@@ -16,6 +16,7 @@
       systemd-boot.enable = true; # Use systemd-boot as the EFI bootloader.
     };
   };
+  boot.loader.systemd-boot.memtest86.enable = true;
 
   environment.systemPackages = with pkgs; [
     brightnessctl # Control the display and Apple SMC keyboard backlights from the CLI.
