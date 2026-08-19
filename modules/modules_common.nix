@@ -7,7 +7,7 @@
     cmatrix
     curl
     fastfetch
-    fetch
+    # fetch
     fd
     gh
     git
