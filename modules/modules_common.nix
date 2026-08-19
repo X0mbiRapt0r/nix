@@ -7,11 +7,14 @@
     cmatrix
     curl
     fastfetch
+    fetch
     fd
     gh
     git
+    hyfetch
     jq
     lsd # Modern `ls` replacement used by shell aliases.
+    nerdfetch
     ripgrep
     rsync
     tmux
