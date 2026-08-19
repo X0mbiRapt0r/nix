@@ -11,6 +11,7 @@ host that needs it.
 - `Irish-MBP-2013`: a 2013 Intel MacBook Pro running NixOS with COSMIC and Steam.
 - `Irish-PC`: an x86_64 NixOS gaming system.
 - `QTM-Irish-MBA`: an Apple Silicon work Mac managed by nix-darwin.
+- `QTM-Irish-NUC`: a headless x86_64 NixOS automation host.
 
 ## Layout
 
@@ -117,7 +118,7 @@ The normal deployment flow is deliberately one-way:
 1. Make configuration changes on a Mac, then commit and push them.
 2. When intentionally updating flake inputs, run `nfu` separately from the
    clean Mac checkout; it commits and pushes `flake.lock` itself.
-3. Run `nrs` on either NixOS host; it fast-forwards the checkout and activates
+3. Run `nrs` on a NixOS host; it fast-forwards the checkout and activates
    the already-published configuration and lock file.
 
 Avoid running `nfu` on deployment-only hosts unless that machine is
