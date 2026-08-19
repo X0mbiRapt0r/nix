@@ -80,7 +80,7 @@
         }:
         nixpkgs.lib.nixosSystem {
           specialArgs = { inherit nixpkgs; }; # Passed to modules that need the original flake input.
-          system = "x86_64-linux"; # Both NixOS hosts use AMD64 hardware.
+          system = "x86_64-linux"; # All current NixOS hosts use AMD64 hardware.
 
           modules = [
             ./modules/modules_common.nix # Shared packages and Nix settings.
@@ -129,6 +129,11 @@
           hardwareModule = ./hosts/Irish-PC/hardware-configuration.nix;
           homeStateVersion = "24.05"; # Preserve the established Home Manager behavior.
           hostModule = ./hosts/Irish-PC/configuration.nix;
+        };
+        QTM-Irish-NUC = mkNixosConfiguration {
+          hardwareModule = ./hosts/QTM-Irish-NUC/hardware-configuration.nix;
+          homeStateVersion = "26.05"; # Fresh Home Manager installation on this host.
+          hostModule = ./hosts/QTM-Irish-NUC/configuration.nix;
         };
       };
     };
