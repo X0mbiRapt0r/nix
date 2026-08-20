@@ -16,7 +16,7 @@
   # Apply the private work identity only below the dedicated work-repository root.
   home-manager.users.irish.programs.git.includes = [
     {
-      condition = "gitdir/i:~/Documents/github.com/work/**";
+      condition = "gitdir/i:~/Documents/github.com/RudolphIrish/**";
       path = "~/Documents/github.com/X0mbiRapt0r/nix/hosts/QTM-Irish-NUC/.gitconfig-qtm.inc";
     }
   ];
