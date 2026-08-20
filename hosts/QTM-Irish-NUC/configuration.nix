@@ -24,6 +24,7 @@
   i18n.defaultLocale = "en_GB.UTF-8"; # System language and formatting locale.
 
   networking = {
+    firewall.allowedTCPPorts = [ 2586 ]; # Expose ntfy only to networks that can already reach the NUC.
     hostName = "QTM-Irish-NUC"; # Local network hostname and flake host name.
     networkmanager.enable = true; # Manage the NUC's Ethernet and any future Wi-Fi connection.
   };
@@ -40,7 +41,27 @@
 
   programs.zsh.enable = true; # Register zsh as the login shell managed by Home Manager.
 
-  services.openssh.enable = true; # Keep the NUC remotely accessible during SSH hardening.
+  services = {
+    avahi = {
+      enable = true; # Advertise the NUC as qtm-irish-nuc.local on the local network.
+      publish = {
+        addresses = true;
+        enable = true;
+      };
+    };
+
+    ntfy-sh = {
+      enable = true;
+      settings = {
+        auth-default-access = "deny-all"; # Require an explicitly provisioned account for every topic.
+        base-url = "http://qtm-irish-nuc.local:2586";
+        listen-http = ":2586"; # Listen on the LAN; the firewall limits access to reachable networks.
+        upstream-base-url = "https://ntfy.sh"; # Relay content-free poll requests for timely iOS delivery.
+      };
+    };
+
+    openssh.enable = true; # Keep the NUC remotely accessible during SSH hardening.
+  };
 
   system.stateVersion = "26.05"; # Fresh-install compatibility baseline; do not bump casually.
 

@@ -1,13 +1,22 @@
-{ ... }:
+{ pkgs, ... }:
 
 {
-  # Apply the private, iCloud-synced identity only to work repositories.
-  home-manager.users.irish.programs.git.includes = [
-    {
-      condition = "gitdir/i:~/Library/CloudStorage/OneDrive-*/Documents/github.com/**";
-      path = "~/Library/Mobile Documents/com~apple~CloudDocs/Documents/github.com/X0mbiRapt0r/nix/hosts/QTM-Irish-MBA/.gitconfig-qtm.inc";
-    }
-  ];
+  home-manager.users.irish = {
+    home = {
+      file."Library/Application Support/ntfy/client.yml".text = ''
+        default-host: http://qtm-irish-nuc.local:2586
+      '';
+      packages = [ pkgs.ntfy-sh ]; # Install the ntfy publish/subscribe CLI for the work server.
+    };
+
+    # Apply the private, iCloud-synced identity only to work repositories.
+    programs.git.includes = [
+      {
+        condition = "gitdir/i:~/Library/CloudStorage/OneDrive-*/Documents/github.com/**";
+        path = "~/Library/Mobile Documents/com~apple~CloudDocs/Documents/github.com/X0mbiRapt0r/nix/hosts/QTM-Irish-MBA/.gitconfig-qtm.inc";
+      }
+    ];
+  };
 
   homebrew = {
     brews = [
