@@ -16,7 +16,8 @@ in
     ];
     casks = [
       "gimp"
-      "obsidian"
+      #"obsidian"
+      "radix"
       "visual-studio-code" # VS Code app; preferences and extensions use its built-in Settings Sync.
       "vlc"
       "whatsapp"
