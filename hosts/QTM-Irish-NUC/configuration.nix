@@ -11,6 +11,7 @@
 
   environment.systemPackages = with pkgs; [
     claude-code # Anthropic's headless CLI coding agent.
+    powershell
   ];
 
   # Apply the private work identity only below the dedicated work-repository root.
