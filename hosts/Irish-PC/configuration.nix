@@ -122,7 +122,6 @@ in
 
   environment.systemPackages = with pkgs; [
     rocmPackages.rocm-smi # AMD GPU monitoring CLI.
-    usbutils # Provide `lsusb` for controller, adapter, and TV/CEC hardware diagnostics.
   ];
 
   hardware = {
@@ -158,20 +157,7 @@ in
     '';
   };
 
-  i18n.defaultLocale = "en_GB.UTF-8"; # System language/formatting locale.
-
-  networking = {
-    hostName = "Irish-PC"; # Local network hostname.
-    networkmanager.enable = true; # Manage networking through NetworkManager.
-  };
-
-  nix = {
-    gc = {
-      dates = "weekly"; # Run age-based GC weekly via systemd.
-      persistent = true; # Catch up after boot if the machine missed its scheduled run.
-    };
-    optimise.dates = [ "daily" ]; # Deduplicate the store daily via systemd timer.
-  };
+  networking.hostName = "Irish-PC"; # Local network hostname.
 
   nixpkgs = {
     config.allowUnfree = true; # Allow unfree packages like Steam and Proton GE.
@@ -227,7 +213,6 @@ in
       localNetworkGameTransfers.openFirewall = true; # Open firewall ports for LAN game transfers.
       remotePlay.openFirewall = true; # Open firewall ports for Steam Remote Play.
     };
-    zsh.enable = true; # Register zsh as an available login shell.
   };
 
   services = {
@@ -246,7 +231,6 @@ in
       };
       useTextGreeter = true; # Tell systemd to keep tty1 clean for tuigreet fallback prompts.
     };
-    openssh.enable = true; # Enable SSH for local remote access.
     pipewire = {
       enable = true; # Enable PipeWire audio.
       pulse.enable = true; # Provide PulseAudio compatibility for apps/games.
@@ -262,20 +246,11 @@ in
     };
   };
 
-  time.timeZone = "Africa/Johannesburg"; # System time zone.
-
   system.stateVersion = "24.11"; # NixOS compatibility version; do not bump casually.
 
-  users.users.irish = {
-    description = "Irish"; # Display name.
-    extraGroups = [
-      "networkmanager"
-      "render"
-      "seat"
-      "video"
-      "wheel"
-    ]; # Network, GPU, and sudo access.
-    isNormalUser = true; # Create a regular login user.
-    shell = pkgs.zsh; # Use the Home Manager-managed zsh config for SSH and local shells.
-  };
+  users.users.irish.extraGroups = [
+    "render"
+    "seat"
+    "video"
+  ]; # GPU and seat access beyond the shared Linux groups.
 }

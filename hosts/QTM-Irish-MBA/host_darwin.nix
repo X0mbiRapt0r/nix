@@ -18,19 +18,14 @@
     ];
   };
 
-  homebrew = {
-    brews = [
-      "powershell" # Cross-platform shell and scripting runtime.
-    ];
-    casks = [
-      "claude"
-      "docker-desktop" # Docker Desktop for Mac.
-      "obsidian"
-      "stillcolor" # Disable temporal dithering on supported Apple Silicon displays.
-      "windows-app" # Microsoft Windows App for remote desktops/cloud PCs.
-      "wireshark-app" # Network protocol analyser.
-    ];
-  };
+  homebrew.casks = [
+    "claude"
+    "docker-desktop" # Docker Desktop for Mac.
+    "obsidian"
+    "stillcolor" # Disable temporal dithering on supported Apple Silicon displays.
+    "windows-app" # Microsoft Windows App for remote desktops/cloud PCs.
+    "wireshark-app" # Network protocol analyser.
+  ];
 
   networking = {
     computerName = "QTM-Irish-MBA"; # User-visible macOS computer name.

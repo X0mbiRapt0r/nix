@@ -15,6 +15,7 @@
     jq
     lsd # Modern `ls` replacement used by shell aliases.
     nerdfetch
+    powershell # Cross-platform shell and scripting runtime.
     python3
     ripgrep
     rsync
@@ -37,4 +38,6 @@
       "flakes"
     ]; # Enable modern Nix CLI and flakes on each host.
   };
+
+  programs.zsh.enable = true; # Register zsh as an available shell on every host.
 }

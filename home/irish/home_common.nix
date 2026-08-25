@@ -8,8 +8,7 @@
       ".local/bin/nix-switch".source = ../../scripts/switch; # Expose system switching as `nix-switch`.
     };
     sessionPath = [
-      "$HOME/.local/bin" # Prefer personal helper commands over language-specific binaries.
-      "$HOME/go/bin"
+      "$HOME/.local/bin" # Expose the Home Manager-linked helper commands in interactive shells.
     ];
     username = "irish";
   };
