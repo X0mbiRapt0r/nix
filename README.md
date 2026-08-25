@@ -16,7 +16,7 @@ host that needs it.
 ## Layout
 
 - `flake.nix` declares inputs, hosts, formatters, and validation checks.
-- `modules/` contains shared system and macOS configuration.
+- `modules/` contains shared system and platform-specific configuration.
 - `home/irish/` contains shared and platform-specific Home Manager modules.
 - `hosts/` contains the policy and hardware configuration unique to each host.
 - `scripts/` contains explicit bootstrap, update, switch, and cleanup helpers.

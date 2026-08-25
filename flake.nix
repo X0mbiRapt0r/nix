@@ -84,6 +84,7 @@
 
           modules = [
             ./modules/modules_common.nix # Shared packages and Nix settings.
+            ./modules/modules_linux.nix # Shared NixOS packages, services, and user policy.
             hostModule # Host policy: hardware behavior, desktop, gaming, users, and services.
             hardwareModule # Generated mounts, boot modules, and CPU hints.
 

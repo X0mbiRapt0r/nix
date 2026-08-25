@@ -20,7 +20,6 @@
 
   environment.systemPackages = with pkgs; [
     brightnessctl # Control the display and Apple SMC keyboard backlights from the CLI.
-    usbutils # Provide `lsusb` for hardware diagnostics.
   ];
 
   hardware = {
@@ -38,20 +37,7 @@
     enableRedistributableFirmware = true; # Supply firmware and enable Intel CPU microcode updates.
   };
 
-  i18n.defaultLocale = "en_GB.UTF-8"; # System language/formatting locale.
-
-  networking = {
-    hostName = "Irish-MBP-2013"; # Local network hostname.
-    networkmanager.enable = true; # Manage Ethernet and Wi-Fi through NetworkManager.
-  };
-
-  nix = {
-    gc = {
-      dates = "weekly"; # Run age-based GC weekly via systemd.
-      persistent = true; # Catch up after boot if the machine missed its scheduled run.
-    };
-    optimise.dates = [ "daily" ]; # Deduplicate the store daily via systemd timer.
-  };
+  networking.hostName = "Irish-MBP-2013"; # Local network hostname.
 
   nixpkgs.config = {
     # Limit the insecure exception to the unmaintained driver required by the BCM4360.
@@ -69,7 +55,6 @@
       localNetworkGameTransfers.openFirewall = true; # Open ports for LAN game transfers.
       remotePlay.openFirewall = true; # Open ports for Steam Remote Play.
     };
-    zsh.enable = true; # Register zsh as an available login shell.
   };
 
   services = {
@@ -78,7 +63,6 @@
       user = "irish";
     };
     mbpfan.enable = true; # Keep Apple-specific fan control active under sustained gaming loads.
-    openssh.enable = true; # Enable SSH for local remote access.
     pipewire = {
       enable = true; # Enable PipeWire audio.
       pulse.enable = true; # Provide PulseAudio compatibility for apps and games.
@@ -96,17 +80,8 @@
 
   system.stateVersion = "26.05"; # Fresh-install compatibility baseline; do not bump casually.
 
-  time.timeZone = "Africa/Johannesburg"; # System time zone.
-
-  users.users.irish = {
-    description = "Irish"; # Display name.
-    extraGroups = [
-      "networkmanager"
-      "render"
-      "video"
-      "wheel"
-    ]; # Network, GPU, and sudo access.
-    isNormalUser = true; # Create a regular login user.
-    shell = pkgs.zsh; # Use the Home Manager-managed zsh config for SSH and local shells.
-  };
+  users.users.irish.extraGroups = [
+    "render"
+    "video"
+  ]; # GPU device access beyond the shared Linux groups.
 }

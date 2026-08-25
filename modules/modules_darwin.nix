@@ -5,7 +5,6 @@ let
 in
 {
   environment.systemPackages = with pkgs; [
-    go
     uv
   ];
 
@@ -47,8 +46,6 @@ in
       } # Run store optimisation weekly at Sunday 00:00.
     ];
   };
-
-  programs.zsh.enable = true; # Register zsh as an available shell.
 
   system = {
     defaults = {
