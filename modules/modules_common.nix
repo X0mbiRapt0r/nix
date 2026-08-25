@@ -15,6 +15,7 @@
     jq
     lsd # Modern `ls` replacement used by shell aliases.
     nerdfetch
+    python3
     ripgrep
     rsync
     tmux
