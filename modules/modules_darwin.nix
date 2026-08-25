@@ -6,7 +6,6 @@ in
 {
   environment.systemPackages = with pkgs; [
     go
-    python3
     uv
   ];
 
