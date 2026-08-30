@@ -204,7 +204,7 @@ in
         # `steamos-session-select` hook used by "Switch to Desktop".
         steamArgs = [
           "-steamos3"
-          "-steampal"
+          #"-steampal"
           #"-steamdeck"
           "-gamepadui"
           "-pipewire-dmabuf"
