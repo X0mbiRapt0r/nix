@@ -205,7 +205,7 @@ in
         steamArgs = [
           "-steamos3"
           "-steampal"
-          "-steamdeck"
+          #"-steamdeck"
           "-gamepadui"
           "-pipewire-dmabuf"
         ];
