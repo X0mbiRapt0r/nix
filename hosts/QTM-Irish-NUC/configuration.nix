@@ -46,9 +46,23 @@
         upstream-base-url = "https://ntfy.sh"; # Relay content-free poll requests for timely iOS delivery.
       };
     };
+
+    openssh.settings = {
+      AuthenticationMethods = "publickey";
+      KbdInteractiveAuthentication = false;
+      PasswordAuthentication = false;
+      PermitRootLogin = "no";
+      PubkeyAuthentication = true;
+    };
   };
 
   system.stateVersion = "26.05"; # Fresh-install compatibility baseline; do not bump casually.
 
-  users.users.irish.linger = true; # Start user services at boot without an insecure console auto-login.
+  users.users.irish = {
+    linger = true; # Start user services at boot without an insecure console auto-login.
+    openssh.authorizedKeys.keys = [
+      # QTM-Irish-MBA owns the private key; only its public half is deployed to the NUC.
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIK4MCHusEu25QX2H4Ow2Xf7GB0MiCo5McdSJdOU+1YtR QTM-Irish-MBA"
+    ];
+  };
 }

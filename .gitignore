@@ -5,6 +5,7 @@ result
 result-*
 
 # Local private data that must never be published.
+/.private/
 /hosts/QTM-Irish-MBA/.gitconfig-qtm.inc
 /hosts/QTM-Irish-NUC/.gitconfig-qtm.inc
 /import

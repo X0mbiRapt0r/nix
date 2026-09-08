@@ -87,6 +87,74 @@ The first activation installs the shared Home Manager configuration and `nrs`
 helper. Later deployments are simply `nrs`, which fast-forwards a clean Linux
 checkout before rebuilding.
 
+## Work SSH setup
+
+The work Mac declares `qtm-nuc` for the work automation host, using its own
+`~/.ssh/id_ed25519`. The concrete username and hostname remain in the host
+configuration. This alias is only installed on `QTM-Irish-MBA`.
+The NUC advertises its `.local` name using Avahi; both hosts must be on a
+network where mDNS works.
+
+Generate the client key on the work Mac, only if it does not already exist:
+
+```sh
+mkdir -p ~/.ssh
+chmod 700 ~/.ssh
+ssh-keygen -t ed25519 -a 64 -f ~/.ssh/id_ed25519 -C QTM-Irish-MBA
+/usr/bin/ssh-add --apple-use-keychain ~/.ssh/id_ed25519
+```
+
+Choose a passphrase. Only the `.pub` file belongs in Git. The private key
+stays on the client; the NUC does not need a copy. Home Manager writes only
+the key's runtime path, never its contents. Apple's SSH client uses Keychain
+and the local agent for subsequent connections, without forwarding the agent.
+
+Prefer keeping private backups outside this checkout. `/.private/` is ignored
+if a local backup is needed, but `.gitignore` is not encryption and does not
+protect against force-adds or `path:` flakes copying the whole directory into
+the Nix store. Never use a `path:` flake or a whole-directory source copy on
+a checkout containing secrets, and never reference private files with Nix
+path literals, `builtins.readFile`, or `home.file.source`.
+
+Before activating the Mac configuration, review any existing `~/.ssh/config`
+and migrate entries that should remain; Home Manager backs up an unmanaged
+file as `config.before-hm`, but does not automatically merge its contents.
+
+The NUC declares the work Mac's public key for `irish` and requires public-key
+authentication, with root SSH, passwords, and keyboard-interactive login
+disabled. Other hosts retain their existing policies.
+
+Before activating this NUC configuration, install the same public key using
+the existing login and verify a separate connection using only public-key
+authentication. From the work Mac, this bootstrap command appends the public
+key to the NUC's existing authorized keys:
+
+```sh
+cat ~/.ssh/id_ed25519.pub | ssh qtm-nuc \
+  'umask 077; mkdir -p ~/.ssh; cat >> ~/.ssh/authorized_keys'
+```
+
+Verify
+the NUC's host fingerprint through its console or another trusted connection:
+
+```sh
+sudo ssh-keygen -lf /etc/ssh/ssh_host_ed25519_key.pub
+```
+
+On the Mac, compare that fingerprint on first connection, then test:
+
+```sh
+ssh -o PasswordAuthentication=no -o KbdInteractiveAuthentication=no qtm-nuc 'hostname; whoami'
+```
+
+If the Mac configuration is not activated yet, use
+`ssh -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes -o PasswordAuthentication=no -o KbdInteractiveAuthentication=no qtm-nuc 'hostname; whoami'`.
+
+Keep the existing session open during the later key-only activation and test
+again from a new terminal. Normal use is `ssh qtm-nuc`; run `claude` inside
+that remote session to work on the NUC. SSH setup does not configure a separate
+Claude Desktop integration or grant passwordless sudo.
+
 ## Validation
 
 These checks are safe to run before activation:

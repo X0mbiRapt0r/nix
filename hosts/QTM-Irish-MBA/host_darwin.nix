@@ -9,13 +9,32 @@
       packages = [ pkgs.ntfy-sh ]; # Install the ntfy publish/subscribe CLI for the work server.
     };
 
-    # Apply the private, iCloud-synced identity only to work repositories.
-    programs.git.includes = [
-      {
-        condition = "gitdir/i:~/Library/CloudStorage/OneDrive-*/Documents/github.com/**";
-        path = "~/Library/Mobile Documents/com~apple~CloudDocs/Documents/github.com/X0mbiRapt0r/nix/hosts/QTM-Irish-MBA/.gitconfig-qtm.inc";
-      }
-    ];
+    programs = {
+      # Apply the private, iCloud-synced identity only to work repositories.
+      git.includes = [
+        {
+          condition = "gitdir/i:~/Library/CloudStorage/OneDrive-*/Documents/github.com/**";
+          path = "~/Library/Mobile Documents/com~apple~CloudDocs/Documents/github.com/X0mbiRapt0r/nix/hosts/QTM-Irish-MBA/.gitconfig-qtm.inc";
+        }
+      ];
+
+      ssh = {
+        enable = true;
+        enableDefaultConfig = false; # Keep OpenSSH defaults outside the work-host entry.
+        package = null; # Use Apple's SSH client for native Keychain support.
+        settings."qtm-nuc QTM-Irish-NUC qtm-irish-nuc.local" = {
+          AddKeysToAgent = "yes";
+          ForwardAgent = false; # Remote processes do not need access to the Mac's agent.
+          HostName = "qtm-irish-nuc.local";
+          IdentitiesOnly = true;
+          IdentityFile = "~/.ssh/id_ed25519"; # Runtime path only; never import the private key into Nix.
+          IgnoreUnknown = "UseKeychain"; # Also allow clients without Apple's Keychain extension.
+          ServerAliveInterval = 60;
+          UseKeychain = true;
+          User = "irish";
+        };
+      };
+    };
   };
 
   homebrew.casks = [
