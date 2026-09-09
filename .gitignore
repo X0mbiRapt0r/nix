@@ -6,6 +6,8 @@ result-*
 
 # Local private data that must never be published.
 /.private/
+
+# Retain the previous work-identity locations until every host has migrated.
 /hosts/QTM-Irish-MBA/.gitconfig-qtm.inc
 /hosts/QTM-Irish-NUC/.gitconfig-qtm.inc
 /import

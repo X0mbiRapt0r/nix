@@ -73,10 +73,10 @@ checkout. The explicit Nix option is needed only for a fresh installation that
 has not enabled flakes yet:
 
 ```sh
-mkdir -p "$HOME/Documents/github.com/X0mbiRapt0r"
+mkdir -p "$HOME/Documents/Code"
 nix-shell -p git --run \
-  'git clone https://github.com/X0mbiRapt0r/nix.git "$HOME/Documents/github.com/X0mbiRapt0r/nix"'
-cd "$HOME/Documents/github.com/X0mbiRapt0r/nix"
+  'git clone https://github.com/X0mbiRapt0r/nix.git "$HOME/Documents/Code/nix"'
+cd "$HOME/Documents/Code/nix"
 sudo nixos-rebuild switch \
   --flake ".#Irish-MBP-2013" \
   --option experimental-features "nix-command flakes" \
@@ -86,6 +86,18 @@ sudo nixos-rebuild switch \
 The first activation installs the shared Home Manager configuration and `nrs`
 helper. Later deployments are simply `nrs`, which fast-forwards a clean Linux
 checkout before rebuilding.
+
+## Work Git identity
+
+`QTM-Irish-MBA` and `QTM-Irish-NUC` load their default Git author identity from
+`.private/git/work.inc` inside their respective Nix checkout. Provision that
+ignored file before activating either work host; it must contain only the
+private `[user]` name and email settings. Personal hosts use the public identity
+declared by Home Manager and do not load this file.
+
+Authentication remains platform-specific and separate from commit identity.
+The work Mac uses macOS Keychain through packaged Git, while the NUC routes
+GitHub credential requests through its separately authenticated `gh` CLI.
 
 ## Work SSH setup
 

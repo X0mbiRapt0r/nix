@@ -13,12 +13,11 @@
     claude-code # Anthropic's headless CLI coding agent.
   ];
 
-  # Apply the private work identity only below the dedicated work-repository root.
-  home-manager.users.irish.programs.git.includes = [
-    {
-      condition = "gitdir/i:~/Documents/github.com/work/**";
-      path = "~/Documents/github.com/X0mbiRapt0r/nix/hosts/QTM-Irish-NUC/.gitconfig-qtm.inc";
-    }
+  # Linux has no native Keychain helper, so route GitHub authentication through
+  # gh while the private include owns only the work commit identity.
+  home-manager.users.irish.programs.git.settings.credential."https://github.com".helper = [
+    ""
+    "!gh auth git-credential"
   ];
 
   networking = {

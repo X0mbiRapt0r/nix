@@ -48,10 +48,7 @@
       settings = {
         init.defaultBranch = "main"; # New repos start on main.
         pull.rebase = true; # Rebase local commits when pulling.
-        user = {
-          email = "11319449+X0mbiRapt0r@users.noreply.github.com";
-          name = "X0mbiRapt0r";
-        };
+        user.useConfigOnly = true; # Refuse commits when a host's explicit identity is unavailable.
       };
     };
 

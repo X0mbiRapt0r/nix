@@ -102,7 +102,7 @@ case "$os" in
     rebuild_cmd=(sudo darwin-rebuild switch)
     ;;
   Linux)
-    repo_dir="${repo_dir:-$HOME/Documents/github.com/X0mbiRapt0r/nix}"
+    repo_dir="${repo_dir:-$HOME/Documents/Code/nix}"
     host="${host:-$detected_host}"
     pull_before_switch="${pull_before_switch:-true}" # Deploy the published Git state by default on NixOS.
     rebuild_cmd=(sudo nixos-rebuild switch)

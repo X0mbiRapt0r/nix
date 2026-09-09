@@ -31,23 +31,33 @@
       forAllSystems = nixpkgs.lib.genAttrs supportedSystems;
       forSystem = system: nixpkgs.legacyPackages.${system};
 
-      mkHomeManagerModule = platformModule: stateVersion: {
-        home-manager = {
-          backupFileExtension = "before-hm"; # Back up unmanaged files as `name.before-hm` on every host.
-          useGlobalPkgs = true; # Reuse the system pkgs set instead of importing nixpkgs again.
-          useUserPackages = true; # Install HM packages into the user's profile.
-          users.irish = {
-            home.stateVersion = stateVersion; # Per-host compatibility baseline from first Home Manager use.
-            imports = [
-              ./home/irish/home_common.nix # Shared shell, Git, and helper-command config.
-              platformModule # Platform-only Home Manager config.
-            ];
+      mkHomeManagerModule =
+        {
+          gitIdentityModule,
+          platformModule,
+          stateVersion,
+        }:
+        {
+          home-manager = {
+            backupFileExtension = "before-hm"; # Back up unmanaged files as `name.before-hm` on every host.
+            useGlobalPkgs = true; # Reuse the system pkgs set instead of importing nixpkgs again.
+            useUserPackages = true; # Install HM packages into the user's profile.
+            users.irish = {
+              home.stateVersion = stateVersion; # Per-host compatibility baseline from first Home Manager use.
+              imports = [
+                ./home/irish/home_common.nix # Shared shell, Git, and helper-command config.
+                gitIdentityModule # Select the machine's personal or private work Git identity.
+                platformModule # Platform-only Home Manager config.
+              ];
+            };
           };
         };
-      };
 
       mkDarwinConfiguration =
-        hostModule:
+        {
+          gitIdentityModule,
+          hostModule,
+        }:
         darwin.lib.darwinSystem {
           pkgs = forSystem "aarch64-darwin"; # Share one pinned package set across Darwin modules.
           specialArgs = { inherit nixpkgs; }; # Passed to modules that need the original flake input.
@@ -59,7 +69,11 @@
             hostModule # Host-specific apps and host naming.
 
             home-manager.darwinModules.home-manager # Embed Home Manager in the Darwin switch.
-            (mkHomeManagerModule ./home/irish/home_darwin.nix "24.05")
+            (mkHomeManagerModule {
+              inherit gitIdentityModule;
+              platformModule = ./home/irish/home_darwin.nix;
+              stateVersion = "24.05";
+            })
 
             nix-homebrew.darwinModules.nix-homebrew # Install and manage the Homebrew prefix declaratively.
             {
@@ -74,6 +88,7 @@
 
       mkNixosConfiguration =
         {
+          gitIdentityModule,
           hardwareModule,
           homeStateVersion,
           hostModule,
@@ -89,7 +104,11 @@
             hardwareModule # Generated mounts, boot modules, and CPU hints.
 
             home-manager.nixosModules.home-manager # Embed Home Manager in the NixOS switch.
-            (mkHomeManagerModule ./home/irish/home_linux.nix homeStateVersion)
+            (mkHomeManagerModule {
+              inherit gitIdentityModule;
+              platformModule = ./home/irish/home_linux.nix;
+              stateVersion = homeStateVersion;
+            })
           ];
         };
 
@@ -116,22 +135,31 @@
           '';
         }
       );
-      darwinConfigurations.Irish-MBP = mkDarwinConfiguration ./hosts/Irish-MBP/host_darwin.nix;
-      darwinConfigurations.QTM-Irish-MBA = mkDarwinConfiguration ./hosts/QTM-Irish-MBA/host_darwin.nix;
+      darwinConfigurations.Irish-MBP = mkDarwinConfiguration {
+        gitIdentityModule = ./home/irish/home_git_personal.nix;
+        hostModule = ./hosts/Irish-MBP/host_darwin.nix;
+      };
+      darwinConfigurations.QTM-Irish-MBA = mkDarwinConfiguration {
+        gitIdentityModule = ./home/irish/home_git_work.nix;
+        hostModule = ./hosts/QTM-Irish-MBA/host_darwin.nix;
+      };
       formatter = forAllSystems (system: (forSystem system).nixfmt);
 
       nixosConfigurations = {
         Irish-MBP-2013 = mkNixosConfiguration {
+          gitIdentityModule = ./home/irish/home_git_personal.nix;
           hardwareModule = ./hosts/Irish-MBP-2013/hardware-configuration.nix;
           homeStateVersion = "26.05"; # Fresh Home Manager installation on this host.
           hostModule = ./hosts/Irish-MBP-2013/configuration.nix;
         };
         Irish-PC = mkNixosConfiguration {
+          gitIdentityModule = ./home/irish/home_git_personal.nix;
           hardwareModule = ./hosts/Irish-PC/hardware-configuration.nix;
           homeStateVersion = "24.05"; # Preserve the established Home Manager behavior.
           hostModule = ./hosts/Irish-PC/configuration.nix;
         };
         QTM-Irish-NUC = mkNixosConfiguration {
+          gitIdentityModule = ./home/irish/home_git_work.nix;
           hardwareModule = ./hosts/QTM-Irish-NUC/hardware-configuration.nix;
           homeStateVersion = "26.05"; # Fresh Home Manager installation on this host.
           hostModule = ./hosts/QTM-Irish-NUC/configuration.nix;
