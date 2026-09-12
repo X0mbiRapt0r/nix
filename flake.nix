@@ -30,6 +30,10 @@
       ];
       forAllSystems = nixpkgs.lib.genAttrs supportedSystems;
       forSystem = system: nixpkgs.legacyPackages.${system};
+      sshPublicKeys = {
+        irishMbp = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMjj1Rp7Yc/YvsCOOScn3+pUSpd5uXna/g8qIP9ZKjtp Irish-MBP";
+        qtmIrishMba = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIK4MCHusEu25QX2H4Ow2Xf7GB0MiCo5McdSJdOU+1YtR QTM-Irish-MBA";
+      }; # Public client identities authorized by individual NixOS hosts.
 
       mkHomeManagerModule =
         {
@@ -94,7 +98,9 @@
           hostModule,
         }:
         nixpkgs.lib.nixosSystem {
-          specialArgs = { inherit nixpkgs; }; # Passed to modules that need the original flake input.
+          specialArgs = {
+            inherit nixpkgs sshPublicKeys;
+          }; # Passed to modules that need flake-wide inputs or public client identities.
           system = "x86_64-linux"; # All current NixOS hosts use AMD64 hardware.
 
           modules = [

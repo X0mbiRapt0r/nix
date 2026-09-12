@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, sshPublicKeys, ... }:
 
 {
   boot = {
@@ -16,4 +16,8 @@
   networking.hostName = "XR-NAS"; # Local network hostname and flake host name.
 
   system.stateVersion = "26.05"; # Fresh-install compatibility baseline; do not bump casually.
+
+  users.users.irish.openssh.authorizedKeys.keys = [
+    sshPublicKeys.irishMbp # Irish-MBP owns the private key; only its public half is deployed here.
+  ];
 }

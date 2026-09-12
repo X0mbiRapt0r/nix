@@ -2,6 +2,7 @@
   config,
   lib,
   pkgs,
+  sshPublicKeys,
   ...
 }:
 
@@ -248,9 +249,14 @@ in
 
   system.stateVersion = "24.11"; # NixOS compatibility version; do not bump casually.
 
-  users.users.irish.extraGroups = [
-    "render"
-    "seat"
-    "video"
-  ]; # GPU and seat access beyond the shared Linux groups.
+  users.users.irish = {
+    extraGroups = [
+      "render"
+      "seat"
+      "video"
+    ]; # GPU and seat access beyond the shared Linux groups.
+    openssh.authorizedKeys.keys = [
+      sshPublicKeys.irishMbp # Irish-MBP owns the private key; only its public half is deployed here.
+    ];
+  };
 }

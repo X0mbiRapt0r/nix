@@ -100,13 +100,17 @@ Authentication remains platform-specific and separate from commit identity.
 The work Mac uses macOS Keychain through packaged Git, while the NUC routes
 GitHub credential requests through its separately authenticated `gh` CLI.
 
-## Work SSH setup
+## SSH setup
 
 The work Mac declares `qtm-nuc` for the work automation host, using its own
 `~/.ssh/id_ed25519`. The concrete username and hostname remain in the host
 configuration. This alias is only installed on `QTM-Irish-MBA`.
-The NUC advertises its `.local` name using Avahi; both hosts must be on a
-network where mDNS works.
+The personal Mac similarly declares host aliases using its separate key. The
+concrete usernames and hostnames remain in the host configuration.
+
+Every NixOS host advertises its `.local` name using Avahi. The client and
+server must be on a network where mDNS works; the aliases do not provide DNS
+or remote routing by themselves.
 
 Generate the client key on the work Mac, only if it does not already exist:
 
@@ -116,6 +120,9 @@ chmod 700 ~/.ssh
 ssh-keygen -t ed25519 -a 64 -f ~/.ssh/id_ed25519 -C QTM-Irish-MBA
 /usr/bin/ssh-add --apple-use-keychain ~/.ssh/id_ed25519
 ```
+
+Use the same commands on `Irish-MBP` with `-C Irish-MBP`; each Mac keeps its
+own keypair and receives access only to its corresponding hosts.
 
 Choose a passphrase. Only the `.pub` file belongs in Git. The private key
 stays on the client; the NUC does not need a copy. Home Manager writes only
@@ -135,7 +142,9 @@ file as `config.before-hm`, but does not automatically merge its contents.
 
 The NUC declares the work Mac's public key for `irish` and requires public-key
 authentication, with root SSH, passwords, and keyboard-interactive login
-disabled. Other hosts retain their existing policies.
+disabled. The three personal NixOS hosts declare only the personal Mac's public
+key. Public client keys are centralized in `flake.nix`; private keys remain on
+their respective Macs and never enter Git or Nix.
 
 Before activating this NUC configuration, install the same public key using
 the existing login and verify a separate connection using only public-key
@@ -147,8 +156,8 @@ cat ~/.ssh/id_ed25519.pub | ssh qtm-nuc \
   'umask 077; mkdir -p ~/.ssh; cat >> ~/.ssh/authorized_keys'
 ```
 
-Verify
-the NUC's host fingerprint through its console or another trusted connection:
+Verify the NUC's host fingerprint through its console or another trusted
+connection:
 
 ```sh
 sudo ssh-keygen -lf /etc/ssh/ssh_host_ed25519_key.pub
@@ -167,6 +176,42 @@ Keep the existing session open during the later key-only activation and test
 again from a new terminal. Normal use is `ssh qtm-nuc`; run `claude` inside
 that remote session to work on the NUC. SSH setup does not configure a separate
 Claude Desktop integration or grant passwordless sudo.
+
+For a new personal host, first use its existing password-based connection to
+bootstrap the Mac's public key. Replace `HOST` with the host's current IP or
+resolvable hostname. Verify the server's host-key fingerprint through its local
+console or another trusted connection before accepting a new SSH host prompt:
+
+```sh
+sudo ssh-keygen -lf /etc/ssh/ssh_host_ed25519_key.pub
+```
+
+Then run this from `Irish-MBP`:
+
+```sh
+cat ~/.ssh/id_ed25519.pub | ssh USER@HOST \
+  'umask 077; mkdir -p ~/.ssh; cat >> ~/.ssh/authorized_keys'
+ssh -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes \
+  -o PasswordAuthentication=no -o KbdInteractiveAuthentication=no \
+  USER@HOST 'hostname; whoami'
+```
+
+After that succeeds, publish the Nix change and keep the working SSH session
+open while running `nrs` on that host. Test its alias from a separate Mac
+terminal before closing the original session:
+
+```sh
+ssh irish-pc 'hostname; whoami'
+ssh mbp-2013 'hostname; whoami'
+ssh xr-nas 'hostname; whoami'
+```
+
+Once the activated configuration and alias both work, remove the bootstrap
+copy of the Mac key from `~/.ssh/authorized_keys` on the server. NixOS keeps
+the declarative copy in `/etc/ssh/authorized_keys.d/irish`; removing the
+bootstrap copy ensures later key rotation or revocation remains controlled by
+the flake. Repeat the bootstrap, activation, verification, and cleanup for one
+host at a time.
 
 ## Validation
 

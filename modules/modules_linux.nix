@@ -17,7 +17,26 @@
     optimise.dates = [ "daily" ]; # Deduplicate the store daily via systemd.
   };
 
-  services.openssh.enable = true; # Keep every Linux host available for local remote administration.
+  services = {
+    avahi = {
+      enable = true; # Advertise each NixOS hostname through mDNS for stable `.local` SSH targets.
+      publish = {
+        addresses = true;
+        enable = true;
+      };
+    };
+
+    openssh = {
+      enable = true; # Keep every Linux host available for local remote administration.
+      settings = {
+        AuthenticationMethods = "publickey";
+        KbdInteractiveAuthentication = false;
+        PasswordAuthentication = false;
+        PermitRootLogin = "no";
+        PubkeyAuthentication = true;
+      };
+    };
+  };
 
   time.timeZone = "Africa/Johannesburg"; # Shared system time zone.
 
