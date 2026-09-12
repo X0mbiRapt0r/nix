@@ -2,6 +2,7 @@
 
 {
   environment.systemPackages = with pkgs; [
+    codex # Keep Codex available for local use and ChatGPT Desktop SSH connections.
     usbutils # Provide `lsusb` for Linux hardware diagnostics.
   ];
 
