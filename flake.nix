@@ -164,6 +164,12 @@
           homeStateVersion = "26.05"; # Fresh Home Manager installation on this host.
           hostModule = ./hosts/QTM-Irish-NUC/configuration.nix;
         };
+        XR-NAS = mkNixosConfiguration {
+          gitIdentityModule = ./home/irish/home_git_personal.nix;
+          hardwareModule = ./hosts/XR-NAS/hardware-configuration.nix;
+          homeStateVersion = "26.05"; # Fresh Home Manager installation on this host.
+          hostModule = ./hosts/XR-NAS/configuration.nix;
+        };
       };
     };
 }

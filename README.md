@@ -12,6 +12,7 @@ host that needs it.
 - `Irish-PC`: an x86_64 NixOS gaming system.
 - `QTM-Irish-MBA`: an Apple Silicon work Mac managed by nix-darwin.
 - `QTM-Irish-NUC`: a headless x86_64 NixOS automation host.
+- `XR-NAS`: a headless x86_64 NixOS storage and services host.
 
 ## Layout
 
