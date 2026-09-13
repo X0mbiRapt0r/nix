@@ -7,6 +7,7 @@
     # does not need Linux access to HP BIOS settings, so keep the driver disabled.
     blacklistedKernelModules = [ "hp_bioscfg" ];
     kernelPackages = pkgs.linuxPackages_latest; # Preserve the kernel choice made during installation.
+    kernelParams = [ "consoleblank=300" ]; # Blank the emergency console after five idle minutes.
     loader = {
       efi.canTouchEfiVariables = true; # Allow NixOS to update UEFI boot entries.
       systemd-boot.enable = true; # Use systemd-boot on the NAS's EFI system partition.
@@ -44,6 +45,12 @@
         </service>
       </service-group>
     '';
+
+    logind.settings.Login = {
+      HandleLidSwitch = "ignore";
+      HandleLidSwitchDocked = "ignore";
+      HandleLidSwitchExternalPower = "ignore";
+    };
 
     samba = {
       enable = true;
