@@ -65,7 +65,8 @@ The script installs Nix when needed, clones or reuses the checkout, validates
 the selected host architecture, backs up conflicting system files, and performs
 the initial nix-darwin activation. nix-homebrew installs Homebrew as part of
 that activation. The Mac's local hostname is the default, but `--host` is
-recommended for a new machine. Use `--repo PATH` for a non-standard checkout.
+recommended for a new machine. The standard macOS checkout is iCloud Drive's
+`Documents/Code/nix`; use `--repo PATH` for a non-standard checkout.
 
 ## Bootstrapping NixOS
 

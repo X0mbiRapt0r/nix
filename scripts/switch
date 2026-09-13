@@ -96,7 +96,7 @@ detected_host="$(detect_host)"
 
 case "$os" in
   Darwin)
-    repo_dir="${repo_dir:-$HOME/Library/Mobile Documents/com~apple~CloudDocs/Documents/github.com/X0mbiRapt0r/nix}"
+    repo_dir="${repo_dir:-$HOME/Library/Mobile Documents/com~apple~CloudDocs/Documents/Code/nix}"
     host="${host:-$detected_host}"
     pull_before_switch="${pull_before_switch:-false}"
     rebuild_cmd=(sudo darwin-rebuild switch)

@@ -51,7 +51,7 @@ default_repo_dir() {
   if [[ -n "$script_dir" && -f "$script_dir/../flake.nix" ]]; then
     (cd "$script_dir/.." && pwd -P)
   else
-    printf '%s\n' "$HOME/Library/Mobile Documents/com~apple~CloudDocs/Documents/github.com/X0mbiRapt0r/nix"
+    printf '%s\n' "$HOME/Library/Mobile Documents/com~apple~CloudDocs/Documents/Code/nix"
   fi
 }
 

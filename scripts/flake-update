@@ -64,7 +64,7 @@ fi
 
 case "$(uname -s)" in
   Darwin)
-    repo_dir="${repo_dir:-$HOME/Library/Mobile Documents/com~apple~CloudDocs/Documents/github.com/X0mbiRapt0r/nix}"
+    repo_dir="${repo_dir:-$HOME/Library/Mobile Documents/com~apple~CloudDocs/Documents/Code/nix}"
     ;;
   Linux)
     repo_dir="${repo_dir:-$HOME/Documents/Code/nix}"

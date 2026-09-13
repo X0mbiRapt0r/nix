@@ -5,7 +5,7 @@ let
   # checkout. The path is a runtime string; Nix never reads or stores its contents.
   workIdentityPath =
     if pkgs.stdenv.hostPlatform.isDarwin then
-      "~/Library/Mobile Documents/com~apple~CloudDocs/Documents/github.com/X0mbiRapt0r/nix/.private/git/work.inc"
+      "~/Library/Mobile Documents/com~apple~CloudDocs/Documents/Code/nix/.private/git/work.inc"
     else
       "~/Documents/Code/nix/.private/git/work.inc";
 in
