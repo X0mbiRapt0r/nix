@@ -26,21 +26,22 @@
   ];
 
   networking = {
-    firewall.allowedTCPPorts = [ 2586 ]; # Expose ntfy only to networks that can already reach the NUC.
     hostName = "QTM-Irish-NUC"; # Local network hostname and flake host name.
   };
 
   nixpkgs.config.allowUnfreePredicate = package: lib.getName package == "claude-code";
 
-  services = {
-    ntfy-sh = {
+  xombiraptor.services = {
+    cloudflareTunnel = {
       enable = true;
-      settings = {
-        auth-default-access = "deny-all"; # Require an explicitly provisioned account for every topic.
-        base-url = "http://qtm-irish-nuc.local:2586";
-        listen-http = ":2586"; # Listen on the LAN; the firewall limits access to reachable networks.
-        upstream-base-url = "https://ntfy.sh"; # Relay content-free poll requests for timely iOS delivery.
-      };
+      tokenFile = "/home/irish/Documents/Code/nix/.private/services/QTM-Irish-NUC/cloudflared-token";
+    };
+
+    ntfy = {
+      # The private environment file overrides this local fallback with NTFY_BASE_URL.
+      baseUrl = "http://127.0.0.1:2586";
+      enable = true;
+      environmentFile = "/home/irish/Documents/Code/nix/.private/services/QTM-Irish-NUC/ntfy.env";
     };
   };
 

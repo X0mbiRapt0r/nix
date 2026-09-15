@@ -106,6 +106,8 @@
           modules = [
             ./modules/modules_common.nix # Shared packages and Nix settings.
             ./modules/modules_linux.nix # Shared NixOS packages, services, and user policy.
+            ./modules/service_cloudflare_tunnel.nix # Secure remotely managed Cloudflare Tunnel connector.
+            ./modules/service_ntfy.nix # Shared private ntfy server policy and persistent Web Push state.
             hostModule # Host policy: hardware behavior, desktop, gaming, users, and services.
             hardwareModule # Generated mounts, boot modules, and CPU hints.
 

@@ -95,6 +95,19 @@
     "d /srv/data/share 2770 irish users -" # Keep the filesystem root private for snapshots and service-only data.
   ];
 
+  xombiraptor.services = {
+    cloudflareTunnel = {
+      enable = true;
+      tokenFile = "/home/irish/Documents/Code/nix/.private/services/XR-NAS/cloudflared-token";
+    };
+
+    ntfy = {
+      baseUrl = "https://ntfy.xombiraptor.net";
+      enable = true;
+      environmentFile = "/home/irish/Documents/Code/nix/.private/services/XR-NAS/ntfy.env";
+    };
+  };
+
   users.users.irish.openssh.authorizedKeys.keys = [
     sshPublicKeys.irishMbp # Irish-MBP owns the private key; only its public half is deployed here.
   ];
