@@ -1,14 +1,7 @@
-{ pkgs, ... }:
+{ ... }:
 
 {
   home-manager.users.irish = {
-    home = {
-      file."Library/Application Support/ntfy/client.yml".text = ''
-        default-host: http://qtm-irish-nuc.local:2586
-      '';
-      packages = [ pkgs.ntfy-sh ]; # Install the ntfy publish/subscribe CLI for the work server.
-    };
-
     programs.ssh = {
       enable = true;
       enableDefaultConfig = false; # Keep OpenSSH defaults outside the work-host entry.

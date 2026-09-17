@@ -1,0 +1,33 @@
+{
+  "description": "Combined DNS blocklist for XombiRaptor network infrastructure",
+  "homepage": "https://github.com/X0mbiRapt0r/nix",
+  "inclusions": [
+    "/^0\\.0\\.0\\.0\\s+[^\\s]+$/"
+  ],
+  "name": "XombiRaptor DNS blocklist",
+  "sources": [
+    {
+      "name": "HaGeZi Multi PRO",
+      "source": "https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists-legacy@latest/hosts/pro.txt",
+      "transformations": [
+        "TrimLines",
+        "RemoveComments"
+      ],
+      "type": "hosts"
+    },
+    {
+      "name": "StevenBlack unified hosts",
+      "source": "https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts",
+      "transformations": [
+        "TrimLines",
+        "RemoveComments"
+      ],
+      "type": "hosts"
+    }
+  ],
+  "transformations": [
+    "Deduplicate",
+    "RemoveEmptyLines",
+    "InsertFinalNewLine"
+  ]
+}

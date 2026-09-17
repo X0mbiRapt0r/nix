@@ -1,5 +1,42 @@
-{ pkgs, sshPublicKeys, ... }:
+{
+  lib,
+  pkgs,
+  sshPublicKeys,
+  ...
+}:
 
+let
+  hostlistCompiler = pkgs.callPackage ../../packages/adguard-hostlist-compiler.nix { };
+  # Keep hosts syntax throughout: RouterOS cannot consume HostlistCompiler's
+  # usual compressed AdGuard-rule output.
+  hostlistConfig = ./hostlist-compiler.json;
+
+  buildHostlist = pkgs.writeShellApplication {
+    name = "build-hostlist";
+    runtimeInputs = [
+      pkgs.coreutils
+      pkgs.gawk
+      pkgs.gnused
+    ];
+    text = ''
+      output="/var/lib/hostlist-compiler/combined-hosts.txt"
+      temporary_output="$(mktemp --tmpdir="$(dirname "$output")" .combined-hosts.XXXXXX)"
+      trap 'rm -f "$temporary_output"' EXIT
+
+      ${lib.getExe hostlistCompiler} \
+        --config ${hostlistConfig} \
+        --output "$temporary_output"
+
+      # HostlistCompiler adds AdGuard-style metadata; RouterOS needs pure hosts entries.
+      sed -i '/^!/d' "$temporary_output"
+      test -s "$temporary_output"
+      awk 'NF != 2 || $1 != "0.0.0.0" { exit 1 }' "$temporary_output"
+      chmod 0644 "$temporary_output"
+      mv -f "$temporary_output" "$output"
+      trap - EXIT
+    '';
+  };
+in
 {
   boot = {
     # This HP firmware exposes malformed ACPI data to hp_bioscfg even after
@@ -91,9 +128,41 @@
 
   system.stateVersion = "26.05"; # Fresh-install compatibility baseline; do not bump casually.
 
-  systemd.tmpfiles.rules = [
-    "d /srv/data/share 2770 irish users -" # Keep the filesystem root private for snapshots and service-only data.
-  ];
+  systemd = {
+    services.hostlist-compiler = {
+      after = [ "network-online.target" ];
+      description = "Compile the local DNS blocklist";
+      serviceConfig = {
+        DynamicUser = true;
+        ExecStart = lib.getExe buildHostlist;
+        NoNewPrivileges = true;
+        PrivateTmp = true;
+        ProtectHome = true;
+        ProtectSystem = "strict";
+        StateDirectory = "hostlist-compiler";
+        Type = "oneshot";
+        UMask = "0022";
+        WorkingDirectory = "/var/lib/hostlist-compiler";
+      };
+      wants = [ "network-online.target" ];
+    };
+
+    timers.hostlist-compiler = {
+      description = "Refresh the local DNS blocklist daily";
+      timerConfig = {
+        OnBootSec = "15m";
+        OnCalendar = "daily";
+        Persistent = true;
+        RandomizedDelaySec = "1h";
+        Unit = "hostlist-compiler.service";
+      };
+      wantedBy = [ "timers.target" ];
+    };
+
+    tmpfiles.rules = [
+      "d /srv/data/share 2770 irish users -" # Keep the filesystem root private for snapshots and service-only data.
+    ];
+  };
 
   xombiraptor.services = {
     cloudflareTunnel = {
