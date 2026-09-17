@@ -39,10 +39,6 @@ let
 in
 {
   boot = {
-    # This HP firmware exposes malformed ACPI data to hp_bioscfg even after
-    # applying HP's latest firmware package, preventing a normal boot. The NAS
-    # does not need Linux access to HP BIOS settings, so keep the driver disabled.
-    blacklistedKernelModules = [ "hp_bioscfg" ];
     kernelPackages = pkgs.linuxPackages_latest; # Preserve the kernel choice made during installation.
     kernelParams = [ "consoleblank=300" ]; # Blank the emergency console after five idle minutes.
     loader = {
@@ -66,7 +62,7 @@ in
   };
 
   networking = {
-    firewall.interfaces.eno1.allowedTCPPorts = [ 445 ]; # Expose modern SMB only on the wired LAN interface.
+    firewall.interfaces.enp2s0.allowedTCPPorts = [ 445 ]; # Expose modern SMB only on the wired LAN interface.
     hostName = "XR-NAS"; # Local network hostname and flake host name.
   };
 
@@ -97,7 +93,7 @@ in
           "bind interfaces only" = "yes";
           "disable netbios" = "yes";
           "fruit:aapl" = "yes";
-          interfaces = "lo eno1";
+          interfaces = "lo enp2s0";
           "load printers" = "no";
           "map to guest" = "never";
           "printcap name" = "/dev/null";
