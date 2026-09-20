@@ -166,6 +166,8 @@ in
       tokenFile = "/home/irish/Documents/Code/nix/.private/services/XR-NAS/cloudflared-token";
     };
 
+    icloudMirror.enable = true;
+
     ntfy = {
       baseUrl = "https://ntfy.xombiraptor.net";
       enable = true;
@@ -173,7 +175,10 @@ in
     };
   };
 
-  users.users.irish.openssh.authorizedKeys.keys = [
-    sshPublicKeys.irishMbp # Irish-MBP owns the private key; only its public half is deployed here.
-  ];
+  users.users.irish = {
+    extraGroups = [ "icloud" ]; # Allow local read-only access to the live mirror and its snapshots.
+    openssh.authorizedKeys.keys = [
+      sshPublicKeys.irishMbp # Irish-MBP owns the private key; only its public half is deployed here.
+    ];
+  };
 }

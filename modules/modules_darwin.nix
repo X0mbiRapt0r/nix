@@ -13,6 +13,7 @@ in
       "mole"
     ];
     casks = [
+      "codex"
       "gimp"
       #"obsidian"
       "radix"
