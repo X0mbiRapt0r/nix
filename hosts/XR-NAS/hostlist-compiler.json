@@ -7,6 +7,15 @@
   "name": "XombiRaptor DNS blocklist",
   "sources": [
     {
+      "name": "HaGeZi DoH bypass",
+      "source": "https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists-legacy@latest/hosts/doh.txt",
+      "transformations": [
+        "TrimLines",
+        "RemoveComments"
+      ],
+      "type": "hosts"
+    },
+    {
       "name": "HaGeZi Multi PRO",
       "source": "https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists-legacy@latest/hosts/pro.txt",
       "transformations": [
@@ -18,6 +27,24 @@
     {
       "name": "StevenBlack unified hosts",
       "source": "https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts",
+      "transformations": [
+        "TrimLines",
+        "RemoveComments"
+      ],
+      "type": "hosts"
+    },
+    {
+      "name": "StevenBlack fake-news extension",
+      "source": "https://raw.githubusercontent.com/StevenBlack/hosts/master/alternates/fakenews-only/hosts",
+      "transformations": [
+        "TrimLines",
+        "RemoveComments"
+      ],
+      "type": "hosts"
+    },
+    {
+      "name": "StevenBlack gambling extension",
+      "source": "https://raw.githubusercontent.com/StevenBlack/hosts/master/alternates/gambling-only/hosts",
       "transformations": [
         "TrimLines",
         "RemoveComments"

@@ -17,9 +17,13 @@ let
       pkgs.coreutils
       pkgs.gawk
       pkgs.gnused
+      pkgs.openssh
     ];
     text = ''
-      output="/var/lib/hostlist-compiler/combined-hosts.txt"
+      identity="/var/lib/adlist/id_ed25519"
+      output="/var/lib/adlist/combined-hosts.txt"
+      router="10.12.12.1"
+      router_user="hostlist-publisher"
       temporary_output="$(mktemp --tmpdir="$(dirname "$output")" .combined-hosts.XXXXXX)"
       trap 'rm -f "$temporary_output"' EXIT
 
@@ -31,9 +35,29 @@ let
       sed -i '/^!/d' "$temporary_output"
       test -s "$temporary_output"
       awk 'NF != 2 || $1 != "0.0.0.0" { exit 1 }' "$temporary_output"
-      chmod 0644 "$temporary_output"
+      chmod 0640 "$temporary_output"
       mv -f "$temporary_output" "$output"
       trap - EXIT
+
+      if [[ ! -f "$identity" ]]; then
+        ssh-keygen -q -t ed25519 -N "" -C "hostlist-compiler@XR-NAS" -f "$identity"
+        echo "Generated $identity; import $identity.pub for $router_user on the MikroTik, then run this service again."
+        exit 0
+      fi
+
+      ssh_options=(
+        -i "$identity"
+        -o BatchMode=yes
+        -o ConnectTimeout=10
+        -o IdentitiesOnly=yes
+        -o StrictHostKeyChecking=yes
+        -o UserKnownHostsFile=/etc/ssh/ssh_known_hosts
+      )
+
+      # Preserve the router's active list until the replacement has uploaded completely.
+      scp -O -q "''${ssh_options[@]}" "$output" "$router_user@$router:combined-hosts.next.txt"
+      ssh "''${ssh_options[@]}" "$router_user@$router" \
+        ':local staged [/file/find where name="combined-hosts.next.txt"]; :if ([:len $staged] = 0) do={:error "staged adlist missing"}; :local current [/file/find where name="combined-hosts.txt"]; :if ([:len $current] > 0) do={/file/remove $current}; /file/set $staged name="combined-hosts.txt"; :if ([:len [/ip/dns/adlist/find where file="combined-hosts.txt"]] = 0) do={/ip/dns/adlist/add file="combined-hosts.txt"} else={/ip/dns/adlist/reload}; /ip/dns/adlist/print detail without-paging where file="combined-hosts.txt"'
     '';
   };
 in
@@ -64,6 +88,11 @@ in
   networking = {
     firewall.interfaces.enp2s0.allowedTCPPorts = [ 445 ]; # Expose modern SMB only on the wired LAN interface.
     hostName = "XR-NAS"; # Local network hostname and flake host name.
+  };
+
+  programs.ssh.knownHosts.xr-mt = {
+    hostNames = [ "10.12.12.1" ];
+    publicKey = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCm1ZppSLxzkUsVMLb+ypAgCMwJx7y1sSl0piCJteAuIei5geq24+9LGGdp7BDJ0Usf46WwmyzaqpXnAb36DYPASRn8lroEN0+sqTFGEll0Ox4nuJ0N6k2THql0yScJEKiobf/TMH2J+llLqt2DfSOxltyQ6YF7Tk8Sh8O12jHoD/aeC3h02TU6Srg4Knlbaom1P1RiwgepnetJvWQr/SEw5+w9+CLjEC9vqCgCRJ1dc7HTxXkTHHXsvWwTftUfdEjlGMyBVLRx+b7L7ShADKRYaGXu311qQau0Oem8ogHEAc4sI70/C/WkIzJS49i1UULoYvZWMEBzKeYM+5UTfhVH";
   };
 
   services = {
@@ -131,18 +160,21 @@ in
   systemd = {
     services.hostlist-compiler = {
       after = [ "network-online.target" ];
-      description = "Compile the local DNS blocklist";
+      description = "Compile and publish the MikroTik DNS blocklist";
+      environment.HOME = "/var/lib/adlist";
       serviceConfig = {
-        DynamicUser = true;
         ExecStart = lib.getExe buildHostlist;
+        Group = "hostlist-compiler";
         NoNewPrivileges = true;
         PrivateTmp = true;
         ProtectHome = true;
         ProtectSystem = "strict";
-        StateDirectory = "hostlist-compiler";
+        StateDirectory = "adlist";
+        StateDirectoryMode = "0750";
         Type = "oneshot";
-        UMask = "0022";
-        WorkingDirectory = "/var/lib/hostlist-compiler";
+        UMask = "0027";
+        User = "hostlist-compiler";
+        WorkingDirectory = "/var/lib/adlist";
       };
       wants = [ "network-online.target" ];
     };
@@ -179,10 +211,25 @@ in
     };
   };
 
-  users.users.irish = {
-    extraGroups = [ "icloud" ]; # Allow local read-only access to the live mirror and its snapshots.
-    openssh.authorizedKeys.keys = [
-      sshPublicKeys.irishMbp # Irish-MBP owns the private key; only its public half is deployed here.
-    ];
+  users = {
+    groups.hostlist-compiler = { };
+
+    users = {
+      hostlist-compiler = {
+        group = "hostlist-compiler";
+        home = "/var/lib/adlist";
+        isSystemUser = true;
+      };
+
+      irish = {
+        extraGroups = [
+          "hostlist-compiler" # Read the generated list without exposing the publisher's private key.
+          "icloud" # Allow local read-only access to the live mirror and its snapshots.
+        ];
+        openssh.authorizedKeys.keys = [
+          sshPublicKeys.irishMbp # Irish-MBP owns the private key; only its public half is deployed here.
+        ];
+      };
+    };
   };
 }
