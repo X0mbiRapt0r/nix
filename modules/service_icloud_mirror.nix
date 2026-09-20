@@ -64,7 +64,7 @@ let
     runtimeInputs = [ pkgs.curl ];
     text = ''
       curl \
-        --data-binary "The daily iCloud Drive mirror failed after retries. Authentication may need renewal; inspect: journalctl -u icloud-mirror.service" \
+        --data-binary "The daily iCloud Drive mirror failed after retries. Inspect: journalctl -u icloud-mirror.service" \
         --fail-with-body \
         --header @"$CREDENTIALS_DIRECTORY/ntfy-authorization" \
         --header "Priority: high" \

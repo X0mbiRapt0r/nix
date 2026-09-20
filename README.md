@@ -8,7 +8,7 @@ host that needs it.
 ## Hosts
 
 - `Irish-MBP`: an Apple Silicon macOS system managed by nix-darwin.
-- `Irish-MBP-2013`: a 2013 Intel MacBook Pro running NixOS with COSMIC and Steam.
+- `Irish-MBP-2013`: a 2013 Intel MacBook Pro running NixOS with Xfce and Steam.
 - `Irish-PC`: an x86_64 NixOS gaming system.
 - `QTM-Irish-MBA`: an Apple Silicon work Mac managed by nix-darwin.
 - `QTM-Irish-NUC`: a headless x86_64 NixOS automation host.
@@ -20,6 +20,7 @@ host that needs it.
 - `modules/` contains shared system and platform-specific configuration.
 - `home/irish/` contains shared and platform-specific Home Manager modules.
 - `hosts/` contains the policy and hardware configuration unique to each host.
+- `packages/` contains packages required by host-specific services.
 - `scripts/` contains explicit bootstrap, update, switch, and cleanup helpers.
 
 ## Helper commands
@@ -214,12 +215,53 @@ bootstrap copy ensures later key rotation or revocation remains controlled by
 the flake. Repeat the bootstrap, activation, verification, and cleanup for one
 host at a time.
 
+## XR-NAS operations
+
+XR-NAS mounts the single-device Btrfs data filesystem at `/srv/data` and shares
+only `/srv/data/share` through authenticated SMB. `smartd` monitors every
+detectable drive, weekly TRIM discards unused SSD blocks, and monthly Btrfs
+scrubs verify every declared Btrfs filesystem. SMART warnings are written to
+the journal and sent to logged-in sessions. Scrubs, snapshots, and the iCloud
+mirror all remain on the NAS and are not substitutes for an independent
+backup.
+
+After activating a configuration change, inspect storage monitoring with:
+
+```sh
+systemctl status smartd
+systemctl list-timers 'btrfs-scrub-*'
+journalctl -u smartd
+sudo smartctl -x /dev/sda
+sudo smartctl -x /dev/nvme0
+sudo btrfs scrub status /
+sudo btrfs scrub status /srv/data
+```
+
+The private ntfy server listens only on loopback and is reached through the
+outbound Cloudflare Tunnel. Both services load their credentials from ignored,
+host-local files. The daily HostlistCompiler job also runs locally; its output
+remains private systemd state until a separate publication and access model is
+deliberately configured.
+
+The iCloud mirror synchronises into `/srv/data/icloud` each day after taking a
+read-only pre-sync snapshot under `/srv/data/snapshots/icloud`. It retains 90
+snapshots and records a successful run at
+`/var/lib/icloud/last-mirror-success`. Authentication state and notification
+credentials stay under `/var/lib/icloud` and `/etc/icloud`; they must never be
+added to the repository. Useful checks are:
+
+```sh
+systemctl status icloud-mirror.timer icloud-mirror.service
+journalctl -u icloud-mirror.service
+stat /var/lib/icloud/last-mirror-success
+```
+
 ## Validation
 
 These checks are safe to run before activation:
 
 ```sh
-nix fmt -- --check flake.nix home/**/*.nix hosts/*/configuration.nix hosts/*/host_*.nix modules/*.nix
+nix fmt -- --check flake.nix home/**/*.nix hosts/*/configuration.nix hosts/*/host_*.nix modules/*.nix packages/*.nix
 nix flake check --no-build --all-systems --no-write-lock-file
 nix flake check --no-write-lock-file
 bash -n scripts/*

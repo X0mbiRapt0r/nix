@@ -79,6 +79,8 @@ in
       </service-group>
     '';
 
+    btrfs.autoScrub.enable = true; # Check every declared Btrfs filesystem monthly for checksum errors.
+
     logind.settings.Login = {
       HandleLidSwitch = "ignore";
       HandleLidSwitchDocked = "ignore";
@@ -120,6 +122,8 @@ in
       };
       winbindd.enable = false; # Local user authentication does not need domain identity services.
     };
+
+    smartd.enable = true; # Monitor every detectable drive and report SMART health changes through the journal.
   };
 
   system.stateVersion = "26.05"; # Fresh-install compatibility baseline; do not bump casually.

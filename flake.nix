@@ -135,13 +135,17 @@
               ${self}/home/irish/*.nix \
               ${self}/hosts/*/configuration.nix \
               ${self}/hosts/*/host_*.nix \
-              ${self}/modules/*.nix
+              ${self}/modules/*.nix \
+              ${self}/packages/*.nix
             touch $out
           '';
           shellcheck = pkgs.runCommand "check-shell-scripts" { nativeBuildInputs = [ pkgs.shellcheck ]; } ''
             shellcheck ${self}/scripts/*
             touch $out
           '';
+        }
+        // nixpkgs.lib.optionalAttrs (system == "x86_64-linux") {
+          adguard-hostlist-compiler = pkgs.callPackage ./packages/adguard-hostlist-compiler.nix { };
         }
       );
       darwinConfigurations.Irish-MBP = mkDarwinConfiguration {
