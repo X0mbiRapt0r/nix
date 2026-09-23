@@ -126,6 +126,7 @@ in
   ];
 
   hardware = {
+    amdgpu.opencl.enable = true;
     bluetooth = {
       enable = true; # Enable the Bluetooth service.
       powerOnBoot = true; # Bring Bluetooth up during boot.
