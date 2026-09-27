@@ -64,7 +64,7 @@ in
             "--network=${networkName}"
             "--network-alias=comet-postgres"
           ];
-          image = "postgres:18-alpine";
+          image = "docker.io/library/postgres:18-alpine";
           volumes = [ "comet-postgres:/var/lib/postgresql" ];
         };
       };
