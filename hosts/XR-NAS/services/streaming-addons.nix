@@ -13,6 +13,7 @@ in
       containers = {
         aiostreams = {
           environment = {
+            AIOSTREAMS_AUTH_REQUIRED = "true";
             BASE_URL = "https://streams.xombiraptor.net";
             LOG_FORMAT = "json";
             LOG_LEVEL = "info";
