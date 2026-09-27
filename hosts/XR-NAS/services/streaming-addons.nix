@@ -48,7 +48,8 @@ in
             "--security-opt=no-new-privileges"
             "--tmpfs=/tmp:size=64m,mode=1777"
           ];
-          image = "docker.io/g0ldyy/comet:v2.58.0";
+          # Upstream publishes moving channel tags only; pin the official multi-architecture manifest.
+          image = "ghcr.io/g0ldyy/comet@sha256:dca62133336e02784d02aaad861381820674d1c8e3e98a03797610b81ee4defe";
           ports = [ "127.0.0.1:8000:8000" ];
           volumes = [ "/var/lib/comet:/app/data" ];
         };
