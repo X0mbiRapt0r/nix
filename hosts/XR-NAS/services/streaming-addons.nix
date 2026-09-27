@@ -48,7 +48,7 @@ in
             "--security-opt=no-new-privileges"
             "--tmpfs=/tmp:size=64m,mode=1777"
           ];
-          image = "g0ldyy/comet:v2.58.0";
+          image = "docker.io/g0ldyy/comet:v2.58.0";
           ports = [ "127.0.0.1:8000:8000" ];
           volumes = [ "/var/lib/comet:/app/data" ];
         };
