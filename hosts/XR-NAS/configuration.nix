@@ -62,6 +62,11 @@ let
   };
 in
 {
+  imports = [
+    ./services/icloud-mirror.nix
+    ./services/streaming-addons.nix
+  ];
+
   boot = {
     kernelPackages = pkgs.linuxPackages_latest; # Preserve the kernel choice made during installation.
     kernelParams = [ "consoleblank=300" ]; # Blank the emergency console after five idle minutes.
@@ -199,15 +204,13 @@ in
   xombiraptor.services = {
     cloudflareTunnel = {
       enable = true;
-      tokenFile = "/home/irish/Documents/Code/nix/.private/services/XR-NAS/cloudflared-token";
+      tokenFile = "/etc/xombiraptor/cloudflared-token";
     };
-
-    icloudMirror.enable = true;
 
     ntfy = {
       baseUrl = "https://ntfy.xombiraptor.net";
       enable = true;
-      environmentFile = "/home/irish/Documents/Code/nix/.private/services/XR-NAS/ntfy.env";
+      environmentFile = "/etc/xombiraptor/ntfy.env";
     };
   };
 

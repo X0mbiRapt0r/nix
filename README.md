@@ -17,9 +17,10 @@ host that needs it.
 ## Layout
 
 - `flake.nix` declares inputs, hosts, formatters, and validation checks.
-- `modules/` contains shared system and platform-specific configuration.
+- `modules/` contains configuration shared by multiple hosts.
 - `home/irish/` contains shared and platform-specific Home Manager modules.
-- `hosts/` contains the policy and hardware configuration unique to each host.
+- `hosts/` contains each host's policy, hardware configuration, and private
+  `services/` modules that are not reused elsewhere.
 - `packages/` contains packages required by host-specific services.
 - `scripts/` contains explicit bootstrap, update, switch, and cleanup helpers.
 
@@ -93,14 +94,21 @@ checkout before rebuilding.
 ## Work Git identity
 
 `QTM-Irish-MBA` and `QTM-Irish-NUC` load their default Git author identity from
-`.private/git/work.inc` inside their respective Nix checkout. Provision that
-ignored file before activating either work host; it must contain only the
-private `[user]` name and email settings. Personal hosts use the public identity
-declared by Home Manager and do not load this file.
+`~/.config/git/work.inc`. Provision that host-local file before activating
+either work host; it must contain only the private `[user]` name and email
+settings. Personal hosts use the public identity declared by Home Manager and
+do not load this file.
 
 Authentication remains platform-specific and separate from commit identity.
 The work Mac uses macOS Keychain through packaged Git, while the NUC routes
 GitHub credential requests through its separately authenticated `gh` CLI.
+
+Private restore copies live under `iCloud Drive/Backups/Hosts/<host>` and
+mirror their absolute destination from the host filesystem. For example,
+`Hosts/XR-NAS/etc/xombiraptor/ntfy.env` restores to
+`/etc/xombiraptor/ntfy.env`, while the work identity restores beneath the
+matching user's `.config/git` directory. Restore service credentials as
+`root:root` mode `0600`; the backup tree is not read directly by NixOS.
 
 ## SSH setup
 
@@ -131,12 +139,11 @@ stays on the client; the NUC does not need a copy. Home Manager writes only
 the key's runtime path, never its contents. Apple's SSH client uses Keychain
 and the local agent for subsequent connections, without forwarding the agent.
 
-Prefer keeping private backups outside this checkout. `/.private/` is ignored
-if a local backup is needed, but `.gitignore` is not encryption and does not
-protect against force-adds or `path:` flakes copying the whole directory into
-the Nix store. Never use a `path:` flake or a whole-directory source copy on
-a checkout containing secrets, and never reference private files with Nix
-path literals, `builtins.readFile`, or `home.file.source`.
+Keep private restore copies in the host-mirrored iCloud backup tree, not this
+checkout. `.gitignore` is not encryption and does not protect against
+force-adds or `path:` flakes copying ignored files into the Nix store. Never
+reference private files with Nix path literals, `builtins.readFile`, or
+`home.file.source`.
 
 Before activating the Mac configuration, review any existing `~/.ssh/config`
 and migrate entries that should remain; Home Manager backs up an unmanaged
@@ -238,17 +245,57 @@ sudo btrfs scrub status /srv/data
 ```
 
 The private ntfy server listens only on loopback and is reached through the
-outbound Cloudflare Tunnel. Both services load their credentials from ignored,
-host-local files. The daily HostlistCompiler job also runs locally; its output
-remains private systemd state until a separate publication and access model is
-deliberately configured.
+outbound Cloudflare Tunnel. Both services load their credentials from
+root-owned files under `/etc/xombiraptor`. The daily HostlistCompiler job also
+runs locally; its output remains private systemd state until a separate
+publication and access model is deliberately configured.
+
+AIOStreams and Comet also use the outbound tunnel. Their HTTP ports are bound
+to loopback, Comet's PostgreSQL database is reachable only on a private Podman
+network, and container output is retained by journald. Before the first
+activation, restore these files to `/etc/xombiraptor` with mode `0600`:
+
+```text
+/etc/xombiraptor/aiostreams.env
+  SECRET_KEY=<openssl rand -hex 32>
+  AIOSTREAMS_AUTH=irish:<strong password>
+  AIOSTREAMS_AUTH_PERMISSIONS=irish=admin
+
+/etc/xombiraptor/comet.env
+  POSTGRES_PASSWORD=<openssl rand -hex 32>
+  DATABASE_URL=comet:<same PostgreSQL password>@comet-postgres:5432/comet
+  ADMIN_DASHBOARD_PASSWORD=<strong password>
+  CONFIGURE_PAGE_PASSWORD=<strong password>
+```
+
+Add two public hostnames to the existing remotely managed XR-NAS tunnel:
+
+```text
+streams.xombiraptor.net -> http://localhost:3000
+comet.xombiraptor.net   -> http://localhost:8000
+```
+
+After activation, verify the local services before testing Cloudflare or
+configuring Stremio:
+
+```sh
+systemctl status podman-aiostreams podman-comet podman-comet-postgres
+curl --fail http://127.0.0.1:3000/api/v1/status
+curl --fail http://127.0.0.1:8000/health
+journalctl -u podman-aiostreams -u podman-comet -u podman-comet-postgres
+```
+
+Complete first-run setup at `https://streams.xombiraptor.net/stremio/configure`
+and `https://comet.xombiraptor.net/configure`. Start with local Comet as the
+only AIOStreams discovery addon and AllDebrid as the service; add fallback
+providers only after this baseline has been proven reliable.
 
 The iCloud mirror synchronises into `/srv/data/icloud` each day after taking a
 read-only pre-sync snapshot under `/srv/data/snapshots/icloud`. It retains 90
 snapshots and records a successful run at
 `/var/lib/icloud/last-mirror-success`. Authentication state and notification
-credentials stay under `/var/lib/icloud` and `/etc/icloud`; they must never be
-added to the repository. Useful checks are:
+credentials stay under `/var/lib/icloud` and `/etc/xombiraptor`; they must
+never be added to the repository. Useful checks are:
 
 ```sh
 systemctl status icloud-mirror.timer icloud-mirror.service
@@ -261,7 +308,7 @@ stat /var/lib/icloud/last-mirror-success
 These checks are safe to run before activation:
 
 ```sh
-nix fmt -- --check flake.nix home/**/*.nix hosts/*/configuration.nix hosts/*/host_*.nix modules/*.nix packages/*.nix
+nix fmt -- --check flake.nix home/**/*.nix hosts/*/configuration.nix hosts/*/host_*.nix hosts/*/services/*.nix modules/*.nix packages/*.nix
 nix flake check --no-build --all-systems --no-write-lock-file
 nix flake check --no-write-lock-file
 bash -n scripts/*

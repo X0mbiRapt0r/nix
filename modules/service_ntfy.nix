@@ -16,7 +16,7 @@ in
     enable = lib.mkEnableOption "the private ntfy notification server";
 
     environmentFile = lib.mkOption {
-      type = lib.types.path;
+      type = lib.types.str;
       description = ''
         Root-readable systemd environment file for the stable Web Push keys,
         administrator email address, and any private runtime overrides.

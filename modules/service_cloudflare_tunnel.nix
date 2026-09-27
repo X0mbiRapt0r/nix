@@ -13,7 +13,7 @@ in
     enable = lib.mkEnableOption "the host's remotely managed Cloudflare Tunnel";
 
     tokenFile = lib.mkOption {
-      type = lib.types.path;
+      type = lib.types.str;
       description = ''
         Root-readable file containing the remotely managed Cloudflare Tunnel token.
         Keep this file outside the Nix store and version control.

@@ -34,14 +34,14 @@
   xombiraptor.services = {
     cloudflareTunnel = {
       enable = true;
-      tokenFile = "/home/irish/Documents/Code/nix/.private/services/QTM-Irish-NUC/cloudflared-token";
+      tokenFile = "/etc/xombiraptor/cloudflared-token";
     };
 
     ntfy = {
       # The private environment file overrides this local fallback with NTFY_BASE_URL.
       baseUrl = "http://127.0.0.1:2586";
       enable = true;
-      environmentFile = "/home/irish/Documents/Code/nix/.private/services/QTM-Irish-NUC/ntfy.env";
+      environmentFile = "/etc/xombiraptor/ntfy.env";
     };
   };
 
