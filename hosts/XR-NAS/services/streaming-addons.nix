@@ -15,6 +15,7 @@ in
           environment = {
             AIOSTREAMS_AUTH_REQUIRED = "true";
             BASE_URL = "https://streams.xombiraptor.net";
+            COMET_URL = ''["https://comet.xombiraptor.net"]'';
             LOG_FORMAT = "json";
             LOG_LEVEL = "info";
           };
@@ -38,6 +39,7 @@ in
             POSTGRES_DB = "comet";
             POSTGRES_USER = "comet";
             PUBLIC_BASE_URL = "https://comet.xombiraptor.net";
+            SCRAPE_TORRENTIO = "live";
           };
           environmentFiles = [ cometEnvironmentFile ];
           extraOptions = [
