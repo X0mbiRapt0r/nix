@@ -295,8 +295,11 @@ formatting command. None of these commands rebuilds or activates a host;
 
 The flake follows rolling nixpkgs, Home Manager, and nix-darwin inputs while
 `flake.lock` keeps Nix inputs reproducible between deliberate `nfu` updates.
-Homebrew metadata and packages intentionally update during activation, so
-Homebrew-managed applications are not pinned by `flake.lock`.
+nix-homebrew pins the Homebrew installation through `flake.lock`, while
+Homebrew formulae and casks remain outside the lock file. Activation installs
+declared packages and zaps undeclared ones without implicitly refreshing or
+upgrading Homebrew packages; run `brew upgrade` as an explicit maintenance
+action instead.
 `system.stateVersion` and `home.stateVersion` are compatibility baselines, not
 package-version selectors, and should only change after reviewing the relevant
 migration notes.

@@ -24,9 +24,9 @@ in
     ];
     enable = true; # Let nix-darwin produce and apply a Brewfile.
     onActivation = {
-      autoUpdate = true; # Refresh Homebrew metadata during activation.
+      autoUpdate = false; # Keep rebuilds from refreshing Homebrew metadata implicitly.
       cleanup = "zap"; # Remove undeclared packages and associated cask files during activation.
-      upgrade = true; # Upgrade declared packages using the currently available Homebrew metadata.
+      upgrade = false; # Keep declared package upgrades as an explicit maintenance action.
     };
   };
 
