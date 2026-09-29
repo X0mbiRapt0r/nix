@@ -11,7 +11,6 @@ host that needs it.
 - `Irish-MBP-2013`: a 2013 Intel MacBook Pro running NixOS with Xfce and Steam.
 - `Irish-PC`: an x86_64 NixOS gaming system.
 - `QTM-Irish-MBA`: an Apple Silicon work Mac managed by nix-darwin.
-- `QTM-Irish-NUC`: a headless x86_64 NixOS automation host.
 - `XR-NAS`: a headless x86_64 NixOS storage and services host.
 
 ## Layout
@@ -93,15 +92,14 @@ checkout before rebuilding.
 
 ## Work Git identity
 
-`QTM-Irish-MBA` and `QTM-Irish-NUC` load their default Git author identity from
-`~/.config/git/work.inc`. Provision that host-local file before activating
-either work host; it must contain only the private `[user]` name and email
-settings. Personal hosts use the public identity declared by Home Manager and
-do not load this file.
+`QTM-Irish-MBA` loads its default Git author identity from
+`~/.config/git/work.inc`. Provision that host-local file before activating the
+work Mac; it must contain only the private `[user]` name and email settings.
+Personal hosts use the public identity declared by Home Manager and do not load
+this file.
 
-Authentication remains platform-specific and separate from commit identity.
-The work Mac uses macOS Keychain through packaged Git, while the NUC routes
-GitHub credential requests through its separately authenticated `gh` CLI.
+Authentication remains separate from commit identity. The work Mac uses macOS
+Keychain through packaged Git.
 
 Private restore copies live under `iCloud Drive/Backups/Hosts/<host>` and
 mirror their absolute destination from the host filesystem. For example,
@@ -112,9 +110,10 @@ matching user's `.config/git` directory. Restore service credentials as
 
 ## SSH setup
 
-The work Mac declares `qtm-nuc` for the work automation host, using its own
-`~/.ssh/id_ed25519`. The concrete username and hostname remain in the host
-configuration. This alias is only installed on `QTM-Irish-MBA`.
+The work Mac declares `qtm-nuc`, `QTM-NUC`, and `qtm-nuc.local` for the shared
+Debian NUC, using its own `~/.ssh/id_ed25519`. The concrete username and
+hostname remain in the host configuration. These aliases are installed only on
+`QTM-Irish-MBA`.
 The personal Mac similarly declares host aliases using its separate key. The
 concrete usernames and hostnames remain in the host configuration.
 
@@ -149,42 +148,15 @@ Before activating the Mac configuration, review any existing `~/.ssh/config`
 and migrate entries that should remain; Home Manager backs up an unmanaged
 file as `config.before-hm`, but does not automatically merge its contents.
 
-The NUC declares the work Mac's public key for `irish` and requires public-key
-authentication, with root SSH, passwords, and keyboard-interactive login
-disabled. The three personal NixOS hosts declare only the personal Mac's public
-key. Public client keys are centralized in `flake.nix`; private keys remain on
+The shared Debian NUC is managed outside this flake. Its server-side SSH policy,
+including password access for other users, remains manual. The work Mac still
+uses its configured key when connecting as `irish`; normal use is
+`ssh qtm-nuc`. Verify the replacement NUC's host-key fingerprint through its
+console or another trusted connection before accepting it on the Mac.
+
+The three personal NixOS hosts declare only the personal Mac's public key.
+Those public client keys are centralized in `flake.nix`; private keys remain on
 their respective Macs and never enter Git or Nix.
-
-Before activating this NUC configuration, install the same public key using
-the existing login and verify a separate connection using only public-key
-authentication. From the work Mac, this bootstrap command appends the public
-key to the NUC's existing authorized keys:
-
-```sh
-cat ~/.ssh/id_ed25519.pub | ssh qtm-nuc \
-  'umask 077; mkdir -p ~/.ssh; cat >> ~/.ssh/authorized_keys'
-```
-
-Verify the NUC's host fingerprint through its console or another trusted
-connection:
-
-```sh
-sudo ssh-keygen -lf /etc/ssh/ssh_host_ed25519_key.pub
-```
-
-On the Mac, compare that fingerprint on first connection, then test:
-
-```sh
-ssh -o PasswordAuthentication=no -o KbdInteractiveAuthentication=no qtm-nuc 'hostname; whoami'
-```
-
-If the Mac configuration is not activated yet, use
-`ssh -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes -o PasswordAuthentication=no -o KbdInteractiveAuthentication=no qtm-nuc 'hostname; whoami'`.
-
-Keep the existing session open during the later key-only activation and test
-again from a new terminal. Normal use is `ssh qtm-nuc`; run `claude` inside
-that remote session to work on the NUC. SSH setup does not configure a separate
-Claude Desktop integration or grant passwordless sudo.
 
 For a new personal host, first use its existing password-based connection to
 bootstrap the Mac's public key. Replace `HOST` with the host's current IP or

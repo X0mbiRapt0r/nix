@@ -32,7 +32,6 @@
       forSystem = system: nixpkgs.legacyPackages.${system};
       sshPublicKeys = {
         irishMbp = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMjj1Rp7Yc/YvsCOOScn3+pUSpd5uXna/g8qIP9ZKjtp Irish-MBP";
-        qtmIrishMba = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIK4MCHusEu25QX2H4Ow2Xf7GB0MiCo5McdSJdOU+1YtR QTM-Irish-MBA";
       }; # Public client identities authorized by individual NixOS hosts.
 
       mkHomeManagerModule =
@@ -170,12 +169,6 @@
           hardwareModule = ./hosts/Irish-PC/hardware-configuration.nix;
           homeStateVersion = "24.05"; # Preserve the established Home Manager behavior.
           hostModule = ./hosts/Irish-PC/configuration.nix;
-        };
-        QTM-Irish-NUC = mkNixosConfiguration {
-          gitIdentityModule = ./home/irish/home_git_work.nix;
-          hardwareModule = ./hosts/QTM-Irish-NUC/hardware-configuration.nix;
-          homeStateVersion = "26.05"; # Fresh Home Manager installation on this host.
-          hostModule = ./hosts/QTM-Irish-NUC/configuration.nix;
         };
         XR-NAS = mkNixosConfiguration {
           gitIdentityModule = ./home/irish/home_git_personal.nix;
