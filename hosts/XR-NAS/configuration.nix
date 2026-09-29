@@ -64,6 +64,7 @@ in
 {
   imports = [
     ./services/icloud-mirror.nix
+    ./services/music-assistant.nix
     ./services/streaming-addons.nix
   ];
 
